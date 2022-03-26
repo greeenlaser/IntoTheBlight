@@ -1,0 +1,8 @@
+1) DOWNLOAD GIT LFS IF YOU DONT HAVE IT YET
+2) INSTALL IT
+3) LAUNCH CMD AS ADMIN
+4) cd your\location\here
+5) git lfs track "yourFileName.extension"
+6) git add your\location\here\yourFileName.extension
+7) git commit -m "your commit message here"
+8) git push
