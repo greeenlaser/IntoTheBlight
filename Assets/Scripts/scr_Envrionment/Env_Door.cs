@@ -12,11 +12,27 @@ public class Env_Door : MonoBehaviour
     [SerializeField] private float doorMoveSpeed;
     public Vector3 trigger_Open;
     public Vector3 trigger_Unlock;
-    [SerializeField] private GameObject door;
+    [SerializeField] private DoorType doorType;
+    [SerializeField] private enum DoorType
+    {
+        door_single,
+        door_double
+    }
     [SerializeField] private GameObject thePlayer;
+    [SerializeField] private Env_Lock LockScript;
+
+    [Header("Single door")]
+    [SerializeField] private GameObject door;
     [SerializeField] private Transform pos_DoorOpen;
     [SerializeField] private Transform pos_DoorClosed;
-    [SerializeField] private Env_Lock LockScript;
+
+    [Header("Double door")]
+    [SerializeField] private GameObject door1;
+    [SerializeField] private GameObject door2;
+    [SerializeField] private Transform pos_DoorOpen1;
+    [SerializeField] private Transform pos_DoorOpen2;
+    [SerializeField] private Transform pos_DoorClosed1;
+    [SerializeField] private Transform pos_DoorClosed2;
 
     //public but hidden variables
     [HideInInspector] public bool isActive;
@@ -40,10 +56,21 @@ public class Env_Door : MonoBehaviour
             closeDoor = false;
             isClosed = false;
 
-            doorDistanceFromEndPos = Vector3.Distance(pos_DoorOpen.position, door.transform.position);
+            if (doorType == DoorType.door_single)
+            {
+                doorDistanceFromEndPos = Vector3.Distance(pos_DoorOpen.position, door.transform.position);
 
-            float step = doorMoveSpeed * Time.deltaTime;
-            door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorOpen.position, step);
+                float step = doorMoveSpeed * Time.deltaTime;
+                door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorOpen.position, step);
+            }
+            else if (doorType == DoorType.door_double)
+            {
+                doorDistanceFromEndPos = Vector3.Distance(pos_DoorOpen1.position, door1.transform.position);
+
+                float step = doorMoveSpeed * Time.deltaTime;
+                door1.transform.position = Vector3.MoveTowards(door1.transform.position, pos_DoorOpen1.position, step);
+                door2.transform.position = Vector3.MoveTowards(door2.transform.position, pos_DoorOpen2.position, step);
+            }
 
             if (doorDistanceFromEndPos < 0.01f)
             {
@@ -57,10 +84,22 @@ public class Env_Door : MonoBehaviour
         if (closeDoor)
         {
             openDoor = false;
-            doorDistanceFromEndPos = Vector3.Distance(pos_DoorClosed.position, door.transform.position);
 
-            float step = doorMoveSpeed * Time.deltaTime;
-            door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorClosed.position, step);
+            if (doorType == DoorType.door_single)
+            {
+                doorDistanceFromEndPos = Vector3.Distance(pos_DoorClosed.position, door.transform.position);
+
+                float step = doorMoveSpeed * Time.deltaTime;
+                door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorClosed.position, step);
+            }
+            else if (doorType == DoorType.door_double)
+            {
+                doorDistanceFromEndPos = Vector3.Distance(pos_DoorClosed1.position, door1.transform.position);
+
+                float step = doorMoveSpeed * Time.deltaTime;
+                door1.transform.position = Vector3.MoveTowards(door1.transform.position, pos_DoorClosed1.position, step);
+                door2.transform.position = Vector3.MoveTowards(door2.transform.position, pos_DoorClosed2.position, step);
+            }
 
             if (doorDistanceFromEndPos < 0.01f)
             {

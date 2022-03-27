@@ -655,7 +655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46034f97bd6ffa742bae6747360405e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  str_GameVersion: 0.5.0.1_3
+  str_GameVersion: 0.5.0.2_1
   txt_GameVersion: {fileID: 962294958}
   maxFPS: 300
   fpsUpdateSpeed: 0.1
