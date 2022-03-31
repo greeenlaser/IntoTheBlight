@@ -293,7 +293,11 @@ public class Manager_GameSaving : MonoBehaviour
                         PlayerInventoryScript.inventory.Add(newDuplicate);
 
                         //item count
-                        newDuplicate.GetComponent<Env_Item>().int_itemCount = int.Parse(numbers[0]);
+                        bool isInt = int.TryParse(numbers[0].ToString(), out _);
+                        if (isInt)
+                        {
+                            newDuplicate.GetComponent<Env_Item>().int_itemCount = int.Parse(numbers[0]);
+                        }
 
                         //if this item is a gun
                         if (newDuplicate.GetComponent<Item_Gun>() != null)
@@ -304,6 +308,19 @@ public class Manager_GameSaving : MonoBehaviour
                             newDuplicate.GetComponent<Item_Gun>().maxDurability = float.Parse(numbers[2]);
                             //gun loaded ammo count
                             newDuplicate.GetComponent<Item_Gun>().currentClipSize = int.Parse(numbers[3]);
+                            //gun jam state
+                            if (int.Parse(numbers[4]) == 1)
+                            {
+                                newDuplicate.GetComponent<Item_Gun>().isGunJammed = true;
+                            }
+                        }
+                        //if this item is a melee weapon
+                        else if (newDuplicate.GetComponent<Item_Melee>() != null)
+                        {
+                            //melee weapon durability
+                            newDuplicate.GetComponent<Item_Melee>().durability = float.Parse(numbers[1]);
+                            //melee weapon max durability
+                            newDuplicate.GetComponent<Item_Melee>().maxDurability = float.Parse(numbers[2]);
                         }
                         //if this item is a consumable
                         else if (newDuplicate.GetComponent<Item_Consumable>() != null)
@@ -392,23 +409,72 @@ public class Manager_GameSaving : MonoBehaviour
             }
 
             //---
+            //loading all thrown grenade
+            else if (line.Contains("go_thrGrenade"))
+            {
+                //get grenade position
+                Vector3 position = new Vector3(float.Parse(numbers[0]),
+                                               float.Parse(numbers[1]),
+                                               float.Parse(numbers[2]));
+                //get grenade velocity
+                Vector3 velocity = new Vector3(float.Parse(numbers[3]), 
+                                               float.Parse(numbers[4]), 
+                                               float.Parse(numbers[5]));
+                //get grenade time until explosion
+                float timeUntilExplosion = float.Parse(numbers[6]);
+
+                //find the correct grenade to instantiate
+                GameObject item = null;
+                foreach (GameObject spawnable in ConsoleScript.spawnables)
+                {
+                    if (spawnable.GetComponent<Item_Grenade>() != null
+                        && line.Contains(spawnable.name))
+                    {
+                        //frag grenade
+                        if (spawnable.GetComponent<Item_Grenade>().grenadeType 
+                            == Item_Grenade.GrenadeType.frag)
+                        {
+                            item = spawnable;
+                            break;
+                        }
+                        //plasma grenade
+                        else if (spawnable.GetComponent<Item_Grenade>().grenadeType
+                                 == Item_Grenade.GrenadeType.plasma)
+                        {
+                            item = spawnable;
+                            break;
+                        }
+                        //stun grenade
+                        else if (spawnable.GetComponent<Item_Grenade>().grenadeType
+                                 == Item_Grenade.GrenadeType.stun)
+                        {
+                            item = spawnable;
+                            break;
+                        }
+                    }
+                }
+
+                //spawn the grenade
+                GameObject grenade = Instantiate(item, position, Quaternion.identity);
+                //add to thrown grenades list
+                GameManagerScript.thrownGrenades.Add(grenade);
+                //apply the velocity
+                grenade.GetComponent<Rigidbody>().velocity = velocity;
+                //enable grenade explosion timer
+                grenade.GetComponent<Item_Grenade>().isThrownGrenade = true;
+                grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer = timeUntilExplosion;
+
+                Debug.Log("Loaded " + grenade.GetComponent<Env_Item>().str_ItemName + " at position " + position + " with velocity set to " + velocity + " and this grenade has been cooking for " + timeUntilExplosion + " seconds.");
+            }
+
+            //---
             //loading all cells
-            else if (line.Contains("b_cell"))
+            else if (line.Contains("str_cell"))
             {
                 foreach (GameObject cell in ConsoleScript.allCells)
                 {
-                    int lastValueIndex = values.Length - 1;
-                    string cellDiscoveryState = values[lastValueIndex];
-
-                    //checking whether or not the player had already visited this cell in the loaded save
-                    if (line.Contains(cell.GetComponent<Manager_CurrentCell>().str_CellName))
-                    {
-                        if (cellDiscoveryState == "True")
-                        {
-                            cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
-                            cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
-                        }
-                    }
+                    cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
+                    cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
                 }
             }
 
@@ -913,12 +979,15 @@ public class Manager_GameSaving : MonoBehaviour
 
         saveFile.WriteLine("");
         //save all players items
-        if (PlayerInventoryScript.inventory.Count > 0)
+        if (PlayerInventoryScript.inventory.Count > 1
+            || (PlayerInventoryScript.inventory.Count == 1
+            && PlayerInventoryScript.inventory[0].gameObject.name != "Exoskeleton"))
         {
             saveFile.WriteLine("(1)count (all items)");
             saveFile.WriteLine("(2)current remainder (all consumables) / (2)current durability (all weapons with durability)");
             saveFile.WriteLine("(3)max remainder (all consumables) / (3)max durability (all weapons with durability)");
             saveFile.WriteLine("(4)ammo count (guns)");
+            saveFile.WriteLine("(5)gun jam state (0 means not jammed, 1 means jammed) (guns)");
 
             saveFile.WriteLine("");
             //save all players items
@@ -945,6 +1014,13 @@ public class Manager_GameSaving : MonoBehaviour
 
                         finalOutput += ", " + itemDurability + ", " + maxDurability;
                     }
+                    else if (item.GetComponent<Item_Melee>() != null)
+                    {
+                        itemDurability = item.GetComponent<Item_Melee>().durability;
+                        maxDurability = item.GetComponent<Item_Melee>().maxDurability;
+
+                        finalOutput += ", " + itemDurability + ", " + maxDurability;
+                    }
 
                     //save consumable current and max remainder
                     float itemRemainder = 0;
@@ -964,6 +1040,16 @@ public class Manager_GameSaving : MonoBehaviour
                         loadedAmmoCount = item.GetComponent<Item_Gun>().currentClipSize;
                         finalOutput += ", " + loadedAmmoCount;
                     }
+                    //save gun jam state
+                    int gunJamState = 0;
+                    if (item.GetComponent<Item_Gun>() != null)
+                    {
+                        if (item.GetComponent<Item_Gun>().isGunJammed)
+                        {
+                            gunJamState = 1;
+                        }
+                        finalOutput += ", " + gunJamState;
+                    }
 
                     saveFile.WriteLine(finalOutput);
                 }
@@ -971,7 +1057,9 @@ public class Manager_GameSaving : MonoBehaviour
 
             saveFile.WriteLine("");
         }
-        else if (PlayerInventoryScript.inventory.Count == 0)
+        else if (PlayerInventoryScript.inventory.Count == 0
+                || (PlayerInventoryScript.inventory.Count == 1
+                && PlayerInventoryScript.inventory[0].gameObject.name == "Exoskeleton"))
         {
             saveFile.WriteLine("<<<NO PLAYER INVENTORY ITEMS FOUND>>>");
         }
@@ -1009,10 +1097,9 @@ public class Manager_GameSaving : MonoBehaviour
 
                 itemIndex++;
             }
-
-            saveFile.WriteLine("");
         }
 
+        saveFile.WriteLine("");
         //save exoskeleton if player picked it up
         bool hasExoskeleton = false;
         foreach (GameObject playerItem in PlayerInventoryScript.inventory)
@@ -1104,22 +1191,42 @@ public class Manager_GameSaving : MonoBehaviour
         }
 
         saveFile.WriteLine("");
+        saveFile.WriteLine("--- THROWN GRENADES ---");
+
+        saveFile.WriteLine("");
+        saveFile.WriteLine("(1-3)X,Y and Z positions of this grenade,");
+        saveFile.WriteLine("(4-6)X,Y and Z directions of this grenades velocity aka which direction is this grenade heading,");
+        saveFile.WriteLine("(7)time since start of grenade cook timer");
+
+        saveFile.WriteLine("");
+        foreach (GameObject grenade in GameManagerScript.thrownGrenades)
+        {
+            string finalOutput = "go_thrGrenade_" + grenade.name;
+
+            //save grenades position
+            Vector3 position = grenade.transform.position;
+            finalOutput += position;
+            //save grenades movement direction
+            Vector3 velocity = grenade.GetComponent<Rigidbody>().velocity;
+            finalOutput += velocity;
+            //save grenades time until explosion
+            float timeUntilExplosion = grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer;
+            finalOutput += ", " + Mathf.Round(timeUntilExplosion * 10) / 10;
+
+            saveFile.WriteLine(finalOutput);
+            Debug.Log(finalOutput);
+        }
+
+        saveFile.WriteLine("");
         saveFile.WriteLine("--- DISCOVERED CELLS ---");
 
         saveFile.WriteLine("");
-        //save all teleportable cells and their discovery states
+        //save all cells that have been discovered
         foreach (GameObject cell in ConsoleScript.allCells)
         {
-            if (cell.GetComponent<Manager_CurrentCell>().canBeTeleportedTo)
+            if (cell.GetComponent<Manager_CurrentCell>().discoveredCell)
             {
-                if (cell.GetComponent<Manager_CurrentCell>().discoveredCell)
-                {
-                    saveFile.WriteLine("b_cell_" + cell.GetComponent<Manager_CurrentCell>().str_CellName + " = True");
-                }
-                else
-                {
-                    saveFile.WriteLine("b_cell_" + cell.GetComponent<Manager_CurrentCell>().str_CellName + " = False");
-                }
+                saveFile.WriteLine("str_cell_" + cell.GetComponent<Manager_CurrentCell>().str_CellName);
             }
         }
 

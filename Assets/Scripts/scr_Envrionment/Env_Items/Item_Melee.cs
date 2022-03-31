@@ -6,6 +6,8 @@ public class Item_Melee : MonoBehaviour
 {
     [SerializeField] private int meleeDamage;
     [SerializeField] private float swingTimerLimit;
+    public float maxDurability;
+    [SerializeField] private float durabilityReducedPerHit;
     [SerializeField] private Vector3 correctHoldRotation;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Player_MeleeRangeTargets MeleeTargetsScript;
@@ -17,10 +19,19 @@ public class Item_Melee : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool hasEquippedMeleeWeapon;
+    [HideInInspector] public float durability;
 
     //private variables
     private bool isSwinging;
     private float swingTimer;
+
+    private void Awake()
+    {
+        //durability is random value between third of max durability and 8/10ths of max durability
+        //durability = Mathf.FloorToInt(Random.Range(maxDurability / 3, maxDurability / 10 * 8));
+
+        durability = maxDurability;
+    }
 
     private void Update()
     {
@@ -50,6 +61,7 @@ public class Item_Melee : MonoBehaviour
     private void Swing()
     {
         isSwinging = true;
+        bool hitSomething = false;
 
         for (int i = 0; i < MeleeTargetsScript.targets.Count; i++)
         {
@@ -60,6 +72,22 @@ public class Item_Melee : MonoBehaviour
             {
                 MeleeTargetsScript.targets[i].GetComponent<AI_Health>().Death();
             }
+
+            if (!hitSomething)
+            {
+                hitSomething = true;
+            }
+        }
+
+        if (hitSomething)
+        {
+            durability -= durabilityReducedPerHit;
+
+            UIReuseScript.durability = durability;
+            UIReuseScript.maxDurability = maxDurability;
+            UIReuseScript.UpdateWeaponQuality();
+
+            hitSomething = false;
         }
     }
 
@@ -116,6 +144,10 @@ public class Item_Melee : MonoBehaviour
         gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
         gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
 
+        UIReuseScript.durability = durability;
+        UIReuseScript.maxDurability = maxDurability;
+        UIReuseScript.UpdateWeaponQuality();
+
         //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
     }
     public void UnequipMeleeWeapon()
@@ -134,6 +166,7 @@ public class Item_Melee : MonoBehaviour
             UIReuseScript.txt_InventoryName.text = "Player inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             PlayerInventoryScript.equippedGun = null;
+            UIReuseScript.ClearWeaponUI();
 
             gameObject.SetActive(false);
             gameObject.GetComponent<MeshRenderer>().enabled = false;

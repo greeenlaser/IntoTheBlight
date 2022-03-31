@@ -3627,7 +3627,7 @@ MonoBehaviour:
     /hold item\n   /upper held grenade cooking\n- drop held object\n   /lower grenade
     instant throw\n- throw held item\n- aim down sights\n   /lower held grenade cooking\n-
     reload\n- use ability assigned to that slot\n- assign ability to that slot\n-
-    player menu\n- save game\n- load game\n- pause menu\n- console"
+    player menu\n- save game\n- load game\n- screenshot\n- pause menu\n- console"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1274d28cfb551b14fbb0ac8dc6dee8a6, type: 2}
   m_sharedMaterial: {fileID: 1343242652353938837, guid: 1274d28cfb551b14fbb0ac8dc6dee8a6, type: 2}
@@ -3654,7 +3654,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 27.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3797,7 +3797,9 @@ MonoBehaviour:
     press f9
 
     press
-    esc
+    f12
+
+    press esc
 
     press pageup'
   m_isRightToLeft: 0
@@ -3826,7 +3828,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28.95
+  m_fontSize: 27.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

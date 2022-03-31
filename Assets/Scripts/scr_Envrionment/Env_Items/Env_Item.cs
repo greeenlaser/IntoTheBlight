@@ -14,16 +14,6 @@ public class Env_Item : MonoBehaviour
     [SerializeField] private bool randomizeCount;
     public string str_ItemName;
     public string str_ItemDescription;
-    [Tooltip("How rare is this item? Note: Higher rarity items cost more and have better overall stats.")]
-    public Itemrarity itemRarity;
-    public enum Itemrarity
-    {
-        unassigned,
-        Trash,
-        Common,
-        Rare,
-        Legendary
-    }
 
     [Tooltip("Which faction does this AI belong to?")]
     public Faction faction;
@@ -200,54 +190,21 @@ public class Env_Item : MonoBehaviour
 
         //if the object was dropped and distance is over 25
         //or more than 2 irl minutes have passed after the object was dropped
-        if (droppedObject && !PauseMenuScript.isGamePaused)
+        if (droppedObject
+            && !isProtected
+            && !PauseMenuScript.isGamePaused)
         {
             time += Time.deltaTime;
 
             if (time > 120)
             {
-                if (!isProtected)
-                {
-                    Debug.Log("Perf: " + name + " was destroyed because it had been dropped for too long.");
-                    DestroyObject();
-                }
-                /*
-                else if (isProtected)
-                {
-                    Vector3 playerPos = thePlayer.transform.position;
-                    Vector3 playerDirection = thePlayer.transform.forward;
-
-                    Vector3 placePosition = playerPos + playerDirection * 2;
-                    gameObject.transform.position = placePosition;
-
-                    Debug.Log("Perf: " + name + " cannot be deleted because it is protected! Teleported it to player position.");
-
-                    time = 0;
-                    droppedObject = false;
-                }
-                */
+                Debug.Log("Perf: " + name + " was destroyed because it had been dropped for too long.");
+                DestroyObject();
             }
             else if (Vector3.Distance(transform.position, thePlayer.transform.transform.position) > 25)
             {
-                if (!isProtected)
-                {
-                    Debug.Log("Perf: " + name + " was destroyed after player went too far from it.");
-                    DestroyObject();
-                }
-                /*
-                else if (isProtected)
-                {
-                    Vector3 playerPos = thePlayer.transform.position;
-                    Vector3 playerDirection = thePlayer.transform.forward;
-
-                    Vector3 placePosition = playerPos + playerDirection * 2;
-                    gameObject.transform.position = placePosition;
-
-                    Debug.Log("Perf: " + name + " cannot be deleted because it is protected! Teleported it to player position.");
-
-                    droppedObject = false;
-                }
-                */
+                Debug.Log("Perf: " + name + " was destroyed after player went too far from it.");
+                DestroyObject();
             }
         }
     }
@@ -328,49 +285,7 @@ public class Env_Item : MonoBehaviour
         }
         //item description
         UIReuseScript.txt_ItemDescription.text = str_ItemDescription;
-        UIReuseScript.txt_ItemRarity.text = itemRarity.ToString();
 
-        // ### ITEM TYPE START ###
-
-        //item type is weapon if this item can be used as a gun or melee weapon
-        if (gameObject.GetComponent<Item_Gun>() != null)
-        {
-            UIReuseScript.txt_ItemType.text = "Weapon";
-        }
-        //item type is grenade if this item can be used as a grenade
-        else if (gameObject.GetComponent<Item_Grenade>() != null)
-        {
-            UIReuseScript.txt_ItemType.text = "Grenade";
-        }
-        //item type is healing if this item can be consumed
-        else if (gameObject.GetComponent<Item_Consumable>() != null)
-        {
-            UIReuseScript.txt_ItemType.text = "Healing";
-        }
-        //item type is ammo if this item can be used as ammo for any guns
-        else if (gameObject.GetComponent<Item_Ammo>() != null)
-        {
-            UIReuseScript.txt_ItemType.text = "Ammo";
-        }
-        //item type is key if this item can be used as key for any doors or containers
-        else if (gameObject.GetComponent<Item_Lockpick>() != null
-                 && gameObject.GetComponent<Item_Lockpick>().itemType
-                 == Item_Lockpick.ItemType.key)
-        {
-            UIReuseScript.txt_ItemType.text = "Key";
-        }
-        //item type is misc if no special item script was found
-        else if (gameObject.GetComponent<Item_Gun>() == null
-            && gameObject.GetComponent<Item_Consumable>() == null
-            && gameObject.GetComponent<Item_Ammo>() == null)
-        {
-            UIReuseScript.txt_ItemType.text = "Misc";
-        }
-
-        // ### ITEM TYPE END ###
-
-        //item clan
-        UIReuseScript.txt_ItemClan.text = faction.ToString();
         //single or multiple item value and weight
         if (int_itemCount == 1)
         {

@@ -77,11 +77,6 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_ItemDurability;
     public TMP_Text txt_ItemRemainder;
     public TMP_Text txt_ItemCount;
-    public TMP_Text txt_ItemRarity;
-    public TMP_Text txt_ItemType;
-    public TMP_Text txt_ItemClan;
-    public TMP_Text txt_ItemBuffs;
-    public TMP_Text txt_ItemDebuffs;
     public TMP_Text txt_protected;
     public TMP_Text txt_notStackable;
     public TMP_Text txt_tooHeavy;
@@ -784,11 +779,6 @@ public class Manager_UIReuse : MonoBehaviour
         txt_SliderInfo.text = "";
         txt_ItemDurability.text = "";
         txt_ItemRemainder.text = "";
-        txt_ItemRarity.text = "";
-        txt_ItemType.text = "";
-        txt_ItemClan.text = "";
-        txt_ItemBuffs.text = "";
-        txt_ItemDebuffs.text = "";
         txt_protected.gameObject.SetActive(false);
         txt_notStackable.gameObject.SetActive(false);
         txt_tooHeavy.gameObject.SetActive(false);

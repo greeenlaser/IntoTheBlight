@@ -86,13 +86,13 @@ public class Item_Gun : MonoBehaviour
     [HideInInspector] public bool hasEquippedGun;
     [HideInInspector] public bool isFiring;
     [HideInInspector] public bool isReloading;
+    [HideInInspector] public bool isGunJammed;
     [HideInInspector] public float durability;
     [HideInInspector] public int currentClipSize;
     [HideInInspector] public GameObject ammoClip;
 
     //private variables
     private bool firedFirstShot;
-    private bool isGunJammed;
     private bool isAimingDownSights;
     private bool clearedCursorsList;
     private float timer_automaticFire;
@@ -109,6 +109,9 @@ public class Item_Gun : MonoBehaviour
 
     private void Awake()
     {
+        //durability is random value between third of max durability and 8/10ths of max durability
+        //durability = Mathf.FloorToInt(Random.Range(maxDurability / 3, maxDurability / 10 * 8));
+
         durability = maxDurability;
     }
 

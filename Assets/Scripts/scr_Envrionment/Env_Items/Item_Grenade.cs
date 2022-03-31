@@ -42,6 +42,7 @@ public class Item_Grenade : MonoBehaviour
     [SerializeField] private Manager_Console ConsoleScript;
     [SerializeField] private UI_PauseMenu PausemenuScript;
     [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameManager GameManagerScript;
 
     //public but hidden variables
     [HideInInspector] public bool hasEquippedGrenade;
@@ -591,6 +592,8 @@ public class Item_Grenade : MonoBehaviour
         thrownGrenade = Instantiate(gameObject, pos_GrenadeInstantiate.position, Quaternion.identity, par_ThrownGrenades);
         thrownGrenade.GetComponent<Env_Item>().int_itemCount = 1;
 
+        GameManagerScript.thrownGrenades.Add(thrownGrenade);
+
         PlayerInventoryScript.inventory.Remove(thrownGrenade);
         PlayerInventoryScript.invSpace += gameObject.GetComponent<Env_Item>().int_ItemWeight;
 
@@ -699,6 +702,8 @@ public class Item_Grenade : MonoBehaviour
     public void ExplodeGrenade()
     {
         //Debug.Log("Exploded " + stickyType + " " +  grenadeType.ToString() + " grenade!");
+
+        GameManagerScript.thrownGrenades.Remove(gameObject);
 
         //get all colliders in sphere radius and add effects
         Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRange);

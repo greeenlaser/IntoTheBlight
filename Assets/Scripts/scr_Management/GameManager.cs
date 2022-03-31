@@ -18,6 +18,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float fpsUpdateSpeed;
     [SerializeField] private TMP_Text txt_fpsValue;
 
+    //public but hidden variables
+    [HideInInspector] public List<GameObject> thrownGrenades = new List<GameObject>();
+
     //private variables
     private float fps;
     private int scrCount;

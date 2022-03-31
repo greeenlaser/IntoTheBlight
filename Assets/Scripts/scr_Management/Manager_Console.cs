@@ -376,8 +376,6 @@ public class Manager_Console : MonoBehaviour
                     Command_Help();
                 }
 
-                //----
-
                 //show the intro message
                 else if (separatedWords[0] == "intromessage" && separatedWords.Count == 1)
                 {
@@ -432,8 +430,6 @@ public class Manager_Console : MonoBehaviour
                     Command_Quit();
                 }
 
-                //----
-
                 //selects a target
                 else if (separatedWords[0] == "st" && separatedWords.Count == 1
                          && PlayerHealthScript.isPlayerAlive)
@@ -474,12 +470,12 @@ public class Manager_Console : MonoBehaviour
                     Command_TeleportToVector3Location();
                 }
                 //shows all the games cells
-                else if (separatedWords[0] == "showallcells" && separatedWords.Count == 1)
+                else if (separatedWords[0] == "sac" && separatedWords.Count == 1)
                 {
                     Command_ShowAllCells();
                 }
                 //discovers all the games cells
-                else if (separatedWords[0] == "discoverallcells" && separatedWords.Count == 1)
+                else if (separatedWords[0] == "dac" && separatedWords.Count == 1)
                 {
                     Command_DiscoverAllCells();
                 }
@@ -489,8 +485,6 @@ public class Manager_Console : MonoBehaviour
                 {
                     Command_TeleportToCell();
                 }
-
-                //--------
 
                 //some commands are disabled if the player is dead
                 else if (!PlayerHealthScript.isPlayerAlive)
@@ -514,8 +508,6 @@ public class Manager_Console : MonoBehaviour
                         CreateNewConsoleLine();
                     }
                 }
-
-                //--------
 
                 //get or set a player value
                 else if (separatedWords[0] == "player")
@@ -577,8 +569,6 @@ public class Manager_Console : MonoBehaviour
                         Command_GetAllPlayerQuestIDs();
                     }
 
-                    //--------
-
                     //some commands are disabled if the player is dead
                     else if (!PlayerHealthScript.isPlayerAlive)
                     {
@@ -611,8 +601,6 @@ public class Manager_Console : MonoBehaviour
                     }
                 }
 
-                //--------
-
                 //get or set a quest value
                 else if (separatedWords[0] == "quest")
                 {
@@ -624,8 +612,6 @@ public class Manager_Console : MonoBehaviour
                     consoleText = "Error: Unknown or incorrect command!";
                     CreateNewConsoleLine();
                 }
-
-                //--------
 
                 //get or set a graphics value
                 else if (separatedWords[0] == "graphics")
@@ -750,9 +736,9 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             consoleText = "tp xValue yValue zValue - Teleports the player to xValue, yValue and zValue coordinates.";
             CreateNewConsoleLine();
-            consoleText = "showallcells - Shows all the games cells.";
+            consoleText = "sac - Shows all the games cells.";
             CreateNewConsoleLine();
-            consoleText = "discoverallcells - Enables all the games cells.";
+            consoleText = "dac - Enables all the games cells.";
             CreateNewConsoleLine();
             consoleText = "tpcell cellName - Teleports the player to cell cellName.";
             CreateNewConsoleLine();
@@ -833,10 +819,6 @@ public class Manager_Console : MonoBehaviour
 
         separatedWords.Clear();
     }
-
-    //--------
-
-    // VVV ALL GENERAL COMMANDS VVV
 
     //shows the console intro message
     private void Command_ShowIntroMessage()
@@ -967,8 +949,6 @@ public class Manager_Console : MonoBehaviour
         Application.Quit();
     }
 
-    //--------
-
     private void Command_SelectTarget()
     {
         insertedCommands.Add("selecttarget");
@@ -1018,34 +998,34 @@ public class Manager_Console : MonoBehaviour
                             //killableState
                             if (target.GetComponent<AI_Health>().isKillable)
                             {
-                                consoleText = "killableState: 1";
+                                consoleText = "canBeKilled = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<AI_Health>().isKillable)
                             {
-                                consoleText = "killableState: 0";
+                                consoleText = "canBeKilled = false";
                                 CreateNewConsoleLine();
                             }
                             //hostileState
                             if (target.GetComponent<AI_Health>().canBeHostile)
                             {
-                                consoleText = "hostileState: 1";
+                                consoleText = "canBeHostile = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<AI_Health>().canBeHostile)
                             {
-                                consoleText = "hostileState: 0";
+                                consoleText = "canBeHostile = false";
                                 CreateNewConsoleLine();
                             }
                         }
                         else if (target.GetComponent<AI_Health>() == null)
                         {
-                            consoleText = "killableState: 1";
+                            consoleText = "canBeKilled = false";
                             CreateNewConsoleLine();
-                            consoleText = "hostileState: 1";
+                            consoleText = "canBeHostile = false";
                             CreateNewConsoleLine();
                         }
-                        consoleText = "factionName: " + target.GetComponent<UI_AIContent>().faction.ToString();
+                        consoleText = "factionName = " + target.GetComponent<UI_AIContent>().faction.ToString();
                         CreateNewConsoleLine();
 
                         consoleText = "--- target commands:";
@@ -1071,34 +1051,54 @@ public class Manager_Console : MonoBehaviour
                         //is item protected
                         if (target.GetComponent<Env_Item>().isProtected)
                         {
-                            consoleText = "protectedState: 1";
+                            consoleText = "isProtected = true";
                             CreateNewConsoleLine();
                         }
                         else if (!target.GetComponent<Env_Item>().isProtected)
                         {
-                            consoleText = "protectedState: 0";
+                            consoleText = "isProtected = false";
                             CreateNewConsoleLine();
                         }
                         //is item stackable
                         if (target.GetComponent<Env_Item>().isStackable)
                         {
-                            consoleText = "stackableState: 1";
+                            consoleText = "isStackable = true";
                             CreateNewConsoleLine();
                         }
                         else if (!target.GetComponent<Env_Item>().isStackable)
                         {
-                            consoleText = "stackableState: 0";
+                            consoleText = "isStackable = false";
                             CreateNewConsoleLine();
                         }
 
-                        consoleText = "item count: " + target.GetComponent<Env_Item>().int_itemCount;
+                        consoleText = "itemCount = " + target.GetComponent<Env_Item>().int_itemCount;
                         CreateNewConsoleLine();
-                        consoleText = "item value: " + target.GetComponent<Env_Item>().int_ItemValue + " (" + target.GetComponent<Env_Item>().int_ItemValue * target.GetComponent<Env_Item>().int_itemCount + ")";
+                        consoleText = "itemValue = " + target.GetComponent<Env_Item>().int_ItemValue + " (" + target.GetComponent<Env_Item>().int_ItemValue * target.GetComponent<Env_Item>().int_itemCount + ")";
                         CreateNewConsoleLine();
-                        consoleText = "item weight: " + target.GetComponent<Env_Item>().int_ItemWeight  + " (" + target.GetComponent<Env_Item>().int_ItemWeight * target.GetComponent<Env_Item>().int_itemCount + ")";
+                        consoleText = "itemWeight = " + target.GetComponent<Env_Item>().int_ItemWeight  + " (" + target.GetComponent<Env_Item>().int_ItemWeight * target.GetComponent<Env_Item>().int_itemCount + ")";
                         CreateNewConsoleLine();
+                        if (target.GetComponent<Item_Gun>() != null)
+                        {
+                            consoleText = "currentDurability = " + target.GetComponent<Item_Gun>().durability;
+                            CreateNewConsoleLine();
+                            consoleText = "maxDurability = " + target.GetComponent<Item_Gun>().maxDurability;
+                            CreateNewConsoleLine();
+                        }
+                        else if (target.GetComponent<Item_Melee>() != null)
+                        {
+                            consoleText = "currentdurability = " + target.GetComponent<Item_Melee>().durability;
+                            CreateNewConsoleLine();
+                            consoleText = "maxdurability = " + target.GetComponent<Item_Melee>().maxDurability;
+                            CreateNewConsoleLine();
+                        }
 
                         consoleText = "--- target commands:";
+                        CreateNewConsoleLine();
+
+                        //default modifiable variables for all gameobjects
+                        consoleText = "target disable - disables gameobject if it isn't protected";
+                        CreateNewConsoleLine();
+                        consoleText = "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed";
                         CreateNewConsoleLine();
 
                         consoleText = "target setcount countValue - changes the item count to countValue";
@@ -1107,6 +1107,14 @@ public class Manager_Console : MonoBehaviour
                         CreateNewConsoleLine();
                         consoleText = "target setweight weightValue - changes individual item weight to weightValue";
                         CreateNewConsoleLine();
+                        if (target.GetComponent<Item_Gun>() != null
+                            || target.GetComponent<Item_Melee>() != null)
+                        {
+                            consoleText = "target setdurability durabilityValue - changes individual item durability to durabilityValue";
+                            CreateNewConsoleLine();
+                            consoleText = "target setmaxdurability maxDurabilityValue - changes individual item max durability to maxDurabilityValue";
+                            CreateNewConsoleLine();
+                        }
                     }
                     //door/container states and commands
                     else if (target.GetComponent<Env_Lock>() != null)
@@ -1119,23 +1127,23 @@ public class Manager_Console : MonoBehaviour
                         {
                             if (target.GetComponent<Env_Door>().isProtected)
                             {
-                                consoleText = "protectedState: 1";
+                                consoleText = "isprotected = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<Env_Door>().isProtected)
                             {
-                                consoleText = "protectedState: 0";
+                                consoleText = "isprotected = false";
                                 CreateNewConsoleLine();
                             }
 
                             if (target.GetComponent<Env_Door>().isLocked)
                             {
-                                consoleText = "lockedState: 1";
+                                consoleText = "islocked = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<Env_Door>().isLocked)
                             {
-                                consoleText = "lockedState: 0";
+                                consoleText = "islocked = false";
                                 CreateNewConsoleLine();
                             }
                         }
@@ -1144,23 +1152,23 @@ public class Manager_Console : MonoBehaviour
                         {
                             if (target.GetComponent<Inv_Container>().isProtected)
                             {
-                                consoleText = "protectedState: 1";
+                                consoleText = "isprotected = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<Inv_Container>().isProtected)
                             {
-                                consoleText = "protectedState: 0";
+                                consoleText = "isprotected = false";
                                 CreateNewConsoleLine();
                             }
 
                             if (target.GetComponent<Inv_Container>().isLocked)
                             {
-                                consoleText = "lockedState: 1";
+                                consoleText = "islocked = true";
                                 CreateNewConsoleLine();
                             }
                             else if (!target.GetComponent<Inv_Container>().isLocked)
                             {
-                                consoleText = "lockedState: 0";
+                                consoleText = "islocked = false";
                                 CreateNewConsoleLine();
                             }
                         }
@@ -1171,12 +1179,6 @@ public class Manager_Console : MonoBehaviour
                         consoleText = "target unlock - unlocks the door/container if it isn't protected";
                         CreateNewConsoleLine();
                     }
-
-                    //default modifiable variables for all gameobjects
-                    consoleText = "target disable - disables gameobject if it isn't protected";
-                    CreateNewConsoleLine();
-                    consoleText = "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed";
-                    CreateNewConsoleLine();
                 }
 
                 //disable target
@@ -1435,6 +1437,78 @@ public class Manager_Console : MonoBehaviour
 
                                 consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s weight to " + insertedValue + ".";
                                 CreateNewConsoleLine();
+                            }
+                            else if (secondCommandName == "setdurability")
+                            {
+                                if (target.GetComponent<Item_Gun>() != null
+                                    && insertedValue <= target.GetComponent<Item_Gun>().maxDurability)
+                                {
+                                    target.GetComponent<Item_Gun>().durability = insertedValue;
+
+                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".";
+                                    CreateNewConsoleLine();
+                                }
+                                else if (target.GetComponent<Item_Melee>() != null
+                                         && insertedValue <= target.GetComponent<Item_Melee>().maxDurability)
+                                {
+                                    target.GetComponent<Item_Melee>().durability = insertedValue;
+
+                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".";
+                                    CreateNewConsoleLine();
+                                }
+
+                                //custom error message for too high durability
+                                else if ((target.GetComponent<Item_Gun>() != null
+                                         && insertedValue > target.GetComponent<Item_Gun>().maxDurability)
+                                         || (target.GetComponent<Item_Melee>() != null
+                                         && insertedValue > target.GetComponent<Item_Melee>().maxDurability))
+                                {
+                                    consoleText = "Error: Target item durability cannot be higher than its max durability!";
+                                    CreateNewConsoleLine();
+                                }
+                                //custom error message for weapon not found
+                                else if (target.GetComponent<Item_Gun>() == null
+                                         && target.GetComponent<Item_Melee>() == null)
+                                {
+                                    consoleText = "Error: Targets durability cannot be edited. Target is not an item with any durability!";
+                                    CreateNewConsoleLine();
+                                }
+                            }
+                            else if (secondCommandName == "setmaxdurability")
+                            {
+                                if (target.GetComponent<Item_Gun>() != null
+                                    && insertedValue > target.GetComponent<Item_Gun>().durability)
+                                {
+                                    target.GetComponent<Item_Gun>().maxDurability = insertedValue;
+
+                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".";
+                                    CreateNewConsoleLine();
+                                }
+                                else if (target.GetComponent<Item_Melee>() != null
+                                         && insertedValue > target.GetComponent<Item_Melee>().durability)
+                                {
+                                    target.GetComponent<Item_Melee>().maxDurability = insertedValue;
+
+                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".";
+                                    CreateNewConsoleLine();
+                                }
+
+                                //custom error message for too low max durability
+                                else if ((target.GetComponent<Item_Gun>() != null
+                                         && insertedValue < target.GetComponent<Item_Gun>().durability)
+                                         || (target.GetComponent<Item_Melee>() != null
+                                         && insertedValue < target.GetComponent<Item_Melee>().durability))
+                                {
+                                    consoleText = "Error: Target item max durability cannot be lower than its durability!";
+                                    CreateNewConsoleLine();
+                                }
+                                //custom error message for weapon not found
+                                else if (target.GetComponent<Item_Gun>() == null
+                                         && target.GetComponent<Item_Melee>() == null)
+                                {
+                                    consoleText = "Error: Targets max durability cannot be edited. Target is not an item with any durability!";
+                                    CreateNewConsoleLine();
+                                }
                             }
 
                             else if (secondCommandName == "setcount"
@@ -2220,7 +2294,7 @@ public class Manager_Console : MonoBehaviour
     //list all valid game cell names
     private void Command_ShowAllCells()
     {
-        insertedCommands.Add("showallcells");
+        insertedCommands.Add("sac");
         currentSelectedInsertedCommand = insertedCommands.Count;
         consoleText = "--" + input + "--";
         CreateNewConsoleLine();
@@ -2238,12 +2312,21 @@ public class Manager_Console : MonoBehaviour
     //discover all game cell names
     private void Command_DiscoverAllCells()
     {
-        insertedCommands.Add("discoverallcells");
+        insertedCommands.Add("dac");
         currentSelectedInsertedCommand = insertedCommands.Count;
         consoleText = "--" + input + "--";
         CreateNewConsoleLine();
 
-        consoleText = "Error: This command has no functions yet!";
+        foreach (GameObject cell in allCells)
+        {
+            if (!cell.GetComponent<Manager_CurrentCell>().discoveredCell)
+            {
+                cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
+                cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
+            }
+        }
+
+        consoleText = "All cells are now discovered!";
         CreateNewConsoleLine();
 
         separatedWords.Clear();
@@ -2296,19 +2379,13 @@ public class Manager_Console : MonoBehaviour
                 else if (i == allCells.Count -1
                         && cellName != lastCell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
-                    consoleText = "Error: Cell name not found! Use showallcells to list all valid game cells.";
+                    consoleText = "Error: Cell name not found! Use sac to list all valid game cells.";
                     CreateNewConsoleLine();
                 }
             }
         }
         separatedWords.Clear();
     }
-
-    // ^^^ ALL GENERAL COMMANDS ^^^
-
-    //--------
-
-    // VVV ALL GENERAL PLAYER RELATED COMMANDS VVV
 
     //get player current coordinates
     private void Command_GetPlayerCurrentCoordinates()
@@ -2440,10 +2517,6 @@ public class Manager_Console : MonoBehaviour
         }
         separatedWords.Clear();
     }
-
-    //----
-    // VVV PLAYER STAT COMMANDS VVV
-    //----
 
     //shows all player stats
     private void Command_ShowPlayerStats()
@@ -2922,10 +2995,6 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
 
-    //----
-    // VVV PLAYER ITEM COMMANDS VVV
-    //----
-
     //list all spawnable game items
     private void Command_ShowAllSpawnableItems()
     {
@@ -3373,10 +3442,6 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
 
-    //----
-    // VVV PLAYER REPAIR COMMANDS VVV
-    //----
-
     //shows all player repairable items and their durability
     private void Command_ShowAllRepairableItems()
     {
@@ -3478,10 +3543,6 @@ public class Manager_Console : MonoBehaviour
 
         separatedWords.Clear();
     }
-
-    //----
-    // VVV PLAYER FACTION COMMANDS VVV
-    //----
 
     //set player reputation with a faction
     private void Command_SetPlayerRep()
@@ -3598,40 +3659,6 @@ public class Manager_Console : MonoBehaviour
         }
         separatedWords.Clear();
     }
-
-    //----
-    // VVV PLAYER EQUIPPED THROWABLE COMMANDS VVV
-    //----
-
-    //----
-    // VVV PLAYER EQUIPPED MELEE WEAPON COMMANDS VVV
-    //----
-
-    //----
-    // VVV PLAYER EQUIPPED GUN COMMANDS VVV
-    //----
-
-    //----
-    // VVV PLAYER EQUIPPED ARMOR COMMANDS VVV
-    //----
-
-    //----
-    // VVV PLAYER EQUIPPED GEAR COMMANDS VVV
-    //----
-
-    // ^^^ ALL GENERAL PLAYER RELATED COMMANDS ^^^
-
-    // VVV ALL TARGET RELATED COMMANDS VVV
-    // ^^^ ALL TARGET RELATED COMMANDS ^^^
-
-    // VVV ALL QUEST RELATED COMMANDS VVV
-    // ^^^ ALL QUEST RELATED COMMANDS ^^^
-
-    // VVV ALL GRAPHICS RELATED COMMANDS VVV
-
-    // ^^^ ALL GRAPHICS RELATED COMMANDS ^^^
-
-    //--------
 
     private void RebuildInventoryUI()
     {
