@@ -21,6 +21,8 @@ public class AI_Movement : MonoBehaviour
     [HideInInspector] public bool goingTowardsTarget;
     [HideInInspector] public bool calledTargetLostOnce;
     [HideInInspector] public GameObject target;
+    [HideInInspector] public GameObject currentCell;
+    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool calledWaitOnce;
@@ -59,8 +61,7 @@ public class AI_Movement : MonoBehaviour
                     if (AIContentScript.AIActivated
                         && !AIContentScript.isAIUIOpen
                         && AIContentScript.hasDialogue
-                        && ConsoleScript.toggleAIDetection
-                        && !ConsoleScript.noclipEnabled)
+                        && ConsoleScript.toggleAIDetection)
                     {
                         agent.isStopped = true;
 
@@ -276,5 +277,20 @@ public class AI_Movement : MonoBehaviour
         Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " has lost the target. Returning to original waypoints.");
         calledTargetLostOnce = true;
         StartCoroutine(Wait());
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("WorldBlocker"))
+        {
+            if (currentCell != null)
+            {
+                transform.position = currentCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+            else if (currentCell == null && lastCell != null)
+            {
+                transform.position = lastCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+        }
     }
 }

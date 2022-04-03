@@ -273,8 +273,6 @@ public class Item_Grenade : MonoBehaviour
                 && startedExplodedGrenadeDestroyTimer
                 && !endedExplosionEffects)
             {
-                Debug.DrawRay(transform.position, pos_HoldItem.transform.parent.parent.position, Color.green, 25);
-
                 //frag grenade effects
                 if (fragExplode)
                 {
@@ -383,17 +381,11 @@ public class Item_Grenade : MonoBehaviour
                         //player in stungrenade explosion range
                         //and if player doesnt have godmode enabled
                         if (target.GetComponent<Player_Movement>() != null
-                            && PlayerHealthScript.canTakeDamage)
+                            && PlayerHealthScript.canTakeDamage
+                            && PlayerRaycastScript.targets.Contains(gameObject))
                         {
-                            //checking if player also saw this grenade
-                            foreach (GameObject collider in PlayerRaycastScript.targets)
-                            {
-                                if (collider == gameObject)
-                                {
-                                    //stuns the player
-                                    target.GetComponent<Player_Movement>().Stun();
-                                }
-                            }
+                            //stuns the player
+                            target.GetComponent<Player_Movement>().Stun();
                         }
                         //killable AI in stungrenade explosion range
                         //and if this AI actually also saw this grenade

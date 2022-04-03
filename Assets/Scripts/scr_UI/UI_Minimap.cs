@@ -8,7 +8,6 @@ public class UI_Minimap : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;
-    [SerializeField] private GameObject noclipCamera;
     [SerializeField] private UI_PauseMenu PauseMenuScript;
     [SerializeField] private Manager_Console ConsoleScript;
     [SerializeField] private Manager_UIReuse UIReuseScript;
@@ -27,25 +26,13 @@ public class UI_Minimap : MonoBehaviour
         if (!PauseMenuScript.isGamePaused)
         {
             //minimap updates with player rotation and position
-            if (!ConsoleScript.noclipEnabled)
-            {
-                //get player y global rotation
-                playerYRot = thePlayer.transform.eulerAngles.y;
+            //get player y global rotation
+            playerYRot = thePlayer.transform.eulerAngles.y;
 
-                //get player global x and z positions
-                playerPos = thePlayer.transform.position;
+            //get player global x and z positions
+            playerPos = thePlayer.transform.position;
 
-                //Debug.Log(playerYRot + " (" + MinimapPlayerPos.eulerAngles + ")");
-            }
-            //minimap updates with noclip camera rotation and position
-            else if (ConsoleScript.noclipEnabled)
-            {
-                //get noclip camera y global rotation
-                playerYRot = noclipCamera.transform.eulerAngles.y;
-
-                //get noclip camera global x and z positions
-                playerPos = noclipCamera.transform.position;
-            }
+            //Debug.Log(playerYRot + " (" + MinimapPlayerPos.eulerAngles + ")");
 
             //get player position transform on minimap
             Transform MinimapPlayerPos = UIReuseScript.MinimapPlayerPosition.transform;

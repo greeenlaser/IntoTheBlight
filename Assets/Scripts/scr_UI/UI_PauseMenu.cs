@@ -300,11 +300,6 @@ public class UI_PauseMenu : MonoBehaviour
         //Debug.Log("Closed pause menu UI!");
     }
 
-    public void RestartCurrentScene()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
     public void BackToPauseMenu()
     {
         UIReuseScript.par_PauseMenuContent.SetActive(true);

@@ -7,6 +7,7 @@ TagManager:
   - Noclip
   - Item
   - NPC
+  - WorldBlocker
   layers:
   - Default
   - TransparentFX

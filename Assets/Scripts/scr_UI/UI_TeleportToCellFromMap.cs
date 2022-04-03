@@ -6,7 +6,6 @@ using UnityEngine.EventSystems;
 public class UI_TeleportToCellFromMap : MonoBehaviour, IPointerClickHandler
 { 
     [SerializeField] private GameObject thePlayer;
-    [SerializeField] private GameObject noclipCamera;
     [SerializeField] private Manager_CurrentCell CurrentCellScript;
     [SerializeField] private Manager_Console ConsoleScript;
     [SerializeField] private UI_PlayerMenu PlayerMenuScript;
@@ -30,14 +29,7 @@ public class UI_TeleportToCellFromMap : MonoBehaviour, IPointerClickHandler
 
     public void ConfirmTeleport()
     {
-        if (!ConsoleScript.noclipEnabled)
-        {
-            thePlayer.transform.position = CurrentCellScript.currentCellSpawnpoint.position;
-        }
-        else if (ConsoleScript.noclipEnabled)
-        {
-            noclipCamera.transform.position = CurrentCellScript.currentCellSpawnpoint.position;
-        }
+        thePlayer.transform.position = CurrentCellScript.currentCellSpawnpoint.position;
 
         UIReuseScript.par_TeleportCheck.SetActive(false);
         PlayerMenuScript.ClosePlayerMenuUI();

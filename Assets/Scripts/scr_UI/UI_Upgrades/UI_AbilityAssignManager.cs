@@ -117,6 +117,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
                 Slot3Script.UseAbility();
                 timer = 0;
             }
+            /*
             //custom error for not having any ability assigned to the pressed ability key
             else if (timer > 0
                      && timer < maxWait
@@ -132,6 +133,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
             {
                 Debug.LogWarning("Error: No ability has been assigned to this key yet!");
             }
+            */
 
             if (canIncreaseTimer)
             {

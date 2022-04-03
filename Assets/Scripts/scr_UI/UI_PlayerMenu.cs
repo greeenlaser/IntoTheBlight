@@ -55,7 +55,6 @@ public class UI_PlayerMenu : MonoBehaviour
                 && !PlayerInventoryScript.isPlayerInventoryOpen
                 && !isPlayerMenuOpen
                 && !PauseMenuScript.isUIOpen
-                && !ConsoleScript.noclipEnabled
                 && lockpickUI == null)
             {
                 openedInventoryUI = true;

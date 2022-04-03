@@ -44,6 +44,8 @@ public class Manager_CurrentCell : MonoBehaviour
         {
             LoadCell();
             isPlayerInCell = true;
+
+            other.GetComponent<Player_Movement>().currentCell = gameObject;
         }
         if (other.CompareTag("Item")
             && !other.GetComponent<Env_Item>().isInPlayerInventory
@@ -51,16 +53,21 @@ public class Manager_CurrentCell : MonoBehaviour
             && !other.GetComponent<Env_Item>().isInTraderShop
             && !items.Contains(other.gameObject))
         {
-            items.Add(other.gameObject);
             if (!isPlayerInCell)
             {
                 LoadCell();
                 UnloadCell();
             }
+
+            other.GetComponent<Env_Item>().currentCell = gameObject;
+
+            items.Add(other.gameObject);
         }
         if (other.CompareTag("NPC")
             && !AI.Contains(other.gameObject))
         {
+            other.GetComponent<AI_Movement>().currentCell = gameObject;
+
             AI.Add(other.gameObject);
         }
     }
@@ -70,6 +77,9 @@ public class Manager_CurrentCell : MonoBehaviour
         {
             UnloadCell();
             isPlayerInCell = false;
+
+            other.GetComponent<Player_Movement>().currentCell = null;
+            other.GetComponent<Player_Movement>().lastCell = gameObject;
         }
         if (other.CompareTag("Item")
             && !other.GetComponent<Env_Item>().isInPlayerInventory
@@ -77,16 +87,23 @@ public class Manager_CurrentCell : MonoBehaviour
             && !other.GetComponent<Env_Item>().isInTraderShop
             && items.Contains(other.gameObject))
         {
-            items.Remove(other.gameObject);
             if (!isPlayerInCell)
             {
                 LoadCell();
                 UnloadCell();
             }
+
+            other.GetComponent<Env_Item>().currentCell = null;
+            other.GetComponent<Env_Item>().lastCell = gameObject;
+
+            items.Remove(other.gameObject);
         }
         if (other.CompareTag("NPC")
             && AI.Contains(other.gameObject))
         {
+            other.GetComponent<AI_Movement>().currentCell = null;
+            other.GetComponent<AI_Movement>().lastCell = gameObject;
+
             AI.Remove(other.gameObject);
         }
     }

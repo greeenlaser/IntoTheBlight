@@ -8,11 +8,8 @@ using UnityEngine.SceneManagement;
 public class Manager_Console : MonoBehaviour
 {
     [Header("Player assignables")]
-    [SerializeField] private GameObject par_Player;
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private GameObject cam_Player;
-    [SerializeField] private GameObject par_NoclipPlayer;
-    [SerializeField] private GameObject cam_NoclipPlayer;
 
     [Header("Assignables")]
     public GameObject ammoTemplate; 
@@ -31,7 +28,6 @@ public class Manager_Console : MonoBehaviour
     [SerializeField] private UI_PauseMenu PauseMenuScript;
     [SerializeField] private GameManager GameManagerScript;
     [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_Logs LogsScript;
     [SerializeField] private Manager_WorldClock ClockScript;
     [SerializeField] private Manager_FactionReputation FactionScript;
     [SerializeField] private UI_PlayerMenuStats PlayerMenuStatsScript; 
@@ -40,14 +36,12 @@ public class Manager_Console : MonoBehaviour
     [HideInInspector] public bool consoleOpen;
     [HideInInspector] public bool displayUnityLogs;
     [HideInInspector] public bool toggleAIDetection;
-    [HideInInspector] public bool noclipEnabled;
     [HideInInspector] public int originalMaxHealth;
     [HideInInspector] public int originalMaxStamina;
     [HideInInspector] public int originalStaminaRecharge;
     [HideInInspector] public int originalMaxRadiation;
     [HideInInspector] public int originalMaxMentalState;
     [HideInInspector] public int originalSpeed;
-    [HideInInspector] public int originalNoclipSpeed;
     [HideInInspector] public int originalJumpHeight;
     [HideInInspector] public int originalMaxInvspace;
     [HideInInspector] private readonly List<string> cellnames = new List<string>();
@@ -91,8 +85,17 @@ public class Manager_Console : MonoBehaviour
     private List<GameObject> removables = new List<GameObject>();
     private List<string> factionNames = new List<string>();
 
+    //unity log variables
+    private bool startedWait;
+    private string lastOutput;
+    private string output;
+    private string stack;
+
     private void Awake()
     {
+        //start recieving unity logs
+        Application.logMessageReceived += HandleLog;
+
         par_DebugUI.transform.localPosition = new Vector3(0, 300, 0);
         displayUnityLogs = true;
         toggleAIDetection = true;
@@ -103,7 +106,6 @@ public class Manager_Console : MonoBehaviour
         originalMaxMentalState = Mathf.FloorToInt(thePlayer.GetComponent<Player_Health>().maxMentalState);
         originalMaxRadiation = Mathf.FloorToInt(thePlayer.GetComponent<Player_Health>().maxRadiation);
         originalSpeed = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().speedIncrease);
-        originalNoclipSpeed = Mathf.FloorToInt(cam_NoclipPlayer.GetComponent<Player_NoclipCamera>().flySpeed);
         originalJumpHeight = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().jumpHeight);
         originalMaxInvspace = Mathf.FloorToInt(thePlayer.GetComponent<Inv_Player>().maxInvSpace);
 
@@ -185,36 +187,18 @@ public class Manager_Console : MonoBehaviour
         //updates player camera and position values on debug screen if game isnt paused and debug menu is being displayed
         if (!PauseMenuScript.isGamePaused && displayDebugMenu)
         {
-            if (!noclipEnabled)
-            {
-                playerPos = new Vector3(
-                    Mathf.FloorToInt(thePlayer.transform.position.x),
-                    Mathf.FloorToInt(thePlayer.transform.position.y),
-                    Mathf.FloorToInt(thePlayer.transform.position.z)).ToString();
+            playerPos = new Vector3(
+                Mathf.FloorToInt(thePlayer.transform.position.x),
+                Mathf.FloorToInt(thePlayer.transform.position.y),
+                Mathf.FloorToInt(thePlayer.transform.position.z)).ToString();
 
-                cameraAngle = new Vector3(
-                    Mathf.FloorToInt(cam_Player.transform.eulerAngles.x),
-                    Mathf.FloorToInt(cam_Player.transform.eulerAngles.y),
-                    Mathf.FloorToInt(cam_Player.transform.eulerAngles.z)).ToString();
+            cameraAngle = new Vector3(
+                Mathf.FloorToInt(cam_Player.transform.eulerAngles.x),
+                Mathf.FloorToInt(cam_Player.transform.eulerAngles.y),
+                Mathf.FloorToInt(cam_Player.transform.eulerAngles.z)).ToString();
 
-                playerSpeed = Mathf.FloorToInt((thePlayer.transform.position - lastPos).magnitude / Time.deltaTime).ToString();
-                lastPos = thePlayer.transform.position;
-            }
-            else if (noclipEnabled)
-            {
-                playerPos = new Vector3(
-                    Mathf.FloorToInt(par_NoclipPlayer.transform.position.x),
-                    Mathf.FloorToInt(par_NoclipPlayer.transform.position.y),
-                    Mathf.FloorToInt(par_NoclipPlayer.transform.position.z)).ToString();
-
-                cameraAngle = new Vector3(
-                    Mathf.FloorToInt(cam_NoclipPlayer.transform.eulerAngles.x),
-                    Mathf.FloorToInt(cam_NoclipPlayer.transform.eulerAngles.y),
-                    Mathf.FloorToInt(cam_NoclipPlayer.transform.eulerAngles.z)).ToString();
-
-                playerSpeed = Mathf.FloorToInt((par_NoclipPlayer.transform.position - lastPos).magnitude / Time.deltaTime).ToString();
-                lastPos = par_NoclipPlayer.transform.position;
-            }
+            playerSpeed = Mathf.FloorToInt((thePlayer.transform.position - lastPos).magnitude / Time.deltaTime).ToString();
+            lastPos = thePlayer.transform.position;
 
             timer += Time.deltaTime;
             if (timer > 0.05f)
@@ -273,13 +257,6 @@ public class Manager_Console : MonoBehaviour
         txt_PlayerPos.text = playerPos;
         txt_CameraAngle.text = cameraAngle;
         txt_PlayerSpeed.text = playerSpeed;
-    }
-
-    public void NewUnitylogMessage()
-    {
-        consoleText = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]" + " - " + LogsScript.output;
-        CreateNewConsoleLine();
-        LogsScript.lastOutput = LogsScript.output;
     }
 
     private void ToggleConsole()
@@ -418,11 +395,6 @@ public class Manager_Console : MonoBehaviour
                 else if (separatedWords[0] == "clear" && separatedWords.Count == 1)
                 {
                     Command_ClearConsole();
-                }
-                //restart the level
-                else if (separatedWords[0] == "restart" && separatedWords.Count == 1)
-                {
-                    Command_Restart();
                 }
                 //quit the game
                 else if (separatedWords[0] == "quit" && separatedWords.Count == 1)
@@ -712,8 +684,6 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             consoleText = "clear - Clears the console log.";
             CreateNewConsoleLine();
-            consoleText = "restart - Restarts the game from the start (WILL PROBABLY BE REMOVED IN THE FUTURE).";
-            CreateNewConsoleLine();
             consoleText = "quit - Quits the game.";
             CreateNewConsoleLine();
 
@@ -928,18 +898,13 @@ public class Manager_Console : MonoBehaviour
     {
         separatedWords.Clear();
 
-        LogsScript.lastOutput = "";
+        lastOutput = "";
 
         foreach (GameObject createdText in createdTexts)
         {
             Destroy(createdText);
         }
         createdTexts.Clear();
-    }
-    //restarts the game
-    private void Command_Restart()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     //quits the game
     private void Command_Quit()
@@ -2271,21 +2236,10 @@ public class Manager_Console : MonoBehaviour
                 consoleText = "--tp " + firstVec + " " + secondVec + " " + thirdVec + "--";
                 CreateNewConsoleLine();
 
-                if (noclipEnabled)
-                {
-                    consoleText = "Success: Teleported noclipping player to " + teleportPos + "!";
-                    CreateNewConsoleLine();
-                    par_NoclipPlayer.transform.position = teleportPos;
-                    ToggleConsole();
-                }
-
-                else if (!noclipEnabled)
-                {
-                    consoleText = "Success: Teleported player to " + teleportPos + "!";
-                    CreateNewConsoleLine();
-                    thePlayer.transform.position = teleportPos;
-                    ToggleConsole();
-                }
+                consoleText = "Success: Teleported player to " + teleportPos + "!";
+                CreateNewConsoleLine();
+                thePlayer.transform.position = teleportPos;
+                ToggleConsole();
 
                 separatedWords.Clear();
             }
@@ -2358,15 +2312,7 @@ public class Manager_Console : MonoBehaviour
                     //get vector3 from valid cell
                     Transform teleportLoc = cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint;
                     //move player to cell
-                    if (!noclipEnabled)
-                    {
-                        thePlayer.transform.position = teleportLoc.position;
-                    }
-                    //move noclip camera to cell
-                    else if (noclipEnabled)
-                    {
-                        par_NoclipPlayer.transform.position = teleportLoc.position;
-                    }
+                    thePlayer.transform.position = teleportLoc.position;
                     //assign teleported cell to AllGameCells script
                     currentCell = cell;
                     //unload other cells if any are active and load teleported cell
@@ -2433,64 +2379,20 @@ public class Manager_Console : MonoBehaviour
         consoleText = "--" + input + "--";
         CreateNewConsoleLine();
 
-        if (!noclipEnabled)
+        if (!thePlayer.GetComponent<Player_Movement>().isNoclipping)
         {
             consoleText = "Enabled noclip.";
             CreateNewConsoleLine();
-            toggleAIDetection = false;
-
-            //drops the held object when enabling noclip while object is being held
-            if (cam_Player.GetComponent<Player_RaycastSystem>().heldObject != null)
-            {
-                cam_Player.GetComponent<Player_RaycastSystem>().DropHeldObject();
-            }
-
-            //move par_noclipplayer under par_parent
-            par_NoclipPlayer.transform.SetParent(par_Player.transform);
-            //move theplayer under cam_nocpliplayer
-            thePlayer.transform.SetParent(par_NoclipPlayer.transform);
-
-            //get the player angles
-            float angleX = cam_Player.transform.eulerAngles.x;
-            float angleY = thePlayer.transform.eulerAngles.y;
-            //set cam_noclip angles
-            cam_NoclipPlayer.transform.eulerAngles = new Vector3(angleX, 0, 0);
-            //set par_noclipplayer angles
-            par_NoclipPlayer.transform.eulerAngles = new Vector3(0, angleY, 0);
-
-            //disable theplayer
-            thePlayer.SetActive(false);
-            //enable cam_noclipplayer
-            par_NoclipPlayer.SetActive(true);
 
             thePlayer.GetComponent<Player_Movement>().isClimbingLadder = false;
-            noclipEnabled = true;
+            thePlayer.GetComponent<Player_Movement>().isNoclipping = true;
         }
-        else if (noclipEnabled)
+        else if (thePlayer.GetComponent<Player_Movement>().isNoclipping)
         {
             consoleText = "Disabled noclip.";
             CreateNewConsoleLine();
-            toggleAIDetection = true;
 
-            //move theplayer under par_player
-            thePlayer.transform.SetParent(par_Player.transform);
-            //move cam_noclipplayer under cam_player
-            par_NoclipPlayer.transform.SetParent(cam_Player.transform);
-
-            //get the noclipplayer angles
-            float angleX = cam_NoclipPlayer.transform.eulerAngles.x;
-            float angleY = par_NoclipPlayer.transform.eulerAngles.y;
-            //set cam_player angles
-            cam_Player.transform.eulerAngles = new Vector3(angleX, 0, 0);
-            //set theplayer angles
-            thePlayer.transform.eulerAngles = new Vector3(0, angleY, 0);
-
-            //disable cam_noclipplayer
-            par_NoclipPlayer.SetActive(false);
-            //enable theplayer
-            thePlayer.SetActive(true);
-
-            noclipEnabled = false;
+            thePlayer.GetComponent<Player_Movement>().isNoclipping = false;
         }
 
         separatedWords.Clear();
@@ -2602,7 +2504,6 @@ public class Manager_Console : MonoBehaviour
             && thePlayer.GetComponent<Player_Health>().maxMentalState == originalMaxMentalState
             && thePlayer.GetComponent<Player_Health>().maxRadiation == originalMaxRadiation
             && thePlayer.GetComponent<Player_Movement>().speedIncrease == originalSpeed
-            && cam_NoclipPlayer.GetComponent<Player_NoclipCamera>().flySpeed == originalNoclipSpeed
             && thePlayer.GetComponent<Player_Movement>().jumpHeight == originalJumpHeight + 0.75f
             && thePlayer.GetComponent<Inv_Player>().maxInvSpace == originalMaxInvspace)
         {
@@ -2624,7 +2525,6 @@ public class Manager_Console : MonoBehaviour
             thePlayer.GetComponent<Player_Health>().radiation = 0;
             thePlayer.GetComponent<Player_Health>().maxRadiation = originalMaxRadiation;
             thePlayer.GetComponent<Player_Movement>().speedIncrease = originalSpeed;
-            cam_NoclipPlayer.GetComponent<Player_NoclipCamera>().flySpeed = originalNoclipSpeed;
             thePlayer.GetComponent<Player_Movement>().jumpHeight = originalJumpHeight + 0.75f; //increasing the jump height to the real original jump height
             thePlayer.GetComponent<Inv_Player>().maxInvSpace = originalMaxInvspace;
             PlayerMenuStatsScript.GetStats();
@@ -2879,27 +2779,6 @@ public class Manager_Console : MonoBehaviour
                 else if (insertedValue < 0)
                 {
                     consoleText = "Error: Player speed must be set over -1!";
-                    CreateNewConsoleLine();
-                }
-            }
-            //when changing noclip speed
-            else if (statName == "noclipspeed")
-            {
-                if (insertedValue > -1 && insertedValue < 1000001)
-                {
-                    cam_NoclipPlayer.GetComponent<Player_NoclipCamera>().flySpeed = insertedValue;
-                    string speed = cam_NoclipPlayer.GetComponent<Player_NoclipCamera>().flySpeed.ToString();
-                    consoleText = "Changed noclip camera speed to " + speed + ".";
-                    CreateNewConsoleLine();
-                }
-                else if (insertedValue >= 1000001)
-                {
-                    consoleText = "Error: Noclip camera speed must be set below 1000001!";
-                    CreateNewConsoleLine();
-                }
-                else if (insertedValue < 0)
-                {
-                    consoleText = "Error: Noclip camera speed must be set over -1!";
                     CreateNewConsoleLine();
                 }
             }
@@ -3821,5 +3700,35 @@ public class Manager_Console : MonoBehaviour
             RebuildInventoryUI();
         }
         yield return null;
+    }
+
+    private void HandleLog(string logString, string stackTrace, LogType type)
+    {
+        output = logString;
+        stack = stackTrace;
+
+        if (displayUnityLogs && !startedWait)
+        {
+            if (lastOutput == output)
+            {
+                startedWait = true;
+                StartCoroutine(Wait());
+            }
+
+            NewUnitylogMessage();
+        }
+    }
+
+    private void NewUnitylogMessage()
+    {
+        consoleText = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]" + " - " + output;
+        CreateNewConsoleLine();
+        lastOutput = output;
+    }
+
+    private IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(0.5f);
+        startedWait = false;
     }
 }

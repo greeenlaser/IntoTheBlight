@@ -184,8 +184,7 @@ public class Inv_Player : MonoBehaviour
             if (!isPlayerInventoryOpen
                 && canOpenPlayerInventory
                 && !closedInventoryThroughContainer
-                && !PauseMenuScript.isUIOpen
-                && !ConsoleScript.noclipEnabled)
+                && !PauseMenuScript.isUIOpen)
             {
                 PauseMenuScript.isInventoryOpen = true;
             }

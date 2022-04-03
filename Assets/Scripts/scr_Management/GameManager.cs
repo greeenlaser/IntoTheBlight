@@ -18,8 +18,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float fpsUpdateSpeed;
     [SerializeField] private TMP_Text txt_fpsValue;
 
+    [Header("Message send test")]
+    [SerializeField] private GameObject logo;
+    [SerializeField] private UI_TabletMessages TabletMessagesScript;
+    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private UI_PauseMenu PauseMenuScript;
+
     //public but hidden variables
-    [HideInInspector] public List<GameObject> thrownGrenades = new List<GameObject>();
+    public List<GameObject> thrownGrenades = new List<GameObject>();
 
     //private variables
     private float fps;
@@ -41,6 +47,15 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F12))
         {
             Screenshot();
+        }
+        if (Input.GetKeyDown(KeyCode.P)
+            && !PauseMenuScript.isGamePaused
+            && !ConsoleScript.consoleOpen)
+        {
+            string senderName = "System";
+            string messageTitle = Random.Range(1, 100).ToString();
+            string messageContent = "This is a very long message sent by the game manager script.";
+            TabletMessagesScript.SendMessage(logo, senderName, messageTitle, messageContent);
         }
     }
 

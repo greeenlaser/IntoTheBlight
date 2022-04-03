@@ -34,17 +34,22 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private float groundDistance;
 
     [Header("Assignables")]
-    [Tooltip("The trigger to check whether or not the player is grounded.")]
+    [SerializeField] private GameObject light_Flashlight;
     public CharacterController controller;
     [SerializeField] private Camera PlayerCamera;
     [SerializeField] private GameObject checkSphere;
-    [SerializeField] private LayerMask groundMask;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
     [SerializeField] private AudioSource ladderAudioSource;
     [SerializeField] private AudioClip[] ladderSFX;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private Player_Health PlayerHealthScript;
+    [SerializeField] private Inv_Player PlayerInventoryScript;
+    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private UI_PauseMenu PausemenuScript;
+    [SerializeField] private Manager_UIReuse UIReuseScript;
 
     //public but hidden variables
     [HideInInspector] public bool canMove;
+    [HideInInspector] public bool isNoclipping;
     [HideInInspector] public bool isStunned;
     [HideInInspector] public bool canSprint;
     [HideInInspector] public bool isSprinting;
@@ -55,13 +60,18 @@ public class Player_Movement : MonoBehaviour
     [HideInInspector] public bool isJumping;
     [HideInInspector] public bool canCrouch;
     [HideInInspector] public bool isCrouching;
+    [HideInInspector] public bool hasFlashlight;
+    [HideInInspector] public bool isFlashlightEnabled;
     [HideInInspector] public float speedIncrease = 1;
     [HideInInspector] public float currentStamina;
     [HideInInspector] public float jumpBuff;
     [HideInInspector] public float sprintBuff;
     [HideInInspector] public float staminaRegenBuff;
     [HideInInspector] public float finalStaminaRegen;
+    [HideInInspector] public Vector3 velocity;
     [HideInInspector] public GameObject ladder;
+    [HideInInspector] public GameObject currentCell;
+    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool startStaminaRechargeCooldown;
@@ -70,9 +80,11 @@ public class Player_Movement : MonoBehaviour
     private readonly float gravity = -9.81f;
     private float originalHeight;
     private float currentSpeed;
+    private float nc_moveSpeed;
     private float staminaCooldown;
+    private float minVelocity;
     private int alphaValue;
-    private Vector3 velocity;
+    private string deathMessage;
 
     private void Awake()
     {
@@ -94,6 +106,8 @@ public class Player_Movement : MonoBehaviour
         UIReuseScript.stamina = currentStamina;
         UIReuseScript.maxStamina = maxStamina;
         UIReuseScript.UpdatePlayerStamina();
+
+        nc_moveSpeed = walkSpeed * 2.5f;
     }
 
     private void Update()
@@ -109,55 +123,78 @@ public class Player_Movement : MonoBehaviour
             UIReuseScript.UpdatePlayerStamina();
         }
 
-        if (canMove)
+        //toggles players flashlight if flashlight item was picked up
+        if (Input.GetKeyDown(KeyCode.F)
+            && !ConsoleScript.consoleOpen
+            && !PausemenuScript.isGamePaused
+            && PlayerHealthScript.isPlayerAlive)
         {
-            //check if player is grounded
-            if (Physics.CheckSphere(checkSphere.transform.position, groundDistance, groundMask))
+            if (!hasFlashlight)
             {
-                isGrounded = true;
-                //Debug.Log("Player is grounded!");
-            }
-            else
-            {
-                isGrounded = false;
-                //Debug.Log("Player is no longer grounded...");
-            }
-
-            if (!isClimbingLadder)
-            {
-                //gravity if player is grounded
-                if (velocity.y < 0 && isGrounded)
+                foreach (GameObject item in PlayerInventoryScript.inventory)
                 {
-                    velocity.y = -2f;
-                }
-
-                //gravity if player isnt grounded
-                if (!isGrounded)
-                {
-                    velocity.y += gravity * Time.deltaTime * 4f;
-
-                    if (isStunned)
+                    if (item.name == "Flashlight")
                     {
-                        //movement input
-                        float x = 0;
-                        float z = 0;
+                        isFlashlightEnabled = !isFlashlightEnabled;
 
-                        Vector3 move = Vector3.zero;
-                        move = Vector3.ClampMagnitude(move, 1);
-
-                        //first movement update based on speed and input
-                        controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
-
-                        //final movement update based on velocity
-                        controller.Move(velocity * Time.deltaTime);
-
-                        //get all velocity of the controller
-                        Vector3 horizontalVelocity = transform.right * x + transform.forward * z;
+                        hasFlashlight = true;
+                        break;
                     }
                 }
+            }
+            else if (hasFlashlight)
+            {
+                isFlashlightEnabled = !isFlashlightEnabled;
 
-                if (!isStunned)
+                CheckForFlashlight();
+            }
+        }
+
+        if (canMove)
+        {
+            if (!isNoclipping)
+            {
+                //check if player is grounded
+                if (Physics.CheckSphere(checkSphere.transform.position, groundDistance, groundMask))
                 {
+                    isGrounded = true;
+                    //Debug.Log("Player is grounded!");
+                }
+                else
+                {
+                    isGrounded = false;
+                    //Debug.Log("Player is no longer grounded...");
+                }
+
+                if (!isClimbingLadder)
+                {
+                    //gravity if player is grounded
+                    if (velocity.y < 0 && isGrounded)
+                    {
+                        //get smallest velocity
+                        if (velocity.y < minVelocity)
+                        {
+                            minVelocity = velocity.y;
+                        }
+                        //check if smallest velocity is less than or equal to -10f
+                        if (minVelocity <= -10f)
+                        {
+                            ApplyFallDamage();
+
+                            //Debug.Log(minVelocity);
+
+                            minVelocity = -2f;
+                        }
+
+                        velocity.y = -2f;
+                    }
+
+                    //gravity if player isnt grounded
+                    if (!isGrounded)
+                    {
+                        velocity.y += gravity * Time.deltaTime * 4f;
+                    }
+
                     //movement input
                     float x = Input.GetAxis("Horizontal");
                     float z = Input.GetAxis("Vertical");
@@ -314,65 +351,95 @@ public class Player_Movement : MonoBehaviour
                         }
                     }
                 }
-            }
-
-            else if (isClimbingLadder
-                    && !isStunned)
-            {
-                if (!facingOtherLadderSide)
+                else if (isClimbingLadder)
                 {
-                    float y = Input.GetAxis("Vertical");
-
-                    Vector3 move = new Vector3(0, y, 0);
-                    move = Vector3.ClampMagnitude(move, 1);
-
-                    controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
-                }
-                else if (facingOtherLadderSide)
-                {
-                    float y = Input.GetAxis("VerticalFlipped");
-
-                    Vector3 move = new Vector3(0, y, 0);
-                    move = Vector3.ClampMagnitude(move, 1);
-
-                    controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
-                }
-
-                if (!isGrounded)
-                {
-                    //pressing either W or S while the other isnt being pressed and while player is not grounded
-                    if ((Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S)) || (!Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.S)))
+                    if (!facingOtherLadderSide)
                     {
-                        //ladder SFX is played while not climbing ladder and while not playing any SFX
-                        if (!isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                        float y = Input.GetAxis("Vertical");
+
+                        Vector3 move = new Vector3(0, y, 0);
+                        move = Vector3.ClampMagnitude(move, 1);
+
+                        controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
+                    }
+                    else if (facingOtherLadderSide)
+                    {
+                        float y = Input.GetAxis("VerticalFlipped");
+
+                        Vector3 move = new Vector3(0, y, 0);
+                        move = Vector3.ClampMagnitude(move, 1);
+
+                        controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
+                    }
+
+                    if (!isGrounded)
+                    {
+                        //pressing either W or S while the other isnt being pressed and while player is not grounded
+                        if ((Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S)) || (!Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.S)))
                         {
-                            PlayLadderSFX();
+                            //ladder SFX is played while not climbing ladder and while not playing any SFX
+                            if (!isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                            {
+                                PlayLadderSFX();
+                            }
+                            //another ladder SFX is played while already climbing ladder and while not playing any SFX
+                            else if (isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                            {
+                                PlayOtherLadderSFX();
+                            }
                         }
-                        //another ladder SFX is played while already climbing ladder and while not playing any SFX
-                        else if (isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                        //if player is no longer pressing W and S
+                        //then ladder SFX is stopped if ladder SFX is currently playing
+                        else if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S) && isPlayingLadderSFX)
                         {
-                            PlayOtherLadderSFX();
+                            ladderAudioSource.Stop();
+                            isPlayingLadderSFX = false;
+                        }
+
+                        //if player presses space while not grounded
+                        //then player has basic jump
+                        else if (Input.GetKeyDown(KeyCode.Space) && currentStamina > 5)
+                        {
+                            //jump up 0.5 meters
+                            transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+                            currentStamina -= 5;
+                        }
+                        //if player is not grounded but presses A or D
+                        //then the ladder SFX will stop and player is no longer climbing ladder
+                        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+                        {
+                            if (isPlayingLadderSFX)
+                            {
+                                ladderAudioSource.Stop();
+                                isPlayingLadderSFX = false;
+                            }
+                            isClimbingLadder = false;
+                            //Debug.Log("Stopped climbing ladder.");
                         }
                     }
-                    //if player is no longer pressing W and S
-                    //then ladder SFX is stopped if ladder SFX is currently playing
-                    else if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S) && isPlayingLadderSFX)
-                    {
-                        ladderAudioSource.Stop();
-                        isPlayingLadderSFX = false;
-                    }
-
-                    //if player presses space while not grounded
-                    //then player has basic jump
-                    else if (Input.GetKeyDown(KeyCode.Space) && currentStamina > 5)
-                    {
-                        //jump up 0.5 meters
-                        transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-                        currentStamina -= 5;
-                    }
-                    //if player is not grounded but presses A or D
+                    //if player is grounded and presses space/A/D
                     //then the ladder SFX will stop and player is no longer climbing ladder
-                    else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+                    else if (isGrounded
+                            && !facingOtherLadderSide
+                            && (Input.GetKey(KeyCode.Space)
+                            || Input.GetKey(KeyCode.A)
+                            || Input.GetKey(KeyCode.S)
+                            || Input.GetKey(KeyCode.D)))
+                    {
+                        if (isPlayingLadderSFX)
+                        {
+                            ladderAudioSource.Stop();
+                            isPlayingLadderSFX = false;
+                        }
+                        isClimbingLadder = false;
+                        //Debug.Log("Stopped climbing ladder.");
+                    }
+                    else if (isGrounded
+                            && facingOtherLadderSide
+                            && (Input.GetKey(KeyCode.Space)
+                            || Input.GetKey(KeyCode.A)
+                            || Input.GetKey(KeyCode.W)
+                            || Input.GetKey(KeyCode.D)))
                     {
                         if (isPlayingLadderSFX)
                         {
@@ -383,37 +450,25 @@ public class Player_Movement : MonoBehaviour
                         //Debug.Log("Stopped climbing ladder.");
                     }
                 }
-                //if player is grounded and presses space/A/D
-                //then the ladder SFX will stop and player is no longer climbing ladder
-                else if (isGrounded
-                        && !facingOtherLadderSide
-                        && (Input.GetKey(KeyCode.Space)
-                        || Input.GetKey(KeyCode.A)
-                        || Input.GetKey(KeyCode.S)
-                        || Input.GetKey(KeyCode.D)))
+            }
+            else if (isNoclipping)
+            {
+                //noclip movement
+                float x = Input.GetAxis("Horizontal");
+                float z = Input.GetAxis("Vertical");
+
+                Vector3 move = transform.right * x + PlayerCamera.gameObject.transform.forward * z;
+                move = Vector3.ClampMagnitude(move, 1);
+
+                transform.position += nc_moveSpeed * Time.deltaTime * move;
+
+                if (Input.GetKeyDown(KeyCode.LeftShift))
                 {
-                    if (isPlayingLadderSFX)
-                    {
-                        ladderAudioSource.Stop();
-                        isPlayingLadderSFX = false;
-                    }
-                    isClimbingLadder = false;
-                    //Debug.Log("Stopped climbing ladder.");
+                    nc_moveSpeed = walkSpeed * 10;
                 }
-                else if (isGrounded
-                        && facingOtherLadderSide
-                        && (Input.GetKey(KeyCode.Space)
-                        || Input.GetKey(KeyCode.A)
-                        || Input.GetKey(KeyCode.W)
-                        || Input.GetKey(KeyCode.D)))
+                if (Input.GetKeyUp(KeyCode.LeftShift))
                 {
-                    if (isPlayingLadderSFX)
-                    {
-                        ladderAudioSource.Stop();
-                        isPlayingLadderSFX = false;
-                    }
-                    isClimbingLadder = false;
-                    //Debug.Log("Stopped climbing ladder.");
+                    nc_moveSpeed = walkSpeed * 2.5f;
                 }
             }
         }
@@ -442,8 +497,25 @@ public class Player_Movement : MonoBehaviour
         //Debug.Log("Playing another ladder SFX.");
     }
 
+    //deal damage based off of velocity when hitting ground
+    private void ApplyFallDamage()
+    {
+        float damageDealt = Mathf.Round(Mathf.Abs(velocity.y * 1.5f) * 10) / 10;
+        if (damageDealt >= PlayerHealthScript.health)
+        {
+            string deathMessage = "You took " + damageDealt + " damage from that fall and fell to your death! Shouldve brought rocket boots...";
+            PlayerHealthScript.Death(deathMessage);
+        }
+        else
+        {
+            PlayerHealthScript.health -= damageDealt;
+            UIReuseScript.UpdatePlayerHealth();
+        }
+
+        //Debug.Log("Applied fall damage " + damageDealt + " to player.");
+    }
+
     //player stun effect, all stun effects last the same amount
-    //and stop player from moving while stun effect is active
     //player can only be stunned once at a time - cannot stun again
     //while one stun effect is already in effect
     public void Stun()
@@ -456,10 +528,6 @@ public class Player_Movement : MonoBehaviour
             UIReuseScript.bgr_PlayerStun.transform.localPosition = new Vector3(0, 0, 0);
 
             StartCoroutine(Stunned());
-        }
-        else if (isStunned)
-        {
-            Debug.LogWarning("Error: Player is already stunned!");
         }
     }
 
@@ -481,5 +549,50 @@ public class Player_Movement : MonoBehaviour
         alphaValue = 255;
 
         isStunned = false;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("WorldBlocker"))
+        {
+            if (currentCell != null)
+            {
+                transform.position = currentCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+            else if (currentCell == null && lastCell != null)
+            {
+                transform.position = lastCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+        }
+    }
+
+    public void CheckForFlashlight()
+    {
+        bool hasFlashlight = false;
+        foreach (GameObject item in PlayerInventoryScript.inventory)
+        {
+            if (item.name == "Flashlight")
+            {
+                hasFlashlight = true;
+                break;
+            }
+        }
+        if (!hasFlashlight
+            && light_Flashlight.activeInHierarchy)
+        {
+            isFlashlightEnabled = false;
+            light_Flashlight.SetActive(false);
+        }
+        else if (hasFlashlight)
+        {
+            if (isFlashlightEnabled && !light_Flashlight.activeInHierarchy)
+            {
+                light_Flashlight.SetActive(true);
+            }
+            else if (!isFlashlightEnabled && light_Flashlight.activeInHierarchy)
+            {
+                light_Flashlight.SetActive(false);
+            }
+        }
     }
 }

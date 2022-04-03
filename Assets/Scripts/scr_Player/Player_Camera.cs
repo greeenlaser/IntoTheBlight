@@ -8,12 +8,10 @@ public class Player_Camera : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private Camera cam_Main;
-    [SerializeField] private Camera cam_Noclip;
     [SerializeField] private TMP_Text txt_mouseSpeed;
     public TMP_Text txt_fov;
     [SerializeField] private Slider MouseSpeedSlider;
     public Slider FOVSlider;
-    [SerializeField] private Player_NoclipCamera NoclipCameraScript;
     [SerializeField] private Player_Movement PlayerMovementScript;
 
     //public but hidden variables
@@ -31,7 +29,6 @@ public class Player_Camera : MonoBehaviour
     private void Awake()
     {
         cam_Main.fieldOfView = fov;
-        cam_Noclip.fieldOfView = fov;
         sensX = mouseSpeed;
         sensY = mouseSpeed;
         StartCoroutine(Wait());
@@ -83,8 +80,6 @@ public class Player_Camera : MonoBehaviour
         sensY = MouseSpeedSlider.value;
 
         txt_mouseSpeed.text = MouseSpeedSlider.value.ToString();
-
-        NoclipCameraScript.SetMouseSpeed();
     }
 
     public void SetFOV()
@@ -93,9 +88,6 @@ public class Player_Camera : MonoBehaviour
         txt_fov.text = FOVSlider.value.ToString();
 
         cam_Main.fieldOfView = fov;
-        cam_Noclip.fieldOfView = fov;
-
-        NoclipCameraScript.SetFOV();
     }
 
     private IEnumerator Wait()

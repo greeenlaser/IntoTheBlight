@@ -81,6 +81,9 @@ public class Env_Item : MonoBehaviour
     [SerializeField] private UI_PlayerMenu PlayerMenuScript;
     [SerializeField] private UI_AbilityAssignManager AbilityAssignManagerScript;
 
+    [Header("Flashlight assignables")]
+    [SerializeField] private Player_Movement PlayerMovementScript;
+
     //public but hidden variables
     [HideInInspector] public bool itemActivated;
     [HideInInspector] public bool isInPlayerInventory;
@@ -94,6 +97,8 @@ public class Env_Item : MonoBehaviour
     [HideInInspector] public bool toBeDeleted;
     [HideInInspector] public float time;
     [HideInInspector] public GameObject theItem;
+    [HideInInspector] public GameObject currentCell;
+    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool foundDuplicate;
@@ -107,7 +112,6 @@ public class Env_Item : MonoBehaviour
     private bool isDestroyingMultipleItems;
     private bool isTakingMultipleItems;
     private bool isPlacingMultipleItems;
-
     private int int_selectedCount;
     private int int_confirmedCount;
     private GameObject selectedGun;
@@ -124,22 +128,12 @@ public class Env_Item : MonoBehaviour
     private string str_containerName;
     private string str_traderName;
 
-    //collision check
-    private bool checkForCollision;
-    private bool finishedCollisionCheck;
-    private bool isColliding;
-    private float collisionTimer;
-    private LayerMask layer;
-
     private void Start()
     {
         if (gameObject.name != str_ItemName)
         {
             gameObject.name = str_ItemName;
         }
-
-        string layerName = "Player";
-        layer = LayerMask.NameToLayer(layerName);
 
         if (randomizeCount)
         {
@@ -206,31 +200,6 @@ public class Env_Item : MonoBehaviour
                 Debug.Log("Perf: " + name + " was destroyed after player went too far from it.");
                 DestroyObject();
             }
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (checkForCollision)
-        {
-            //if anything collides with the ray then inventory items cant be dropped and holdable items cant be held
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out _, 1, ~layer, QueryTriggerInteraction.Ignore))
-            {
-                isColliding = true;
-                //Debug.Log("Hit " + hit.transform.name + "! Can't drop inventory items and can't hold holdable items!");
-            }
-
-            collisionTimer += Time.deltaTime;
-            if (collisionTimer >= 0.2f)
-            {
-                finishedCollisionCheck = true;
-                checkForCollision = false;
-            }
-        }
-        else if (checkForCollision && isColliding)
-        {
-            collisionTimer = 0;
-            isColliding = false;
         }
     }
 
@@ -414,6 +383,7 @@ public class Env_Item : MonoBehaviour
                 UIReuseScript.btn_Destroy.onClick.AddListener(Destroy);
                 UIReuseScript.btn_Drop.gameObject.SetActive(true);
                 UIReuseScript.btn_Drop.onClick.AddListener(Drop);
+
             }
             else if (isProtected)
             {
@@ -1841,88 +1811,81 @@ public class Env_Item : MonoBehaviour
 
         if (canContinue)
         {
-            checkForCollision = true;
-
-            if (finishedCollisionCheck)
+            if (int_itemCount == 1)
             {
-                if (!isColliding)
+                if (gameObject.GetComponent<Item_Gun>() != null)
                 {
-                    if (int_itemCount == 1)
-                    {
-                        if (gameObject.GetComponent<Item_Gun>() != null)
-                        {
-                            UnequipAndUnloadGun();
-                        }
-
-                        theItem = gameObject;
-
-                        PlayerInventoryScript.inventory.Remove(gameObject);
-                        PlayerInventoryScript.invSpace += int_ItemWeight;
-
-                        ConsoleScript.playeritemnames.Remove(str_ItemName);
-
-                        gameObject.transform.position = pos_HoldItem.position;
-
-                        droppedObject = true;
-                        time = 0;
-
-                        if (ConsoleScript.currentCell != null
-                            && !ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                        {
-                            ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
-                        }
-                        gameObject.transform.parent = par_DroppedItems.transform;
-
-                        isInPlayerInventory = false;
-
-                        UIReuseScript.ClearStatsUI();
-                        UIReuseScript.ClearInventoryUI();
-                        RemoveListeners();
-                        UIReuseScript.RebuildPlayerInventory();
-
-                        UIReuseScript.txt_InventoryName.text = "Player inventory";
-
-                        foundDuplicate = false;
-                        duplicate = null;
-
-                        PlayerInventoryScript.UpdatePlayerInventoryStats();
-
-                        if (gameObject.GetComponent<Item_Ammo>() != null)
-                        {
-                            RemoveAmmotypeFromAllGuns();
-                        }
-
-                        //Debug.Log("Dropped one " + str_ItemName + "! Added " + int_ItemWeight.ToString() + " space back to players inventory.");
-
-                        ActivateItem();
-                    }
-                    else if (int_itemCount > 1)
-                    {
-                        isDroppingMultipleItems = true;
-
-                        UIReuseScript.par_ItemCount.SetActive(true);
-                        UIReuseScript.itemCountSlider.maxValue = int_itemCount;
-
-                        UIReuseScript.txt_CountInfo.text = "Dropping " + str_ItemName + "(s) from players inventory...";
-                        UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
-                        UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-                        UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
-                        UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-                        UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
-
-                        foundDuplicate = false;
-                        duplicate = null;
-                    }
-                }
-                else if (isColliding)
-                {
-                    foundDuplicate = false;
-                    duplicate = null;
-
-                    Debug.LogWarning("Error: Cannot drop " + str_ItemName + "... Something is in the way!");
+                    UnequipAndUnloadGun();
                 }
 
-                finishedCollisionCheck = false;
+                theItem = gameObject;
+
+                PlayerInventoryScript.inventory.Remove(gameObject);
+                PlayerInventoryScript.invSpace += int_ItemWeight;
+
+                ConsoleScript.playeritemnames.Remove(str_ItemName);
+
+                if (gameObject.name == "Flashlight")
+                {
+                    PlayerMovementScript.CheckForFlashlight();
+                }
+
+                //get a random direction (360°) in radians
+                float angle = Random.Range(0.0f, Mathf.PI * 2);
+                //create a vector with length 1.0
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                //set item drop position
+                gameObject.transform.position = thePlayer.transform.position + dropPos;
+
+                droppedObject = true;
+                time = 0;
+
+                if (ConsoleScript.currentCell != null
+                    && !ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                {
+                    ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                }
+                gameObject.transform.parent = par_DroppedItems.transform;
+
+                isInPlayerInventory = false;
+
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
+                RemoveListeners();
+                UIReuseScript.RebuildPlayerInventory();
+
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
+
+                foundDuplicate = false;
+                duplicate = null;
+
+                PlayerInventoryScript.UpdatePlayerInventoryStats();
+
+                if (gameObject.GetComponent<Item_Ammo>() != null)
+                {
+                    RemoveAmmotypeFromAllGuns();
+                }
+
+                //Debug.Log("Dropped one " + str_ItemName + "! Added " + int_ItemWeight.ToString() + " space back to players inventory.");
+
+                ActivateItem();
+            }
+            else if (int_itemCount > 1)
+            {
+                isDroppingMultipleItems = true;
+
+                UIReuseScript.par_ItemCount.SetActive(true);
+                UIReuseScript.itemCountSlider.maxValue = int_itemCount;
+
+                UIReuseScript.txt_CountInfo.text = "Dropping " + str_ItemName + "(s) from players inventory...";
+                UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+                UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+                UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
+                UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+                UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
+
+                foundDuplicate = false;
+                duplicate = null;
             }
         }
         canContinue = true;
@@ -1995,6 +1958,11 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.invSpace += int_ItemWeight;
 
                 ConsoleScript.playeritemnames.Remove(str_ItemName);
+
+                if (gameObject.name == "Flashlight")
+                {
+                    PlayerMovementScript.CheckForFlashlight();
+                }
 
                 isInPlayerInventory = false;
 
@@ -2786,7 +2754,12 @@ public class Env_Item : MonoBehaviour
 
                 ConsoleScript.playeritemnames.Remove(str_ItemName);
 
-                gameObject.transform.position = pos_HoldItem.position;
+                //get a random direction (360°) in radians
+                float angle = Random.Range(0.0f, Mathf.PI * 2);
+                //create a vector with length 1.0
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                //set item drop position
+                gameObject.transform.position = thePlayer.transform.position + dropPos;
 
                 droppedObject = true;
                 time = 0;
@@ -2811,7 +2784,12 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.invSpace += (int_ItemWeight * int_confirmedCount);
                 int_itemCount -= int_confirmedCount;
 
-                theItem.transform.position = pos_HoldItem.position;
+                //get a random direction (360°) in radians
+                float angle = Random.Range(0.0f, Mathf.PI * 2);
+                //create a vector with length 1.0
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                //set item drop position
+                theItem.transform.position = thePlayer.transform.position + dropPos;
 
                 droppedObject = true;
                 time = 0;
@@ -3147,5 +3125,20 @@ public class Env_Item : MonoBehaviour
         UIReuseScript.btn_Equip.onClick.RemoveAllListeners();
         UIReuseScript.btn_Unequip.onClick.RemoveAllListeners();
         UIReuseScript.btn_Consume.onClick.RemoveAllListeners();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("WorldBlocker"))
+        {
+            if (currentCell != null)
+            {
+                transform.position = currentCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+            else if (currentCell == null && lastCell != null)
+            {
+                transform.position = lastCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+            }
+        }
     }
 }

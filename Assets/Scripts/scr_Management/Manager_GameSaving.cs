@@ -11,6 +11,7 @@ public class Manager_GameSaving : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject playerCamera;
+    [SerializeField] private GameObject light_Flashlight;
 
     [Header("Special items")]
     [SerializeField] private GameObject Exoskeleton;
@@ -155,6 +156,12 @@ public class Manager_GameSaving : MonoBehaviour
             }
 
             //---
+            //loading player grounded state
+            else if (line.Contains("b_isPlayerGrounded = False"))
+            {
+                PlayerMovementScript.isGrounded = false;
+            }
+
             //loading player position
             else if (line.Contains("v3_playerPosition"))
             {
@@ -184,6 +191,11 @@ public class Manager_GameSaving : MonoBehaviour
                                                 float.Parse(numbers[2]));
                 //add all temporary playerCameraRot values to real player camera rotation
                 playerCamera.transform.eulerAngles = playerCameraRot;
+            }
+            //loading player Y velocity
+            else if (line.Contains("f_playerYVelocity"))
+            {
+                PlayerMovementScript.velocity.y = float.Parse(numbers[0]);
             }
 
             //loading player health
@@ -267,14 +279,15 @@ public class Manager_GameSaving : MonoBehaviour
                 AbilityAssignManagerScript.hasExosuit = true;
                 UIReuseScript.ShowExoskeletonUI();
 
-                Exoskeleton.SetActive(false);
-
                 exoskeleton.GetComponent<Env_Item>().DeactivateItem();
+
+                StartCoroutine(WaitBeforeRemovingExoskeleton());
             }
 
             //loading player inventory items
             else if (line.Contains("go_")
-                     && !line.Contains("go_equippedWeapon")
+                     && !line.Contains("equippedWeapon")
+                     && !line.Contains("thrGrenade")
                      && numbers.Count >= 1)
             {
                 foreach (GameObject item in ConsoleScript.spawnables)
@@ -361,18 +374,28 @@ public class Manager_GameSaving : MonoBehaviour
                 foreach (GameObject item in PlayerInventoryScript.inventory)
                 {
                     if (line.Contains(item.name)
-                        && (numbers.Count == 0
-                        || (numbers.Count > 0
-                        && item.GetComponent<Item_Gun>() != null
-                        && item.GetComponent<Item_Gun>().durability == float.Parse(numbers[0]))))
+                        && (item.GetComponent<Item_Grenade>() != null
+                        || (item.GetComponent<Item_Gun>() != null
+                        && item.GetComponent<Item_Gun>().durability == float.Parse(numbers[0]))
+                        || (item.GetComponent<Item_Melee>() != null
+                        && item.GetComponent<Item_Melee>().durability == float.Parse(numbers[0]))))
                     {
                         equippedWeapon = item;
+
+                        //Debug.Log(item.name + " " + line);
 
                         StartCoroutine(LoadEquippedWeapon());
 
                         break;
                     }
                 }
+            }
+            //loading player flashlight state
+            else if (line.Contains("b_flashlightEnabled = True"))
+            {
+                PlayerMovementScript.hasFlashlight = true;
+                PlayerMovementScript.isFlashlightEnabled = true;
+                light_Flashlight.SetActive(true);
             }
 
             //---
@@ -427,26 +450,28 @@ public class Manager_GameSaving : MonoBehaviour
                 GameObject item = null;
                 foreach (GameObject spawnable in ConsoleScript.spawnables)
                 {
-                    if (spawnable.GetComponent<Item_Grenade>() != null
-                        && line.Contains(spawnable.name))
+                    if (spawnable.GetComponent<Item_Grenade>() != null)
                     {
                         //frag grenade
                         if (spawnable.GetComponent<Item_Grenade>().grenadeType 
-                            == Item_Grenade.GrenadeType.frag)
+                            == Item_Grenade.GrenadeType.frag
+                            && line.Contains(spawnable.name))
                         {
                             item = spawnable;
                             break;
                         }
                         //plasma grenade
                         else if (spawnable.GetComponent<Item_Grenade>().grenadeType
-                                 == Item_Grenade.GrenadeType.plasma)
+                                 == Item_Grenade.GrenadeType.plasma
+                                 && line.Contains(spawnable.name))
                         {
                             item = spawnable;
                             break;
                         }
                         //stun grenade
                         else if (spawnable.GetComponent<Item_Grenade>().grenadeType
-                                 == Item_Grenade.GrenadeType.stun)
+                                 == Item_Grenade.GrenadeType.stun
+                                 && line.Contains(spawnable.name))
                         {
                             item = spawnable;
                             break;
@@ -460,11 +485,18 @@ public class Manager_GameSaving : MonoBehaviour
                 GameManagerScript.thrownGrenades.Add(grenade);
                 //apply the velocity
                 grenade.GetComponent<Rigidbody>().velocity = velocity;
-                //enable grenade explosion timer
-                grenade.GetComponent<Item_Grenade>().isThrownGrenade = true;
-                grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer = timeUntilExplosion;
 
-                Debug.Log("Loaded " + grenade.GetComponent<Env_Item>().str_ItemName + " at position " + position + " with velocity set to " + velocity + " and this grenade has been cooking for " + timeUntilExplosion + " seconds.");
+                //set this grenade to thrown grenade
+                grenade.GetComponent<Item_Grenade>().isThrownGrenade = true;
+                //enable grenade explosion timer if this grenade is timed
+                if (grenade.GetComponent<Item_Grenade>().explosionType
+                    == Item_Grenade.ExplosionType.timed)
+                {
+                    grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer = timeUntilExplosion;
+                }
+
+                //Debug.Log(grenade.GetComponent<Env_Item>().int_itemCount + ", " + grenade.GetComponent<Item_Grenade>().isThrownGrenade);
+                //Debug.Log("Loaded " + grenade.GetComponent<Env_Item>().str_ItemName + " at position " + position + " with velocity set to " + velocity + " and this grenade has been cooking for " + timeUntilExplosion + " seconds.");
             }
 
             //---
@@ -473,8 +505,11 @@ public class Manager_GameSaving : MonoBehaviour
             {
                 foreach (GameObject cell in ConsoleScript.allCells)
                 {
-                    cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
-                    cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
+                    if (line.Contains(cell.GetComponent<Manager_CurrentCell>().str_CellName))
+                    {
+                        cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
+                        cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
+                    }
                 }
             }
 
@@ -940,7 +975,13 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("--- PLAYER VALUES ---");
 
         saveFile.WriteLine("");
-        saveFile.WriteLine("X, Y, Z positions and rotations");
+        //player grounded state
+        saveFile.WriteLine("b_isPlayerGrounded = " + PlayerMovementScript.isGrounded);
+        //player Y velocity
+        saveFile.WriteLine("f_playerYVelocity = " + Mathf.Round(PlayerMovementScript.velocity.y * 10) / 10);
+
+        saveFile.WriteLine("");
+        saveFile.WriteLine("X, Y, Z values");
 
         saveFile.WriteLine("");
         //player position
@@ -987,7 +1028,7 @@ public class Manager_GameSaving : MonoBehaviour
             saveFile.WriteLine("(2)current remainder (all consumables) / (2)current durability (all weapons with durability)");
             saveFile.WriteLine("(3)max remainder (all consumables) / (3)max durability (all weapons with durability)");
             saveFile.WriteLine("(4)ammo count (guns)");
-            saveFile.WriteLine("(5)gun jam state (0 means not jammed, 1 means jammed) (guns)");
+            saveFile.WriteLine("(5)gun jam state (0 - not jammed, 1 - jammed) (guns)");
 
             saveFile.WriteLine("");
             //save all players items
@@ -1054,8 +1095,6 @@ public class Manager_GameSaving : MonoBehaviour
                     saveFile.WriteLine(finalOutput);
                 }
             }
-
-            saveFile.WriteLine("");
         }
         else if (PlayerInventoryScript.inventory.Count == 0
                 || (PlayerInventoryScript.inventory.Count == 1
@@ -1067,8 +1106,11 @@ public class Manager_GameSaving : MonoBehaviour
         //save equipped weapon
         if (PlayerInventoryScript.equippedGun != null)
         {
+            saveFile.WriteLine("----");
             saveFile.WriteLine("(1)equipped weapon name,");
             saveFile.WriteLine("(2)durability (weapons with durability)");
+
+            saveFile.WriteLine("");
 
             int itemIndex = 0;
 
@@ -1099,7 +1141,7 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
 
-        saveFile.WriteLine("");
+        saveFile.WriteLine("----");
         //save exoskeleton if player picked it up
         bool hasExoskeleton = false;
         foreach (GameObject playerItem in PlayerInventoryScript.inventory)
@@ -1112,6 +1154,30 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
         saveFile.WriteLine("b_hasExoskeleton = " + hasExoskeleton);
+
+        //looking for flashlight in players inventory
+        bool foundFlashlight = false;
+        foreach (GameObject item in PlayerInventoryScript.inventory)
+        {
+            if (item.name == "Flashlight")
+            {
+                foundFlashlight = true;
+                break;
+            }
+        }
+        if (foundFlashlight)
+        {
+            saveFile.WriteLine("----");
+            //save flashlight toggle state
+            if (light_Flashlight.gameObject.activeInHierarchy)
+            {
+                saveFile.WriteLine("b_flashlightEnabled = True");
+            }
+            else
+            {
+                saveFile.WriteLine("b_flashlightEnabled = False");
+            }
+        }
 
         saveFile.WriteLine("");
         saveFile.WriteLine("--- PLAYER ABILITIES ---");
@@ -1193,28 +1259,41 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("");
         saveFile.WriteLine("--- THROWN GRENADES ---");
 
-        saveFile.WriteLine("");
-        saveFile.WriteLine("(1-3)X,Y and Z positions of this grenade,");
-        saveFile.WriteLine("(4-6)X,Y and Z directions of this grenades velocity aka which direction is this grenade heading,");
-        saveFile.WriteLine("(7)time since start of grenade cook timer");
-
-        saveFile.WriteLine("");
-        foreach (GameObject grenade in GameManagerScript.thrownGrenades)
+        if (GameManagerScript.thrownGrenades.Count > 0)
         {
-            string finalOutput = "go_thrGrenade_" + grenade.name;
+            saveFile.WriteLine("");
+            saveFile.WriteLine("(1-3)X,Y and Z positions of this grenade,");
+            saveFile.WriteLine("(4-6)X,Y and Z directions of this grenades velocity aka which direction is this grenade heading,");
+            saveFile.WriteLine("(7)time since start of grenade cook timer (timed grenades)");
 
-            //save grenades position
-            Vector3 position = grenade.transform.position;
-            finalOutput += position;
-            //save grenades movement direction
-            Vector3 velocity = grenade.GetComponent<Rigidbody>().velocity;
-            finalOutput += velocity;
-            //save grenades time until explosion
-            float timeUntilExplosion = grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer;
-            finalOutput += ", " + Mathf.Round(timeUntilExplosion * 10) / 10;
+            saveFile.WriteLine("");
+            foreach (GameObject grenade in GameManagerScript.thrownGrenades)
+            {
+                string finalOutput = "go_thrGrenade_" + grenade.name + " = ";
 
-            saveFile.WriteLine(finalOutput);
-            Debug.Log(finalOutput);
+                //save grenades position
+                Vector3 position = grenade.transform.position;
+                finalOutput += position;
+
+                //save grenades movement direction
+                Vector3 velocity = grenade.GetComponent<Rigidbody>().velocity;
+                finalOutput += ", " + velocity;
+
+                //save grenades time until explosion if this is a timed grenade
+                if (grenade.GetComponent<Item_Grenade>().explosionType
+                    == Item_Grenade.ExplosionType.timed)
+                {
+                    float timeUntilExplosion = grenade.GetComponent<Item_Grenade>().cookingGrenadeTimer;
+                    finalOutput += ", " + Mathf.Round(timeUntilExplosion * 100) / 100;
+                }
+
+                saveFile.WriteLine(finalOutput);
+            }
+        }
+        else if (GameManagerScript.thrownGrenades.Count == 0)
+        {
+            saveFile.WriteLine("");
+            saveFile.WriteLine("<<<NO THROWN GRENADES FOUND>>>");
         }
 
         saveFile.WriteLine("");
@@ -1842,5 +1921,12 @@ public class Manager_GameSaving : MonoBehaviour
 
             mainIndex++;
         }
+    }
+
+    private IEnumerator WaitBeforeRemovingExoskeleton()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        Exoskeleton.SetActive(false);
     }
 }

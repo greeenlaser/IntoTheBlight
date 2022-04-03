@@ -26,6 +26,7 @@ public class Player_Health : MonoBehaviour
 
     //private variables
     private bool calledOnce;
+    private string str_deathMessage;
 
     private void Awake()
     {
@@ -53,87 +54,95 @@ public class Player_Health : MonoBehaviour
 
     private void Update()
     {
-        if (isTakingDamage && damageDealers.Count == 0)
+        if (isPlayerAlive)
         {
-            isTakingDamage = false;
-        }
-
-        if (health > 0 
-            && radiation < maxRadiation 
-            && mentalState > 0)
-        {
-            if (UIReuseScript.health != health)
+            if (isTakingDamage && damageDealers.Count == 0)
             {
-                UIReuseScript.health = health;
-                UIReuseScript.UpdatePlayerHealth();
-            }
-            if (UIReuseScript.maxHealth != maxHealth)
-            {
-                UIReuseScript.maxHealth = maxHealth;
-                UIReuseScript.UpdatePlayerHealth();
+                isTakingDamage = false;
             }
 
-            if (UIReuseScript.mentalState != mentalState)
+            if (health > 0
+                && radiation < maxRadiation
+                && mentalState > 0)
             {
-                UIReuseScript.mentalState = mentalState;
-                UIReuseScript.UpdatePlayerMentalState();
-            }
-            if (UIReuseScript.maxMentalState != maxMentalState)
-            {
-                UIReuseScript.maxMentalState = maxMentalState;
-                UIReuseScript.UpdatePlayerMentalState();
-            }
+                if (UIReuseScript.health != health)
+                {
+                    UIReuseScript.health = health;
+                    UIReuseScript.UpdatePlayerHealth();
+                }
+                if (UIReuseScript.maxHealth != maxHealth)
+                {
+                    UIReuseScript.maxHealth = maxHealth;
+                    UIReuseScript.UpdatePlayerHealth();
+                }
 
-            if (UIReuseScript.radiation != radiation)
-            {
-                UIReuseScript.radiation = radiation;
-                UIReuseScript.UpdatePlayerRadiation();
-            }
-            if (UIReuseScript.maxRadiation != maxRadiation)
-            {
-                UIReuseScript.maxRadiation = maxRadiation;
-                UIReuseScript.UpdatePlayerRadiation();
-            }
+                if (UIReuseScript.mentalState != mentalState)
+                {
+                    UIReuseScript.mentalState = mentalState;
+                    UIReuseScript.UpdatePlayerMentalState();
+                }
+                if (UIReuseScript.maxMentalState != maxMentalState)
+                {
+                    UIReuseScript.maxMentalState = maxMentalState;
+                    UIReuseScript.UpdatePlayerMentalState();
+                }
 
-            if (mentalState < maxMentalState)
-            {
-                mentalState += 0.25f * Time.deltaTime;
+                if (UIReuseScript.radiation != radiation)
+                {
+                    UIReuseScript.radiation = radiation;
+                    UIReuseScript.UpdatePlayerRadiation();
+                }
+                if (UIReuseScript.maxRadiation != maxRadiation)
+                {
+                    UIReuseScript.maxRadiation = maxRadiation;
+                    UIReuseScript.UpdatePlayerRadiation();
+                }
+
+                if (mentalState < maxMentalState)
+                {
+                    mentalState += 0.25f * Time.deltaTime;
+                }
             }
-        }
-        //player dies if health or mental state runs out or if radiation reaches max radiation
-        else if (health <= 0 
-                 || radiation >= maxRadiation 
-                 || mentalState <= 0)
-        {
-            if (health <= 0)
+            //player dies if health or mental state runs out or if radiation reaches max radiation
+            else if (health <= 0
+                     || radiation >= maxRadiation
+                     || mentalState <= 0)
             {
-                health = 0;
-                UIReuseScript.health = health;
-                UIReuseScript.UpdatePlayerHealth();
-                UIReuseScript.maxHealth = maxHealth;
-                UIReuseScript.UpdatePlayerHealth();
+                if (health <= 0)
+                {
+                    health = 0;
+                    UIReuseScript.health = health;
+                    UIReuseScript.maxHealth = maxHealth;
+                    UIReuseScript.UpdatePlayerHealth();
+
+                    str_deathMessage = "You won't get far in the wasteland if you can't take care of your health...";
+                    Death(str_deathMessage);
+                }
+                else if (mentalState <= 0)
+                {
+                    mentalState = 0;
+                    UIReuseScript.mentalState = mentalState;
+                    UIReuseScript.maxMentalState = maxMentalState;
+                    UIReuseScript.UpdatePlayerMentalState();
+
+                    str_deathMessage = "You managed to fry your brains in a pit of radiation like a zombie. Should've brought protection.";
+                    Death(str_deathMessage);
+                }
+                else if (radiation >= maxRadiation)
+                {
+                    radiation = maxRadiation;
+                    UIReuseScript.radiation = radiation;
+                    UIReuseScript.maxRadiation = maxRadiation;
+                    UIReuseScript.UpdatePlayerRadiation();
+
+                    str_deathMessage = "You went insane trying to uncover the secrets of the reactor and the wasteland...";
+                    Death(str_deathMessage);
+                }
             }
-            if (mentalState <= 0)
-            {
-                mentalState = 0;
-                UIReuseScript.mentalState = mentalState;
-                UIReuseScript.UpdatePlayerMentalState();
-                UIReuseScript.maxMentalState = maxMentalState;
-                UIReuseScript.UpdatePlayerMentalState();
-            }
-            if (radiation >= maxRadiation)
-            {
-                radiation = maxRadiation;
-                UIReuseScript.radiation = radiation;
-                UIReuseScript.UpdatePlayerRadiation();
-                UIReuseScript.maxRadiation = maxRadiation;
-                UIReuseScript.UpdatePlayerRadiation();
-            }
-            Death();
         }
     }
 
-    private void Death()
+    public void Death(string deathMessage)
     {
         if (!calledOnce)
         {
@@ -143,21 +152,13 @@ public class Player_Health : MonoBehaviour
             thePlayer.GetComponent<Rigidbody>().isKinematic = true;
 
             txt_PlayerDied.gameObject.SetActive(true);
-            if (health == 0)
-            {
-                txt_PlayerDied.text = "You won't get far in the wasteland if you can't take care of your health...";
-            }
-            else if (radiation == maxRadiation)
-            {
-                txt_PlayerDied.text = "You managed to fry your brains in a pit of radiation like a zombie. Should've brought protection.";
-            }
-            else if (mentalState == 0)
-            {
-                txt_PlayerDied.text = "You went insane trying to uncover the secrets of the reactor and the wasteland...";
-            }
+            txt_PlayerDied.text = deathMessage;
 
             isPlayerAlive = false;
             ConsoleScript.toggleAIDetection = false;
+
+            health = 0;
+            UIReuseScript.UpdatePlayerHealth();
 
             calledOnce = true;
         }
