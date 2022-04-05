@@ -93,9 +93,6 @@ public class Manager_Console : MonoBehaviour
 
     private void Awake()
     {
-        //start recieving unity logs
-        Application.logMessageReceived += HandleLog;
-
         par_DebugUI.transform.localPosition = new Vector3(0, 300, 0);
         displayUnityLogs = true;
         toggleAIDetection = true;
@@ -108,14 +105,6 @@ public class Manager_Console : MonoBehaviour
         originalSpeed = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().speedIncrease);
         originalJumpHeight = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().jumpHeight);
         originalMaxInvspace = Mathf.FloorToInt(thePlayer.GetComponent<Inv_Player>().maxInvSpace);
-
-        CreateNewConsoleLine();
-        consoleText = "---GAME VERSION: " + GameManagerScript.str_GameVersion + "---";
-        CreateNewConsoleLine();
-        consoleText = "";
-        CreateNewConsoleLine();
-        consoleText = "---Type help to list all game commands---";
-        CreateNewConsoleLine();
     }
 
     private void Start()
@@ -149,6 +138,16 @@ public class Manager_Console : MonoBehaviour
         factionNames.Add("others");
 
         txt_SelectedTargetName.text = "";
+
+        //start recieving unity logs
+        Application.logMessageReceived += HandleLog;
+
+        consoleText = "---GAME VERSION: " + GameManagerScript.str_GameVersion + "---";
+        CreateNewConsoleLine();
+        consoleText = "";
+        CreateNewConsoleLine();
+        consoleText = "---Type help to list all game commands---";
+        CreateNewConsoleLine();
     }
 
     private void Update()
@@ -640,22 +639,25 @@ public class Manager_Console : MonoBehaviour
     //create a new text object
     private void CreateNewConsoleLine()
     {
-        //create text object
-        GameObject newConsoleText = Instantiate(UIReuseScript.txt_InsertedTextTemplate.gameObject);
-        //add created text object to list
-        createdTexts.Add(newConsoleText);
-
-        //check if createdTexts list is longer than limit
-        //and remove oldest
-        if (createdTexts.Count > 200)
+        if (UIReuseScript.txt_InsertedTextTemplate != null)
         {
-            GameObject oldestText = createdTexts[0];
-            createdTexts.Remove(oldestText);
-            Destroy(oldestText);
-        }
+            //create text object
+            GameObject newConsoleText = Instantiate(UIReuseScript.txt_InsertedTextTemplate.gameObject);
+            //add created text object to list
+            createdTexts.Add(newConsoleText);
 
-        newConsoleText.transform.SetParent(UIReuseScript.par_Content.transform, false);
-        newConsoleText.GetComponent<TMP_Text>().text = consoleText;
+            //check if createdTexts list is longer than limit
+            //and remove oldest
+            if (createdTexts.Count > 200)
+            {
+                GameObject oldestText = createdTexts[0];
+                createdTexts.Remove(oldestText);
+                Destroy(oldestText);
+            }
+
+            newConsoleText.transform.SetParent(UIReuseScript.par_Content.transform, false);
+            newConsoleText.GetComponent<TMP_Text>().text = consoleText;
+        }
     }
 
     private void Command_Help()

@@ -52,19 +52,15 @@ public class AI_Health : MonoBehaviour
         //starts countdown and checks player distance from dead AI
         //if time runs out or player is further than 25 meters from the looted dead AI
         //then the dead AI is deleted
-        if (!isAlive && !PausemenuScript.isGamePaused)
+        if (!isAlive 
+            && !PausemenuScript.isGamePaused
+            && par_deadAILoot.GetComponent<Inv_Container>().hasLootedDeadAIInventoryOnce)
         {
             timer += Time.deltaTime;
 
             if (timer > 120)
             {
                 Debug.Log("Perf: " + gameObject.GetComponent<UI_AIContent>().str_NPCName + " was destroyed after timer ran out.");
-                Destroy(par_deadAILoot.GetComponent<Inv_Container>().discardableDeadNPC);
-            }
-            else if (par_deadAILoot.GetComponent<Inv_Container>().hasLootedDeadAIInventoryOnce
-                     && Vector3.Distance(transform.position, thePlayer.transform.position) > 25)
-            {
-                Debug.Log("Perf: " + gameObject.GetComponent<UI_AIContent>().str_NPCName + " was destroyed after player went too far from it.");
                 Destroy(par_deadAILoot.GetComponent<Inv_Container>().discardableDeadNPC);
             }
         }
@@ -83,6 +79,7 @@ public class AI_Health : MonoBehaviour
     //currentHealth <= 0
     public void Death()
     {
+        gameObject.GetComponent<AI_Movement>().canMove = false;
         isAlive = false;
 
         gameObject.GetComponent<Renderer>().material.color = Color.red;

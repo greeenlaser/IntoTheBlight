@@ -443,8 +443,12 @@ public class Manager_GameSaving : MonoBehaviour
                 Vector3 velocity = new Vector3(float.Parse(numbers[3]), 
                                                float.Parse(numbers[4]), 
                                                float.Parse(numbers[5]));
-                //get grenade time until explosion
-                float timeUntilExplosion = float.Parse(numbers[6]);
+                //get grenade time until explosion if this grenade has a timer
+                float timeUntilExplosion = 0;
+                if (numbers.Count > 6)
+                {
+                    timeUntilExplosion = float.Parse(numbers[6]);
+                }
 
                 //find the correct grenade to instantiate
                 GameObject item = null;
@@ -488,6 +492,7 @@ public class Manager_GameSaving : MonoBehaviour
 
                 //set this grenade to thrown grenade
                 grenade.GetComponent<Item_Grenade>().isThrownGrenade = true;
+                grenade.GetComponent<Item_Grenade>().startedCookingGrenadeTimer = true;
                 //enable grenade explosion timer if this grenade is timed
                 if (grenade.GetComponent<Item_Grenade>().explosionType
                     == Item_Grenade.ExplosionType.timed)

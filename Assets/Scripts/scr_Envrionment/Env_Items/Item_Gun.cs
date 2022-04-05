@@ -419,7 +419,7 @@ public class Item_Gun : MonoBehaviour
                 else if (defaultDamage >= target.GetComponent<AI_Health>().currentHealth)
                 {
                     target.GetComponent<AI_Health>().Death();
-                    Debug.Log("Player killed " + hit.transform.gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
+                    //Debug.Log("Player killed " + hit.transform.gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
                 }
             }
             //deal damage to target in gunrange

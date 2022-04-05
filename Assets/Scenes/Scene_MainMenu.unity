@@ -660,6 +660,11 @@ MonoBehaviour:
   maxFPS: 300
   fpsUpdateSpeed: 0.1
   txt_fpsValue: {fileID: 1483036526}
+  logo: {fileID: 0}
+  TabletMessagesScript: {fileID: 0}
+  ConsoleScript: {fileID: 0}
+  PauseMenuScript: {fileID: 0}
+  thrownGrenades: []
 --- !u!114 &188475529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3626,8 +3631,9 @@ MonoBehaviour:
     single bullet\n   /upper held grenade instant throw\n- fire automatic gun\n  
     /hold item\n   /upper held grenade cooking\n- drop held object\n   /lower grenade
     instant throw\n- throw held item\n- aim down sights\n   /lower held grenade cooking\n-
-    reload\n- use ability assigned to that slot\n- assign ability to that slot\n-
-    player menu\n- save game\n- load game\n- screenshot\n- pause menu\n- console"
+    reload\n- toggle flashlight (if player has flashlight in inventory)\n- use ability
+    assigned to that slot\n- assign ability to that slot\n- player menu\n- save game\n-
+    load game\n- screenshot\n- pause menu\n- console"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1274d28cfb551b14fbb0ac8dc6dee8a6, type: 2}
   m_sharedMaterial: {fileID: 1343242652353938837, guid: 1274d28cfb551b14fbb0ac8dc6dee8a6, type: 2}
@@ -3654,7 +3660,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27.8
+  m_fontSize: 25.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3786,6 +3792,8 @@ MonoBehaviour:
     press
     r
 
+    press f
+
     press z/x/c
 
     hold z/x/c
@@ -3794,10 +3802,10 @@ MonoBehaviour:
 
     press f5
 
-    press f9
-
     press
-    f12
+    f9
+
+    press f12
 
     press esc
 
@@ -3828,7 +3836,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27.8
+  m_fontSize: 26.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

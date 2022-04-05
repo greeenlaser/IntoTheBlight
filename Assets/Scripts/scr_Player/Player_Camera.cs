@@ -23,6 +23,8 @@ public class Player_Camera : MonoBehaviour
     //private variables
     private float sensX;
     private float sensY;
+    private float mouseX;
+    private float mouseY;
     private float xRot;
     private GameObject ThePlayer;
 
@@ -47,28 +49,22 @@ public class Player_Camera : MonoBehaviour
         {
             if (!isAimingDownSights)
             {
-                float mouseX = Input.GetAxis("Mouse X") * sensX * 5 * Time.deltaTime;
-                float mouseY = Input.GetAxis("Mouse Y") * sensY * 5 * Time.deltaTime;
+                mouseX = Input.GetAxis("Mouse X") * sensX * 5 * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 5 * Time.deltaTime;
 
-                xRot -= mouseY;
-
-                xRot = Mathf.Clamp(xRot, -90f, 90f);
-                transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-
-                ThePlayer.transform.Rotate(Vector3.up * mouseX);
             }
             else if (isAimingDownSights)
             {
-                float mouseX = Input.GetAxis("Mouse X") * sensX * 2.5f * Time.deltaTime;
-                float mouseY = Input.GetAxis("Mouse Y") * sensY * 2.5f * Time.deltaTime;
-
-                xRot -= mouseY;
-
-                xRot = Mathf.Clamp(xRot, -90f, 90f);
-                transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-
-                ThePlayer.transform.Rotate(Vector3.up * mouseX);
+                mouseX = Input.GetAxis("Mouse X") * sensX * 2.5f * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 2.5f * Time.deltaTime;
             }
+
+            xRot -= mouseY;
+
+            xRot = Mathf.Clamp(xRot, -90f, 90f);
+            transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
+
+            ThePlayer.transform.Rotate(Vector3.up * mouseX);
         }    
     }
 

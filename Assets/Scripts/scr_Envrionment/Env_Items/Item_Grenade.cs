@@ -235,7 +235,9 @@ public class Item_Grenade : MonoBehaviour
             }
 
             //continues explosion countdown for thrown grenade
-            if (isThrownGrenade)
+            if (isThrownGrenade
+                && explosionType
+                == ExplosionType.timed)
             {
                 cookingGrenadeTimer += Time.deltaTime;
 
@@ -246,7 +248,8 @@ public class Item_Grenade : MonoBehaviour
             }
 
             //updates sticky grenade positon in case the parent moves
-            if (targetParent != null)
+            if (targetParent != null
+                && stickyType == StickyType.sticky)
             {
                 transform.position = pos_sticky.position;
                 //Debug.Log(pos_sticky.position);

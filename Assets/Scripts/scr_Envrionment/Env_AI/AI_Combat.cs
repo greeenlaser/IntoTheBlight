@@ -94,7 +94,7 @@ public class AI_Combat : MonoBehaviour
                     gameObject.GetComponent<AI_Movement>().goingTowardsTarget = true;
                     if (confirmedTarget.CompareTag("Player"))
                     {
-                        Debug.Log("Target was confirmed by " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ". Target is the player.");
+                        //Debug.Log("Target was confirmed by " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ". Target is the player.");
                     }
                     else if (confirmedTarget.CompareTag("NPC"))
                     {

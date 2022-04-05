@@ -37,7 +37,7 @@ public class AI_Movement : MonoBehaviour
     private void Start()
     {
         canMove = true;
-        realWaitTime = waypointWaitTime;
+        realWaitTime = 0;
         waypointWaitTime = 0;
         agent.autoBraking = false;
         GoToNextPoint();
@@ -45,20 +45,23 @@ public class AI_Movement : MonoBehaviour
 
     private void Update()
     {
-        if (canMove && !isStunned)
+        if (canMove)
         {
-            //resets stun timer
-            if (stunRemaining < 3)
+            if (!isStunned)
             {
-                stunRemaining = 3;
-            }
-
-            if (!goingTowardsTarget)
-            {
-                if (Vector3.Distance(transform.position, thePlayer.transform.position) < 3f)
+                //resets stun timer
+                if (stunRemaining < 3)
                 {
-                    //can talk to this AI
-                    if (AIContentScript.AIActivated
+                    stunRemaining = 3;
+                }
+
+                if (!goingTowardsTarget)
+                {
+                    //can talk to this AI if this AI has dialogue
+                    //and if AI detection is enabled
+                    //and if player is close enough
+                    if (Vector3.Distance(transform.position, thePlayer.transform.position) < 3f
+                        && AIContentScript.AIActivated
                         && !AIContentScript.isAIUIOpen
                         && AIContentScript.hasDialogue
                         && ConsoleScript.toggleAIDetection)
@@ -76,132 +79,104 @@ public class AI_Movement : MonoBehaviour
                         GoToNextPoint();
                     }
                 }
-                else if (Vector3.Distance(transform.position, thePlayer.transform.position) > 3f)
+                //chases the target and deals melee damage when in range
+                else if (goingTowardsTarget)
                 {
-                    agent.isStopped = false;
-                    GoToNextPoint();
-                }
-            }
-            //chases the target and deals melee damage when in range
-            if (goingTowardsTarget)
-            {
-                if (target == null)
-                {
-                    //getting the target gameobject
-                    target = gameObject.GetComponent<AI_Combat>().confirmedTarget;
-                }
-
-                Vector3 targetDir = (target.transform.position - gameObject.transform.position);
-                if (Physics.Raycast(transform.position, targetDir, out RaycastHit hit, 50))
-                {
-                    if (hit.transform.gameObject == target)
+                    if (target == null)
                     {
-                        Debug.DrawRay(transform.position, targetDir, Color.green);
-                        //if (target.CompareTag("Player"))
-                        //{
-                        //Debug.Log("Hit correct target - player.");
-                        //}
-                        //else if (target.CompareTag("NPC"))
-                        //{
-                        //Debug.Log("Hit correct target - " + target.GetComponent<UI_AIContent>().str_NPCName + ".");
-                        //}
+                        //getting the target gameobject
+                        target = gameObject.GetComponent<AI_Combat>().confirmedTarget;
+                    }
 
-                        if (!targetInSight)
+                    Vector3 targetDir = (target.transform.position - gameObject.transform.position);
+                    if (Physics.Raycast(transform.position, targetDir, out RaycastHit hit, 50))
+                    {
+                        if (hit.transform.gameObject == target)
                         {
-                            targetInSight = true;
+                            if (!targetInSight)
+                            {
+                                targetInSight = true;
+                            }
+                        }
+                        else
+                        {
+                            if (targetInSight)
+                            {
+                                targetInSight = false;
+                            }
                         }
                     }
-                    else
-                    {
-                        Debug.DrawRay(transform.position, targetDir, Color.red);
-                        //Debug.Log("Hit incorrect target - " + hit.transform.name + ".");
 
-                        if (targetInSight)
-                        {
-                            targetInSight = false;
-                        }
-                    }
-                }
-
-                if (targetInSight)
-                {
-                    //last known target position always updates if the player is in sight
-                    lastKnownTargetPosition = gameObject.GetComponent<AI_Combat>().confirmedTarget.transform.position;
-                    //sends the AI to the players position
-                    agent.destination = gameObject.GetComponent<AI_Combat>().confirmedTarget.transform.position;
-
-                    //how far is the AI from the target
-                    float distance = Vector3.Distance(gameObject.transform.position, target.transform.position);
-                    //if AI is in melee range to attack target
-                    if (distance <= gameObject.GetComponent<AI_Combat>().attackRange
-                        && !gameObject.GetComponent<AI_Combat>().attackConfirmedTarget
-                        && !agent.isStopped)
+                    if (targetInSight)
                     {
-                        agent.isStopped = true;
-                        gameObject.GetComponent<AI_Combat>().attackConfirmedTarget = true;
-                    }
-                    //if AI is not in melee range to attack target
-                    else if (distance > gameObject.GetComponent<AI_Combat>().attackRange
-                             && gameObject.GetComponent<AI_Combat>().attackConfirmedTarget)
-                    {
-                        agent.isStopped = false;
-                        gameObject.GetComponent<AI_Combat>().dealtFirstDamage = false;
-                        gameObject.GetComponent<AI_Combat>().attackConfirmedTarget = false;
-                    }
-                }
-                else if (!targetInSight)
-                {
-                    if (gameObject.GetComponent<AI_Combat>().finishedHostileSearch)
-                    {
-                        gameObject.GetComponent<AI_Combat>().finishedHostileSearch = false;
+                        //last known target position always updates if the player is in sight
+                        lastKnownTargetPosition = gameObject.GetComponent<AI_Combat>().confirmedTarget.transform.position;
+                        //sends the AI to the players position
+                        agent.destination = gameObject.GetComponent<AI_Combat>().confirmedTarget.transform.position;
 
-                        if (gameObject.GetComponent<AI_Combat>().foundPossibleHostiles)
-                        {
-                            gameObject.GetComponent<AI_Combat>().foundPossibleHostiles = false;
-                        }
-                    }
-                    
-                    //AI goes to last known target position when target goes out of sight
-                    agent.destination = lastKnownTargetPosition;
-
-                    //AI waits at last known target position
-                    if (agent.remainingDistance < 1f && !targetInSight)
-                    {
-                        if (!agent.isStopped)
+                        //how far is the AI from the target
+                        float distance = Vector3.Distance(gameObject.transform.position, target.transform.position);
+                        //if AI is in melee range to attack target
+                        if (distance <= gameObject.GetComponent<AI_Combat>().attackRange
+                            && !gameObject.GetComponent<AI_Combat>().attackConfirmedTarget
+                            && !agent.isStopped)
                         {
                             agent.isStopped = true;
+                            gameObject.GetComponent<AI_Combat>().attackConfirmedTarget = true;
                         }
-                        StartCoroutine(WaitAtLastKnownTargetPosition());
+                        //if AI is not in melee range to attack target
+                        else if (distance > gameObject.GetComponent<AI_Combat>().attackRange
+                                 && gameObject.GetComponent<AI_Combat>().attackConfirmedTarget)
+                        {
+                            agent.isStopped = false;
+                            gameObject.GetComponent<AI_Combat>().dealtFirstDamage = false;
+                            gameObject.GetComponent<AI_Combat>().attackConfirmedTarget = false;
+                        }
+                    }
+                    else if (!targetInSight)
+                    {
+                        if (gameObject.GetComponent<AI_Combat>().finishedHostileSearch)
+                        {
+                            gameObject.GetComponent<AI_Combat>().finishedHostileSearch = false;
+
+                            if (gameObject.GetComponent<AI_Combat>().foundPossibleHostiles)
+                            {
+                                gameObject.GetComponent<AI_Combat>().foundPossibleHostiles = false;
+                            }
+                        }
+
+                        //AI goes to last known target position when target goes out of sight
+                        agent.destination = lastKnownTargetPosition;
+
+                        //AI waits at last known target position
+                        if (agent.remainingDistance < 1f && !targetInSight)
+                        {
+                            if (!agent.isStopped)
+                            {
+                                agent.isStopped = true;
+                            }
+                            StartCoroutine(WaitAtLastKnownTargetPosition());
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            if (!agent.isStopped)
+            else if (isStunned)
             {
                 agent.isStopped = true;
+                stunRemaining -= 1 * Time.deltaTime;
+
+                //Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " is stunned for " + Mathf.FloorToInt(stunRemaining) + " more seconds.");
+
+                if (stunRemaining <= 0)
+                {
+                    isStunned = false;
+                }
             }
         }
-
-        if (isStunned)
+        else if (!canMove
+                 && !agent.isStopped)
         {
             agent.isStopped = true;
-            stunRemaining -= 1 * Time.deltaTime;
-            //Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " is stunned.");
-            //Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " is stunned for " + Mathf.FloorToInt(stunRemaining) + " more seconds.");
-
-            if (stunRemaining <= 0)
-            {
-                isStunned = false;
-            }
-        }
-        if (!isStunned
-            && gameObject.GetComponent<Rigidbody>().velocity.x < 1
-            && gameObject.GetComponent<Rigidbody>().velocity.y < 1)
-        {
-            agent.isStopped = false;
-            GoToNextPoint();
         }
     }
 

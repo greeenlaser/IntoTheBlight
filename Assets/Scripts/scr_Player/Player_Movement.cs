@@ -177,7 +177,8 @@ public class Player_Movement : MonoBehaviour
                             minVelocity = velocity.y;
                         }
                         //check if smallest velocity is less than or equal to -10f
-                        if (minVelocity <= -10f)
+                        if (minVelocity <= -10f
+                            && PlayerHealthScript.canTakeDamage)
                         {
                             ApplyFallDamage();
 
@@ -462,13 +463,26 @@ public class Player_Movement : MonoBehaviour
 
                 transform.position += nc_moveSpeed * Time.deltaTime * move;
 
+                //start fast move
                 if (Input.GetKeyDown(KeyCode.LeftShift))
                 {
                     nc_moveSpeed = walkSpeed * 10;
                 }
+                //stop fast move
                 if (Input.GetKeyUp(KeyCode.LeftShift))
                 {
                     nc_moveSpeed = walkSpeed * 2.5f;
+                }
+
+                //move down
+                if (Input.GetKey(KeyCode.LeftControl))
+                {
+                    transform.position += new Vector3(0, -1, 0) * nc_moveSpeed * Time.deltaTime;
+                }
+                //move up
+                else if (Input.GetKey(KeyCode.Space))
+                {
+                    transform.position += new Vector3(0, 1, 0) * nc_moveSpeed * Time.deltaTime;
                 }
             }
         }
