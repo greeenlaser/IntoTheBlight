@@ -257,9 +257,12 @@ public class Manager_GameSaving : MonoBehaviour
             else if (line.Contains("b_hasExoskeleton")
                      && line.Contains("True"))
             {
-                GameObject exoskeleton = Instantiate(Exoskeleton, PlayerInventoryScript.par_PlayerItems.transform.position, Quaternion.identity);
+                GameObject exoskeleton = Instantiate(Exoskeleton, 
+                                                     PlayerInventoryScript.par_PlayerItems.transform.position, 
+                                                     Quaternion.identity, 
+                                                     PlayerInventoryScript.par_PlayerItems.transform);
+
                 exoskeleton.name = exoskeleton.GetComponent<Env_Item>().str_ItemName;
-                exoskeleton.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
                 PlayerInventoryScript.inventory.Add(exoskeleton);
 
@@ -299,9 +302,12 @@ public class Manager_GameSaving : MonoBehaviour
                     //then it is duplicated and added to player inventory
                     if (line.Contains(itemName))
                     {
-                        GameObject newDuplicate = Instantiate(item, PlayerInventoryScript.par_PlayerItems.transform.position, Quaternion.identity);
+                        GameObject newDuplicate = Instantiate(item, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform.position, 
+                                                              Quaternion.identity,
+                                                              PlayerInventoryScript.par_PlayerItems.transform);
+
                         newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
-                        newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
                         PlayerInventoryScript.inventory.Add(newDuplicate);
 
@@ -350,8 +356,8 @@ public class Manager_GameSaving : MonoBehaviour
                         //assigns new ammo to currently equipped gun if ammo type is same as equipped gun
                         if (newDuplicate.GetComponent<Item_Ammo>() != null
                             && PlayerInventoryScript.equippedGun != null
-                            && newDuplicate.GetComponent<Item_Ammo>().ammoType.ToString()
-                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoType.ToString())
+                            && newDuplicate.GetComponent<Item_Ammo>().caseType.ToString()
+                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
                         {
                             PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().AssignAmmoType();
                         }
@@ -484,7 +490,10 @@ public class Manager_GameSaving : MonoBehaviour
                 }
 
                 //spawn the grenade
-                GameObject grenade = Instantiate(item, position, Quaternion.identity);
+                GameObject grenade = Instantiate(item, 
+                                                 position, 
+                                                 Quaternion.identity);
+
                 //add to thrown grenades list
                 GameManagerScript.thrownGrenades.Add(grenade);
                 //apply the velocity
@@ -1129,12 +1138,18 @@ public class Manager_GameSaving : MonoBehaviour
                     string weaponName = equippedWeapon.GetComponent<Env_Item>().str_ItemName;
                     finalOutput += "go_equippedWeapon = " + weaponName;
 
+                    string weaponDurability = "0";
                     //save equipped weapon current durability if it is a gun
-                    string gunCurrentDurability = "0";
                     if (equippedWeapon.GetComponent<Item_Gun>() != null)
                     {
-                        gunCurrentDurability = equippedWeapon.GetComponent<Item_Gun>().durability.ToString();
-                        finalOutput += ", " + gunCurrentDurability;
+                        weaponDurability = equippedWeapon.GetComponent<Item_Gun>().durability.ToString();
+                        finalOutput += ", " + weaponDurability;
+                    }
+                    //save equipped weapon current durability if it is a melee weapon
+                    else if (equippedWeapon.GetComponent<Item_Melee>() != null)
+                    {
+                        weaponDurability = equippedWeapon.GetComponent<Item_Melee>().durability.ToString();
+                        finalOutput += ", " + weaponDurability;
                     }
 
                     saveFile.WriteLine(finalOutput);
@@ -1583,6 +1598,13 @@ public class Manager_GameSaving : MonoBehaviour
         }
     }
 
+    private IEnumerator WaitBeforeRemovingExoskeleton()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        Exoskeleton.SetActive(false);
+    }
+
     private IEnumerator LoadAbilities()
     {
         yield return new WaitForSeconds(0.1f);
@@ -1926,12 +1948,5 @@ public class Manager_GameSaving : MonoBehaviour
 
             mainIndex++;
         }
-    }
-
-    private IEnumerator WaitBeforeRemovingExoskeleton()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        Exoskeleton.SetActive(false);
     }
 }

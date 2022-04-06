@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Item_Gun : MonoBehaviour
 {
+    [Tooltip("How much damage does this gun deal at max condition?")]
+    public float int_maxDamage;
+    [Tooltip("How far can this gun shoot?")]
+    public float maxRange;
     [Tooltip("Does this gun fire one bullet per lmb click or does it fire bullets while lmb is held down?")]
     [SerializeField] private bool isSingleShot;
     [Range(10, 100)]
@@ -23,8 +27,8 @@ public class Item_Gun : MonoBehaviour
 
     [Header("Assignables")]
     [Tooltip("What ammo type does this gun need.")]
-    public AmmoType ammoType;
-    public enum AmmoType
+    public CaseType caseType;
+    public enum CaseType
     {
         unassigned_ammo,
         _22LR_ammo,
@@ -87,6 +91,7 @@ public class Item_Gun : MonoBehaviour
     [HideInInspector] public bool isFiring;
     [HideInInspector] public bool isReloading;
     [HideInInspector] public bool isGunJammed;
+    [HideInInspector] public float int_damage;
     [HideInInspector] public float durability;
     [HideInInspector] public int currentClipSize;
     [HideInInspector] public GameObject ammoClip;
@@ -100,8 +105,6 @@ public class Item_Gun : MonoBehaviour
     private float timer_gunSFX;
     private float timer_gunBullets;
     private float gunJamChance;
-    private float maxRange;
-    private float defaultDamage;
     private List<GameObject> gunHitCursors = new List<GameObject>();
     private List<GameObject> spawnedBulletCaseSFX = new List<GameObject>();
     private List<GameObject> spawnedBulletCases = new List<GameObject>();
@@ -113,6 +116,28 @@ public class Item_Gun : MonoBehaviour
         //durability = Mathf.FloorToInt(Random.Range(maxDurability / 3, maxDurability / 10 * 8));
 
         durability = maxDurability;
+
+        //update weapon value and damage based off of current durability
+        if (durability < maxDurability / 100 * 75)
+        {
+            //get weapon max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get weapon current durability percentage from max durability
+            float durabilityPercentage = (durability / maxDurability) * 100;
+            //calculate new weapon value according to weapon durability percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+            //assign weapon value
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+            //calculate new weapon damage according to weapon durability percentage
+            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            //assign new damage to weapon
+            int_damage = itemDamage;
+        }
+        else
+        {
+            int_damage = int_maxDamage;
+        }
     }
 
     private void Update()
@@ -139,12 +164,13 @@ public class Item_Gun : MonoBehaviour
                     && currentClipSize > 0
                     && !isGunJammed)
                 {
-                    currentClipSize--;
-                    UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
-                    //gun durability only degrades if it isn't protected
+                    ShootBullet();
+
+                    //gun durability and ammo only decrease if the gun isn't protected
                     if (!gameObject.GetComponent<Env_Item>().isProtected)
-                    {
-                        ShootBullet();
+                    {   
+                        currentClipSize--;
+                        UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
                         durability -= singleShotDegrade;
                         UIReuseScript.durability = durability;
                         UIReuseScript.maxDurability = maxDurability;
@@ -164,21 +190,17 @@ public class Item_Gun : MonoBehaviour
                     }
                     if (isFiring)
                     {
-                        //gun durability and ammo only decrease over time if the gun isn't protected
-                        if (!gameObject.GetComponent<Env_Item>().isProtected)
+                        if (!firedFirstShot)
                         {
-                            if (!firedFirstShot)
-                            {
-                                timer_automaticFire = 0;
-                                firedFirstShot = true;
-                            }
+                            timer_automaticFire = 0;
+                            firedFirstShot = true;
+                        }
 
-                            timer_automaticFire -= fireRate * Time.deltaTime;
-                            if (timer_automaticFire <= 0)
-                            {
-                                AutomaticFireShoot();
-                                timer_automaticFire = 1;
-                            }
+                        timer_automaticFire -= fireRate * Time.deltaTime;
+                        if (timer_automaticFire <= 0)
+                        {
+                            AutomaticFireShoot();
+                            timer_automaticFire = 1;
                         }
                     }
                 }
@@ -359,31 +381,66 @@ public class Item_Gun : MonoBehaviour
     private void AutomaticFireShoot()
     {
         ShootBullet();
-        currentClipSize--;
-        UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
-        durability -= automaticFireDegrade;
-        UIReuseScript.durability = durability;
-        UIReuseScript.maxDurability = maxDurability;
-        UIReuseScript.UpdateWeaponQuality();
+
+        //gun durability and ammo only decrease if the gun isn't protected
+        if (!gameObject.GetComponent<Env_Item>().isProtected)
+        {
+            currentClipSize--;
+            UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
+            durability -= automaticFireDegrade;
+            UIReuseScript.durability = durability;
+            UIReuseScript.maxDurability = maxDurability;
+            UIReuseScript.UpdateWeaponQuality();
+        }
     }
 
     private void ShootBullet()
     {
         //gunfire sfx
-        GameObject spawnedGunSFX = Instantiate(gunFireSFXTemplate, pos_gunFireSFX.transform.position, Quaternion.identity);
+        GameObject spawnedGunSFX = Instantiate(gunFireSFXTemplate, 
+                                               pos_gunFireSFX.transform.position, 
+                                               Quaternion.identity, 
+                                               par_gunSpawns.transform);
+
         spawnedGunSFX.SetActive(true);
-        spawnedGunSFX.transform.parent = par_gunSpawns.transform;
         spawnedGunFireSFX.Add(spawnedGunSFX);
         //bullet drop sfx
-        GameObject spawnedBulletSFX = Instantiate(spawnedBulletCaseSFXTemplate, pos_bulletSpawn.transform.position, Quaternion.identity);
+        GameObject spawnedBulletSFX = Instantiate(spawnedBulletCaseSFXTemplate, 
+                                                  pos_bulletSpawn.transform.position, 
+                                                  Quaternion.identity, 
+                                                  par_gunSpawns.transform);
+
         spawnedBulletSFX.SetActive(true);
-        spawnedBulletSFX.transform.parent = par_gunSpawns.transform;
         spawnedBulletCaseSFX.Add(spawnedBulletSFX);
         //spawn a bullet
-        GameObject spawnedBullet = Instantiate(spawnedBulletCaseTemplate, pos_bulletSpawn.transform.position, Quaternion.identity);
+        GameObject spawnedBullet = Instantiate(spawnedBulletCaseTemplate, 
+                                               pos_bulletSpawn.transform.position, 
+                                               Quaternion.identity, 
+                                               par_gunSpawns.transform);
+
         spawnedBullet.SetActive(true);
-        spawnedBullet.transform.parent = par_gunSpawns.transform;
         spawnedBulletCases.Add(spawnedBullet);
+        //update weapon value and damage based off of current durability
+        if (durability < maxDurability / 100 * 75)
+        {
+            //get weapon max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get weapon current durability percentage from max durability
+            float durabilityPercentage = (durability / maxDurability) * 100;
+            //calculate new weapon value according to weapon durability percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+            //assign weapon value
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+            //calculate new weapon damage according to weapon durability percentage
+            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            //assign new damage to weapon
+            int_damage = Mathf.FloorToInt(itemDamage);
+        }
+        else
+        {
+            int_damage = int_maxDamage;
+        }
 
         //did the gun shoot anything
         RaycastHit hit;
@@ -396,10 +453,10 @@ public class Item_Gun : MonoBehaviour
                 && target.GetComponent<AI_Health>().isKillable
                 && target.GetComponent<AI_Health>().isAlive)
             {
-                if (defaultDamage <target.GetComponent<AI_Health>().currentHealth)
+                if (int_damage < target.GetComponent<AI_Health>().currentHealth)
                 {
                     //deals damage to this human if it can take damage
-                    target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(defaultDamage);
+                    target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(int_damage);
 
                     //if this AI has not yet detected this target and this target shot this AI
                     //and this AI is not currently chasing or attacking another target
@@ -416,7 +473,7 @@ public class Item_Gun : MonoBehaviour
                     //"Remaining health for " + hit.transform.gameObject.GetComponent<UI_AIContent>().str_NPCName + " is "
                     //+ hit.transform.gameObject.GetComponent<AI_Health>().currentHealth + ".");
                 }
-                else if (defaultDamage >= target.GetComponent<AI_Health>().currentHealth)
+                else if (int_damage >= target.GetComponent<AI_Health>().currentHealth)
                 {
                     target.GetComponent<AI_Health>().Death();
                     //Debug.Log("Player killed " + hit.transform.gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
@@ -430,15 +487,18 @@ public class Item_Gun : MonoBehaviour
             //deal damage to destroyable crate
             else if (target.GetComponentInParent<Env_DestroyableCrate>() != null)
             {
-                target.GetComponentInParent<Env_DestroyableCrate>().crateHealth -= defaultDamage;
-                //Debug.Log("Dealt " + defaultDamage + " damage to destroyable crate!");
+                target.GetComponentInParent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(int_damage);
+                //Debug.Log("Dealt " + int_damage + " damage to destroyable crate!");
             }
 
             //create new gun hit cursors
             Vector3 center = new Vector3(960, 540, 0);
-            GameObject newCursor = Instantiate(gunHitCursorTemplate, center, Quaternion.identity);
+            GameObject newCursor = Instantiate(gunHitCursorTemplate, 
+                                               center, 
+                                               Quaternion.identity, 
+                                               par_cursorSpawns.transform);
+
             newCursor.SetActive(true);
-            newCursor.transform.SetParent(par_cursorSpawns.transform);
             gunHitCursors.Add(newCursor);
         }
 
@@ -463,19 +523,19 @@ public class Item_Gun : MonoBehaviour
 
             if (durability < fortyp)
             {
-                gunJamChance = 25;
+                gunJamChance = 20;
 
                 if (durability < thirtyp)
                 {
-                    gunJamChance = 40;
+                    gunJamChance = 35;
 
                     if (durability < twentyp)
                     {
-                        gunJamChance = 65;
+                        gunJamChance = 50;
 
                         if (durability < tenp)
                         {
-                            gunJamChance = 80;
+                            gunJamChance = 65;
                         }
                     }
                 }
@@ -616,9 +676,6 @@ public class Item_Gun : MonoBehaviour
         isReloading = true;
         isGunJammed = false;
 
-        maxRange = ammoClip.GetComponent<Item_Ammo>().maxMinDamageRange;
-        defaultDamage = ammoClip.GetComponent<Item_Ammo>().ammoDefaultDamage;
-
         //plays gun reload sfx
         sfx_gunReload.Play();
 
@@ -658,8 +715,8 @@ public class Item_Gun : MonoBehaviour
         foreach (GameObject item in PlayerInventoryScript.inventory)
         {
             if (item.GetComponent<Item_Ammo>() != null
-                && item.GetComponent<Item_Ammo>().ammoType.ToString() 
-                == ammoType.ToString())
+                && item.GetComponent<Item_Ammo>().caseType.ToString() 
+                == caseType.ToString())
             {
                 ammoClip = item;
                 break;
@@ -674,8 +731,8 @@ public class Item_Gun : MonoBehaviour
             foreach (GameObject item in PlayerInventoryScript.inventory)
             {
                 if (item.GetComponent<Item_Ammo>() != null
-                    && item.GetComponent<Item_Ammo>().ammoType.ToString() 
-                    == ammoType.ToString())
+                    && item.GetComponent<Item_Ammo>().caseType.ToString() 
+                    == caseType.ToString())
                 {
                     ammoClip = item;
                     break;

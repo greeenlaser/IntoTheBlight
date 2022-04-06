@@ -5,7 +5,7 @@ using UnityEngine;
 public class Player_MeleeRangeTargets : MonoBehaviour
 {
     //public but hidden variables
-    [HideInInspector] public List<GameObject> targets = new List<GameObject>();
+    public List<GameObject> targets = new List<GameObject>();
 
     //private variables
     private bool startedTargetListUpdater;
@@ -15,7 +15,7 @@ public class Player_MeleeRangeTargets : MonoBehaviour
         if (targets.Count > 0
             && !startedTargetListUpdater)
         {
-            StartCoroutine(UpdateTargetsList());
+            UpdateTargetsList();
         }
         else if (startedTargetListUpdater
                  && targets.Count == 0)
@@ -26,48 +26,45 @@ public class Player_MeleeRangeTargets : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!targets.Contains(other.gameObject)
-            && other.GetComponent<AI_Health>() != null
-            && other.GetComponent<AI_Health>().isAlive
-            && other.GetComponent<AI_Health>().isKillable)
+        if (!targets.Contains(other.gameObject))
         {
-            Debug.Log(other.GetComponent<UI_AIContent>().str_NPCName + " is in melee range!");
-            targets.Add(other.gameObject);
+            if (other.GetComponent<AI_Health>() != null
+                && other.GetComponent<AI_Health>().isAlive
+                && other.GetComponent<AI_Health>().isKillable)
+            {
+                //ebug.Log(other.GetComponent<UI_AIContent>().str_NPCName + " is in melee range!");
+                targets.Add(other.gameObject);
+            }
+            else if (other.GetComponentInParent<Env_DestroyableCrate>() != null)
+            {
+                targets.Add(other.gameObject);
+            }
         }
     }
     private void OnTriggerExit(Collider other)
     {
         if (targets.Contains(other.gameObject))
         {
-            Debug.Log(other.GetComponent<UI_AIContent>().str_NPCName + " is no longer in melee range.");
+            //Debug.Log(other.GetComponent<UI_AIContent>().str_NPCName + " is no longer in melee range.");
             targets.Remove(other.gameObject);
         }
     }
 
-    //simple loop to remove unwanted targets
-    //from targets list that died or became unkillable
-    private IEnumerator UpdateTargetsList()
+    //remove unwanted targets from targets list that died or became unkillable
+    private void UpdateTargetsList()
     {
-        while (targets.Count > 0)
+        for (int i = 0; i < targets.Count; i++)
         {
-            for (int i = 0; i < targets.Count; i++)
+            if (targets[i].gameObject == null)
             {
-                if (!targets[i].GetComponent<AI_Health>().isKillable
-                    || !targets[i].GetComponent<AI_Health>().isAlive)
-                {
-                    targets.Remove(targets[i]);
-                }
+                targets.Remove(targets[i]);
             }
-
-            foreach (GameObject target in targets)
+            else if (targets[i].GetComponent<AI_Health>() != null
+                && (!targets[i].GetComponent<AI_Health>().isKillable
+                || !targets[i].GetComponent<AI_Health>().isAlive))
             {
-                if (!target.GetComponent<AI_Health>().isKillable
-                    || !target.GetComponent<AI_Health>().isAlive)
-                {
-                    targets.Remove(target);
-                }
+                targets.Remove(targets[i]);
             }
-            yield return new WaitForSeconds(0.5f);
         }
     }
 }

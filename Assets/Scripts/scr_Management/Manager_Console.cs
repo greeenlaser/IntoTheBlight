@@ -3056,8 +3056,8 @@ public class Manager_Console : MonoBehaviour
                         //assigns new ammo to currently equipped gun if ammo type is same as equipped gun
                         if (duplicate.GetComponent<Item_Ammo>() != null
                             && PlayerInventoryScript.equippedGun != null
-                            && duplicate.GetComponent<Item_Ammo>().ammoType.ToString()
-                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoType.ToString())
+                            && duplicate.GetComponent<Item_Ammo>().caseType.ToString()
+                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
                         {
                             PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().AssignAmmoType();
                         }
@@ -3073,9 +3073,12 @@ public class Manager_Console : MonoBehaviour
                              || (!spawnableItem.GetComponent<Env_Item>().isStackable
                              && insertedValue == 1)))
                     {
-                        GameObject newDuplicate = Instantiate(selectedItem, PlayerInventoryScript.par_PlayerItems.transform.position, Quaternion.identity);
+                        GameObject newDuplicate = Instantiate(selectedItem, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform.position, 
+                                                              Quaternion.identity, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform);
+
                         newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
-                        newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
                         PlayerInventoryScript.inventory.Add(newDuplicate);
                         PlayerInventoryScript.invSpace -= (newDuplicate.GetComponent<Env_Item>().int_ItemWeight * insertedValue);
@@ -3086,8 +3089,8 @@ public class Manager_Console : MonoBehaviour
                         //assigns new ammo to currently equipped gun if ammo type is same as equipped gun
                         if (newDuplicate.GetComponent<Item_Ammo>() != null
                             && PlayerInventoryScript.equippedGun != null
-                            && newDuplicate.GetComponent<Item_Ammo>().ammoType.ToString()
-                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoType.ToString())
+                            && newDuplicate.GetComponent<Item_Ammo>().caseType.ToString()
+                            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
                         {
                             PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().AssignAmmoType();
                         }
@@ -3215,8 +3218,8 @@ public class Manager_Console : MonoBehaviour
                     //cannot delete the equipped guns ammo while the gun is reloading
                     if (selectedGun != null
                         && selectedItem.GetComponent<Item_Ammo>() != null
-                        && selectedGun.GetComponent<Item_Gun>().ammoType.ToString()
-                        == selectedItem.GetComponent<Item_Ammo>().ammoType.ToString()
+                        && selectedGun.GetComponent<Item_Gun>().caseType.ToString()
+                        == selectedItem.GetComponent<Item_Ammo>().caseType.ToString()
                         && selectedGun.GetComponent<Item_Gun>().isReloading)
                     {
                         consoleText = "Error: Can't delete " + selectedItem.GetComponent<Env_Item>().str_ItemName + " through console while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!";
@@ -3225,8 +3228,8 @@ public class Manager_Console : MonoBehaviour
                     }
                     else if (selectedGun == null
                              || selectedItem.GetComponent<Item_Ammo>() == null
-                             || selectedGun.GetComponent<Item_Gun>().ammoType.ToString()
-                             != selectedItem.GetComponent<Item_Ammo>().ammoType.ToString()
+                             || selectedGun.GetComponent<Item_Gun>().caseType.ToString()
+                             != selectedItem.GetComponent<Item_Ammo>().caseType.ToString()
                              || !selectedGun.GetComponent<Item_Gun>().isReloading)
                     {
                         canContinueItemRemoval = true;
@@ -3585,8 +3588,8 @@ public class Manager_Console : MonoBehaviour
     {
         //updates player equpped gun and removes ammo
         if (PlayerInventoryScript.equippedGun != null
-            && selectedItem.GetComponent<Item_Ammo>().ammoType.ToString()
-            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoType.ToString())
+            && selectedItem.GetComponent<Item_Ammo>().caseType.ToString()
+            == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
         {
             PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoClip = null;
             UIReuseScript.txt_ammoForGun.text = "0";
@@ -3610,8 +3613,8 @@ public class Manager_Console : MonoBehaviour
             //looks for the same ammo from the players inventory as this gun
             foreach (GameObject item in PlayerInventoryScript.inventory)
             {
-                if (selectedItem.GetComponent<Item_Gun>().ammoType.ToString()
-                    == item.GetComponent<Item_Ammo>().ammoType.ToString())
+                if (selectedItem.GetComponent<Item_Gun>().caseType.ToString()
+                    == item.GetComponent<Item_Ammo>().caseType.ToString())
                 {
                     correctAmmo = item;
                     break;
@@ -3623,8 +3626,8 @@ public class Manager_Console : MonoBehaviour
             {
                 foreach (GameObject item in PlayerInventoryScript.inventory)
                 {
-                    if (selectedItem.GetComponent<Item_Gun>().ammoType.ToString()
-                        == item.GetComponent<Item_Ammo>().ammoType.ToString())
+                    if (selectedItem.GetComponent<Item_Gun>().caseType.ToString()
+                        == item.GetComponent<Item_Ammo>().caseType.ToString())
                     {
                         item.GetComponent<Env_Item>().int_itemCount += removedAmmo;
                         selectedItem.GetComponent<Item_Gun>().currentClipSize = 0;
@@ -3638,7 +3641,10 @@ public class Manager_Console : MonoBehaviour
             //if no ammo clip for this gun was found in the players inventory then a new clip is created
             else if (correctAmmo == null)
             {
-                GameObject ammo = Instantiate(ammoTemplate, PlayerInventoryScript.pos_EquippedItem.position, Quaternion.identity);
+                GameObject ammo = Instantiate(ammoTemplate, 
+                                              PlayerInventoryScript.pos_EquippedItem.position, 
+                                              Quaternion.identity);
+
                 ammo.GetComponent<Env_Item>().int_itemCount = removedAmmo;
                 ammo.name = ammo.GetComponent<Env_Item>().str_ItemName;
                 PlayerInventoryScript.inventory.Add(ammo);
@@ -3657,9 +3663,12 @@ public class Manager_Console : MonoBehaviour
     {
         while (remainder > 0)
         {
-            GameObject newDuplicate = Instantiate(spawnableItem, PlayerInventoryScript.par_PlayerItems.transform.position, Quaternion.identity);
+            GameObject newDuplicate = Instantiate(spawnableItem, 
+                                                  PlayerInventoryScript.par_PlayerItems.transform.position, 
+                                                  Quaternion.identity, 
+                                                  PlayerInventoryScript.par_PlayerItems.transform);
+
             newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
-            newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
             PlayerInventoryScript.inventory.Add(newDuplicate);
             PlayerInventoryScript.invSpace -= (newDuplicate.GetComponent<Env_Item>().int_ItemWeight);
@@ -3706,18 +3715,21 @@ public class Manager_Console : MonoBehaviour
 
     private void HandleLog(string logString, string stackTrace, LogType type)
     {
-        output = logString;
-        stack = stackTrace;
-
-        if (displayUnityLogs && !startedWait)
+        if (UIReuseScript.txt_InsertedTextTemplate != null)
         {
-            if (lastOutput == output)
-            {
-                startedWait = true;
-                StartCoroutine(Wait());
-            }
+            output = logString;
+            stack = stackTrace;
 
-            NewUnitylogMessage();
+            if (displayUnityLogs && !startedWait)
+            {
+                if (lastOutput == output)
+                {
+                    startedWait = true;
+                    StartCoroutine(Wait());
+                }
+
+                NewUnitylogMessage();
+            }
         }
     }
 

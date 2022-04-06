@@ -53,6 +53,19 @@ public class Item_Consumable : MonoBehaviour
     private void Awake()
     {
         currentConsumableAmount = maxConsumableAmount;
+
+        //update consumable value based off of current consumable amount
+        if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
+        {
+            //get item max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get consumbale current consumable percentage from max consumable amount
+            float consumablePercentage = (currentConsumableAmount / maxConsumableAmount) * 100;
+            //calculate new item value according to item consumable percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * consumablePercentage);
+            //assign item value to consumable
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+        }
     }
 
     public void Consume()
@@ -107,6 +120,19 @@ public class Item_Consumable : MonoBehaviour
                     UIReuseScript.health = PlayerHealthScript.health;
                     UIReuseScript.maxHealth = PlayerHealthScript.maxHealth;
                     UIReuseScript.UpdatePlayerHealth();
+
+                    //update consumable value based off of current consumable amount
+                    if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
+                    {
+                        //get item max value
+                        int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+                        //get consumbale current consumable percentage from max consumable amount
+                        float consumablePercentage = (currentConsumableAmount / maxConsumableAmount) * 100;
+                        //calculate new item value according to item consumable percentage
+                        itemValue = Mathf.FloorToInt(itemValue / 100 * consumablePercentage);
+                        //assign item value to consumable
+                        gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+                    }
                 }
                 else if (playerHealth + currentConsumableAmount <= playerMaxHealth)
                 {
@@ -180,6 +206,19 @@ public class Item_Consumable : MonoBehaviour
                     PlayerInventoryScript.UpdatePlayerInventoryStats();
                     UIReuseScript.durability = item.GetComponent<Item_Gun>().maxDurability;
                     UIReuseScript.maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+
+                    //update consumable value based off of current consumable amount
+                    if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
+                    {
+                        //get item max value
+                        int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+                        //get consumbale current consumable percentage from max consumable amount
+                        float consumablePercentage = (currentConsumableAmount / maxConsumableAmount) * 100;
+                        //calculate new item value according to item consumable percentage
+                        itemValue = Mathf.FloorToInt(itemValue / 100 * consumablePercentage);
+                        //assign item value to consumable
+                        gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+                    }
                 }
                 else if (durability + currentConsumableAmount <= maxDurability)
                 {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Item_Melee : MonoBehaviour
 {
-    [SerializeField] private int meleeDamage;
+    public float int_maxDamage;
     [SerializeField] private float swingTimerLimit;
     public float maxDurability;
     [SerializeField] private float durabilityReducedPerHit;
@@ -20,6 +20,7 @@ public class Item_Melee : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool hasEquippedMeleeWeapon;
     [HideInInspector] public float durability;
+    [HideInInspector] public float int_damage;
 
     //private variables
     private bool isSwinging;
@@ -31,6 +32,28 @@ public class Item_Melee : MonoBehaviour
         //durability = Mathf.FloorToInt(Random.Range(maxDurability / 3, maxDurability / 10 * 8));
 
         durability = maxDurability;
+
+        //update weapon value and damage based off of current durability
+        if (durability < maxDurability / 100 * 75)
+        {
+            //get weapon max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get weapon current durability percentage from max durability
+            float durabilityPercentage = (durability / maxDurability) * 100;
+            //calculate new weapon value according to weapon durability percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+            //assign weapon value
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+            //calculate new weapon damage according to weapon durability percentage
+            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            //assign new damage to weapon
+            int_damage = Mathf.FloorToInt(itemDamage);
+        }
+        else
+        {
+            int_damage = int_maxDamage;
+        }
     }
 
     private void Update()
@@ -65,15 +88,23 @@ public class Item_Melee : MonoBehaviour
 
         for (int i = 0; i < MeleeTargetsScript.targets.Count; i++)
         {
-            MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth -= meleeDamage;
-            Debug.Log("Dealt " + meleeDamage + " damage to " + MeleeTargetsScript.targets[i].GetComponent<UI_AIContent>().str_NPCName + "! Targets remaining health is " + MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth + ".");
-
-            if (MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth <= 0)
+            //deals damage to all alive and killable AI in melee range
+            if (MeleeTargetsScript.targets[i].GetComponent<AI_Health>() != null
+                && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isAlive
+                && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isKillable)
             {
-                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().Death();
+                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(int_damage);
+                //Debug.Log("Dealt " + meleeDamage + " damage to " + MeleeTargetsScript.targets[i].GetComponent<UI_AIContent>().str_NPCName + "! Targets remaining health is " + MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth + ".");
+            }
+            //deals damage to all non-broken destroyable crates in melee range
+            if (MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>() != null
+                && MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>().crateHealth > 0)
+            {
+                MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(int_damage);
             }
 
-            if (!hitSomething)
+            //protected melee weapons dont take durability damage
+            if (!hitSomething && !gameObject.GetComponent<Env_Item>().isProtected)
             {
                 hitSomething = true;
             }
@@ -82,6 +113,28 @@ public class Item_Melee : MonoBehaviour
         if (hitSomething)
         {
             durability -= durabilityReducedPerHit;
+
+            //update weapon value and damage based off of current durability
+            if (durability < maxDurability / 100 * 75)
+            {
+                //get weapon max value
+                int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+                //get weapon current durability percentage from max durability
+                float durabilityPercentage = (durability / maxDurability) * 100;
+                //calculate new weapon value according to weapon durability percentage
+                itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+                //assign weapon value
+                gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+                //calculate new weapon damage according to weapon durability percentage
+                int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+                //assign new damage to weapon
+                int_damage = itemDamage;
+            }
+            else
+            {
+                int_damage = int_maxDamage;
+            }
 
             UIReuseScript.durability = durability;
             UIReuseScript.maxDurability = maxDurability;

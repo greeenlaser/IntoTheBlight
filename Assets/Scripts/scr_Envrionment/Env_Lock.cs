@@ -13,13 +13,17 @@ public class Env_Lock : MonoBehaviour
         door,
         container
     }
-    [SerializeField] private Env_Door DoorScript;
-    [SerializeField] private Inv_Container ContainerScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private Manager_UIReuse UIReuseScript;
     [SerializeField] private UI_PauseMenu PauseMenuScript;
     [SerializeField] private UI_PlayerMenu PlayerMenuScript;
     [SerializeField] private Manager_Console ConsoleScript;
+
+    [Header("For doors")]
+    [SerializeField] private Env_Door DoorScript;
+
+    [Header("For containers")]
+    [SerializeField] private Inv_Container ContainerScript;
 
     //public but hidden variables
     [HideInInspector] public bool isPickingLock;

@@ -45,6 +45,11 @@ public class AI_Health : MonoBehaviour
             {
                 LowHealth();
             }
+            //if ai health is 0
+            else if (currentHealth <= 0)
+            {
+                Death();
+            }
 
             lastHealth = currentHealth;
         }

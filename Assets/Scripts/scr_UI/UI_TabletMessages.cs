@@ -32,11 +32,13 @@ public class UI_TabletMessages : MonoBehaviour
         }
 
         //spawn the message gameobject
-        GameObject newMessage = Instantiate(template_message, pos_messageSpawn.position, Quaternion.identity);
+        GameObject newMessage = Instantiate(template_message, 
+                                            pos_messageSpawn.position, 
+                                            Quaternion.identity,
+                                            par_SpawnedTabletMessages);
+
         //add message to messages list
         messages.Add(newMessage);
-        //set message parent
-        newMessage.transform.SetParent(par_SpawnedTabletMessages);
 
         //get child content from new message
         RawImage logo_message = null;

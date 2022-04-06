@@ -14,23 +14,8 @@ public class Env_Item : MonoBehaviour
     [SerializeField] private bool randomizeCount;
     public string str_ItemName;
     public string str_ItemDescription;
-
-    [Tooltip("Which faction does this AI belong to?")]
-    public Faction faction;
-    public enum Faction
-    {
-        unassigned,
-        Scientists,
-        Geifers,
-        Annies,
-        Verbannte,
-        Raiders,
-        Military,
-        Verteidiger,
-        Others
-    }
-    [Tooltip("How much is this item worth in the in-game currency?")]
-    public int int_ItemValue;
+    [Tooltip("How much is this item worth at its full durability/remainder?")]
+    public int int_maxItemValue;
     [Tooltip("How much does this item weigh?")]
     public int int_ItemWeight;
     [Tooltip("How many of this item exist in this single item slot. Note: Randomized items or dead items dropped from enemies ignore this value.")]
@@ -95,6 +80,7 @@ public class Env_Item : MonoBehaviour
     [HideInInspector] public bool hasUnderscore;
     [HideInInspector] public bool droppedObject;
     [HideInInspector] public bool toBeDeleted;
+    [HideInInspector] public int int_ItemValue;
     [HideInInspector] public float time;
     [HideInInspector] public GameObject theItem;
     [HideInInspector] public GameObject currentCell;
@@ -228,7 +214,7 @@ public class Env_Item : MonoBehaviour
         isSellingMultipleItems = false;
         UIReuseScript.ClearCountSliderUI();
 
-        UIReuseScript.txt_ItemCount.text = "";
+        UIReuseScript.txt_AmmoCount.text = "";
         UIReuseScript.txt_protected.gameObject.SetActive(false);
         UIReuseScript.txt_notStackable.gameObject.SetActive(false);
         UIReuseScript.txt_tooHeavy.gameObject.SetActive(false);
@@ -266,10 +252,25 @@ public class Env_Item : MonoBehaviour
             UIReuseScript.txt_ItemValue.text = int_ItemValue.ToString() + " (" + int_ItemValue * int_itemCount + ")";
             UIReuseScript.txt_ItemWeight.text = int_ItemWeight.ToString() + " (" + int_ItemWeight * int_itemCount + ")";
         }
+
+        //weapon damage
+        if (gameObject.GetComponent<Item_Melee>() != null)
+        {
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Melee>().int_damage.ToString();
+        }
         //gun ammo count
         if (gameObject.GetComponent<Item_Gun>() != null)
         {
-            UIReuseScript.txt_ItemCount.text = "Ammo: " + gameObject.GetComponent<Item_Gun>().currentClipSize.ToString();
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Gun>().int_damage.ToString();
+            UIReuseScript.txt_AmmoCount.text = "Ammo: " + gameObject.GetComponent<Item_Gun>().currentClipSize.ToString();
+        }
+        if (gameObject.GetComponent<Item_Grenade>() != null
+            && (gameObject.GetComponent<Item_Grenade>().grenadeType
+            == Item_Grenade.GrenadeType.frag
+            || gameObject.GetComponent<Item_Grenade>().grenadeType
+            == Item_Grenade.GrenadeType.plasma))
+        {
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Grenade>().damage.ToString();
         }
 
         if (!isInRepairMenu)
@@ -286,27 +287,28 @@ public class Env_Item : MonoBehaviour
             UIReuseScript.txt_InventoryName.text = "Player inventory";
             UIReuseScript.RebuildPlayerInventory();
 
-            if (gameObject.GetComponent<Item_Gun>() == null
-                && gameObject.GetComponent<Item_Consumable>() == null
-                && gameObject.GetComponent<Item_Ammo>() != null)
+            if (gameObject.GetComponent<Item_Ammo>() != null)
             {
                 UIReuseScript.txt_ItemRemainder.text = "Ammo: " + int_itemCount;
             }
-            else if (gameObject.GetComponent<Item_Consumable>() != null
-                     && gameObject.GetComponent<Item_Gun>() == null)
+            else if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
-                else if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit
-                         || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Food)
+                else if (gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Healthkit
+                         || gameObject.GetComponent<Item_Consumable>().consumableType 
+                         == Item_Consumable.ConsumableType.Food)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
                     UIReuseScript.btn_Consume.gameObject.SetActive(true);
                     if (PlayerHealthScript.health < PlayerHealthScript.maxHealth)
@@ -326,30 +328,18 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
-            else if (gameObject.GetComponent<Item_Melee>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
-            {
-                if (!gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
-                {
-                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
-                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().EquipMeleeWeapon);
-                }
-                else if (gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
-                {
-                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
-                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().UnequipMeleeWeapon);
-                }
-            }
-            else if (gameObject.GetComponent<Item_Gun>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+
+            else if (gameObject.GetComponent<Item_Gun>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                UIReuseScript.txt_ItemDurability.text = "Durability: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
                 if (!gameObject.GetComponent<Item_Gun>().hasEquippedGun)
                 {
@@ -362,8 +352,27 @@ public class Env_Item : MonoBehaviour
                     UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Gun>().UnequipGun);
                 }
             }
-            else if (gameObject.GetComponent<Item_Grenade>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+            else if (gameObject.GetComponent<Item_Melee>() != null)
+            {
+                float durability = gameObject.GetComponent<Item_Melee>().durability;
+                float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
+
+                float finalPercentage = durability / maxDurability * 100;
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+
+                if (!gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+                {
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().EquipMeleeWeapon);
+                }
+                else if (gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+                {
+                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().UnequipMeleeWeapon);
+                }
+            }
+            else if (gameObject.GetComponent<Item_Grenade>() != null)
             {
                 if (!gameObject.GetComponent<Item_Grenade>().hasEquippedGrenade)
                 {
@@ -383,7 +392,6 @@ public class Env_Item : MonoBehaviour
                 UIReuseScript.btn_Destroy.onClick.AddListener(Destroy);
                 UIReuseScript.btn_Drop.gameObject.SetActive(true);
                 UIReuseScript.btn_Drop.onClick.AddListener(Drop);
-
             }
             else if (isProtected)
             {
@@ -401,24 +409,27 @@ public class Env_Item : MonoBehaviour
                 && isInContainer
                 && isTaking)
         {
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+            UIReuseScript.txt_InventoryName.text = 
+                PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+
             UIReuseScript.RebuildContainerInventory();
 
-            UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+            UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(
+                PlayerInventoryScript.CloseContainer);
+
             UIReuseScript.btn_Take.gameObject.SetActive(true);
             UIReuseScript.btn_Take.onClick.AddListener(Take);
 
-            if (gameObject.GetComponent<Item_Gun>() == null
-                && gameObject.GetComponent<Item_Consumable>() == null
-                && gameObject.GetComponent<Item_Ammo>() != null)
+            if (gameObject.GetComponent<Item_Ammo>() != null)
             {
                 UIReuseScript.txt_ItemRemainder.text = "Ammo: " + int_itemCount;
             }
-            else if (gameObject.GetComponent<Item_Consumable>() != null
-                && gameObject.GetComponent<Item_Gun>() == null)
+            else if (gameObject.GetComponent<Item_Consumable>() != null)
             {
-                if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit
-                    || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit)
+                if (gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Repairkit
+                    || gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Healthkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
@@ -433,14 +444,24 @@ public class Env_Item : MonoBehaviour
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
                 UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
-            else if (gameObject.GetComponent<Item_Gun>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+
+            else if (gameObject.GetComponent<Item_Gun>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                UIReuseScript.txt_ItemDurability.text = "Durability: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+            else if (gameObject.GetComponent<Item_Melee>() != null)
+            {
+                float durability = gameObject.GetComponent<Item_Melee>().durability;
+                float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
+
+                float finalPercentage = durability / maxDurability * 100;
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             if (int_ItemWeight > PlayerInventoryScript.invSpace)
@@ -468,23 +489,24 @@ public class Env_Item : MonoBehaviour
             UIReuseScript.txt_InventoryName.text = "Player inventory";
             UIReuseScript.RebuildPlayerInventory();
 
-            UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+            UIReuseScript.btn_TakeFromContainer.onClick.AddListener(
+                PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-            if (gameObject.GetComponent<Item_Gun>() == null
-                && gameObject.GetComponent<Item_Consumable>() == null
-                && gameObject.GetComponent<Item_Ammo>() != null)
+            if (gameObject.GetComponent<Item_Ammo>() != null)
             {
                 UIReuseScript.txt_ItemRemainder.text = "Ammo: " + int_itemCount;
             }
-            else if (gameObject.GetComponent<Item_Consumable>() != null
-                     && gameObject.GetComponent<Item_Gun>() == null)
+            else if (gameObject.GetComponent<Item_Consumable>() != null)
             {
-                if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit
-                    || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit)
+                if (gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Repairkit
+                    || gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Healthkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
             else if (gameObject.GetComponent<Item_Lockpick>() != null
@@ -493,16 +515,26 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
-            else if (gameObject.GetComponent<Item_Gun>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+            else if (gameObject.GetComponent<Item_Gun>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                UIReuseScript.txt_ItemDurability.text = "Durability: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+            else if (gameObject.GetComponent<Item_Melee>() != null)
+            {
+                float durability = gameObject.GetComponent<Item_Melee>().durability;
+                float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
+
+                float finalPercentage = durability / maxDurability * 100;
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             if (!isProtected)
@@ -532,21 +564,19 @@ public class Env_Item : MonoBehaviour
 
             UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-            if (gameObject.GetComponent<Item_Gun>() == null
-                && gameObject.GetComponent<Item_Consumable>() == null
-                && gameObject.GetComponent<Item_Ammo>() != null)
+            if (gameObject.GetComponent<Item_Ammo>() != null)
             {
                 UIReuseScript.txt_ItemRemainder.text = "Ammo: " + int_itemCount;
             }
-            else if (gameObject.GetComponent<Item_Consumable>() != null
-                && gameObject.GetComponent<Item_Gun>() == null)
+            else if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit
                     || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
             else if (gameObject.GetComponent<Item_Lockpick>() != null
@@ -555,17 +585,27 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
-            else if (gameObject.GetComponent<Item_Gun>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+
+            else if (gameObject.GetComponent<Item_Gun>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
                 UIReuseScript.txt_ItemDurability.text = "Durability: "
-                + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+            else if (gameObject.GetComponent<Item_Melee>() != null)
+            {
+                float durability = gameObject.GetComponent<Item_Melee>().durability;
+                float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
+
+                float finalPercentage = durability / maxDurability * 100;
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             if (PlayerInventoryScript.money >= int_ItemValue)
@@ -597,23 +637,24 @@ public class Env_Item : MonoBehaviour
             int_finalPrice = int_quarterPrice * 3;
             UIReuseScript.txt_ItemValue.text = int_finalPrice.ToString();
 
-            UIReuseScript.btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+            UIReuseScript.btn_BuyFromTrader.onClick.AddListener(
+                PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-            if (gameObject.GetComponent<Item_Gun>() == null
-                && gameObject.GetComponent<Item_Consumable>() == null
-                && gameObject.GetComponent<Item_Ammo>() != null)
+            if (gameObject.GetComponent<Item_Ammo>() != null)
             {
                 UIReuseScript.txt_ItemRemainder.text = "Ammo: " + int_itemCount;
             }
-            else if (gameObject.GetComponent<Item_Consumable>() != null
-                     && gameObject.GetComponent<Item_Gun>() == null)
+            else if (gameObject.GetComponent<Item_Consumable>() != null)
             {
-                if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit
-                    || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit)
+                if (gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Repairkit
+                    || gameObject.GetComponent<Item_Consumable>().consumableType 
+                    == Item_Consumable.ConsumableType.Healthkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
             else if (gameObject.GetComponent<Item_Lockpick>() != null
@@ -622,15 +663,23 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
-            else if (gameObject.GetComponent<Item_Gun>() != null
-                     && gameObject.GetComponent<Item_Consumable>() == null)
+
+            else if (gameObject.GetComponent<Item_Gun>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
+            }
+            else if (gameObject.GetComponent<Item_Melee>() != null)
+            {
+                float durability = gameObject.GetComponent<Item_Melee>().durability;
+                float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
                 UIReuseScript.txt_ItemDurability.text = "Durability: "
-                + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
+                    + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
             }
 
             if (!isProtected)
@@ -663,7 +712,8 @@ public class Env_Item : MonoBehaviour
                 float maxRepairPrice = gameObject.GetComponent<Item_Gun>().maxRepairPrice;
                 float priceToRepairOnePercent = Mathf.FloorToInt(maxRepairPrice / 100);
 
-                UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
+                UIReuseScript.txt_InventoryName.text = 
+                    PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
                 if (gameObject.GetComponent<Item_Gun>() != null
                     && gameObject.GetComponent<Item_Gun>().durability
@@ -688,7 +738,8 @@ public class Env_Item : MonoBehaviour
             else if (PlayerInventoryScript.Trader == null
                      && PlayerInventoryScript.Workbench != null)
             {
-                UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+                UIReuseScript.txt_InventoryName.text = 
+                    PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
 
                 if (gameObject.GetComponent<Item_Gun>() != null
                     && gameObject.GetComponent<Item_Gun>().durability
@@ -720,7 +771,8 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                UIReuseScript.txt_ItemDurability.text = "Durability: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
+                    + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             if (!isStackable)
             {
@@ -755,7 +807,8 @@ public class Env_Item : MonoBehaviour
             UIReuseScript.ClearInventoryUI();
             RemoveListeners();
             UIReuseScript.RebuildRepairMenu();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
+            UIReuseScript.txt_InventoryName.text = 
+                PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             UIReuseScript.durability = gameObject.GetComponent<Item_Gun>().maxDurability;
@@ -794,7 +847,8 @@ public class Env_Item : MonoBehaviour
             UIReuseScript.ClearInventoryUI();
             RemoveListeners();
             UIReuseScript.RebuildRepairMenu();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
+            UIReuseScript.txt_InventoryName.text = 
+                PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             UIReuseScript.durability = gameObject.GetComponent<Item_Gun>().durability;
@@ -1225,7 +1279,7 @@ public class Env_Item : MonoBehaviour
             //cannot sell the equipped guns ammo while the gun is reloading
             if (selectedGun != null
                 && gameObject.GetComponent<Item_Ammo>() != null
-                && selectedGun.GetComponent<Item_Gun>().ammoType.ToString() == gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                && selectedGun.GetComponent<Item_Gun>().caseType.ToString() == gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                 && selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 Debug.Log("Error: Can't sell " + gameObject.GetComponent<Env_Item>().str_ItemName + " while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!");
@@ -1233,7 +1287,7 @@ public class Env_Item : MonoBehaviour
             }
             else if (selectedGun == null
                      || gameObject.GetComponent<Item_Ammo>() == null
-                     || selectedGun.GetComponent<Item_Gun>().ammoType.ToString() != gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                     || selectedGun.GetComponent<Item_Gun>().caseType.ToString() != gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                      || !selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 canContinue = true;
@@ -1600,7 +1654,7 @@ public class Env_Item : MonoBehaviour
             //cannot place the equipped guns ammo to container while the gun is reloading
             if (selectedGun != null
                 && gameObject.GetComponent<Item_Ammo>() != null
-                && selectedGun.GetComponent<Item_Gun>().ammoType.ToString() == gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                && selectedGun.GetComponent<Item_Gun>().caseType.ToString() == gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                 && selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 Debug.Log("Error: Can't place " + gameObject.GetComponent<Env_Item>().str_ItemName + " to container while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!");
@@ -1608,7 +1662,7 @@ public class Env_Item : MonoBehaviour
             }
             else if (selectedGun == null
                      || gameObject.GetComponent<Item_Ammo>() == null
-                     || selectedGun.GetComponent<Item_Gun>().ammoType.ToString() != gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                     || selectedGun.GetComponent<Item_Gun>().caseType.ToString() != gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                      || !selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 canContinue = true;
@@ -1789,7 +1843,7 @@ public class Env_Item : MonoBehaviour
             //cannot drop the equipped guns ammo while the gun is reloading
             if (selectedGun != null
                 && gameObject.GetComponent<Item_Ammo>() != null
-                && selectedGun.GetComponent<Item_Gun>().ammoType.ToString() == gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                && selectedGun.GetComponent<Item_Gun>().caseType.ToString() == gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                 && selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 Debug.Log("Error: Can't drop " + gameObject.GetComponent<Env_Item>().str_ItemName + " while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!");
@@ -1797,7 +1851,7 @@ public class Env_Item : MonoBehaviour
             }
             else if (selectedGun == null
                      || gameObject.GetComponent<Item_Ammo>() == null
-                     || selectedGun.GetComponent<Item_Gun>().ammoType.ToString() != gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                     || selectedGun.GetComponent<Item_Gun>().caseType.ToString() != gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                      || !selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 canContinue = true;
@@ -1930,7 +1984,7 @@ public class Env_Item : MonoBehaviour
             //cannot destroy the equipped guns ammo while the gun is reloading
             if (selectedGun != null
                 && gameObject.GetComponent<Item_Ammo>() != null
-                && selectedGun.GetComponent<Item_Gun>().ammoType.ToString() == gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                && selectedGun.GetComponent<Item_Gun>().caseType.ToString() == gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                 && selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 Debug.Log("Error: Can't destroy " + gameObject.GetComponent<Env_Item>().str_ItemName + " while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!");
@@ -1938,7 +1992,7 @@ public class Env_Item : MonoBehaviour
             }
             else if (selectedGun == null
                      || gameObject.GetComponent<Item_Ammo>() == null
-                     || selectedGun.GetComponent<Item_Gun>().ammoType.ToString() != gameObject.GetComponent<Item_Ammo>().ammoType.ToString()
+                     || selectedGun.GetComponent<Item_Gun>().caseType.ToString() != gameObject.GetComponent<Item_Ammo>().caseType.ToString()
                      || !selectedGun.GetComponent<Item_Gun>().isReloading)
             {
                 canContinue = true;
@@ -2158,7 +2212,10 @@ public class Env_Item : MonoBehaviour
                     else if (int_confirmedCount < int_itemCount)
                     {
                         Vector3 playerInvPos = PlayerInventoryScript.par_PlayerItems.transform.position;
-                        GameObject newDuplicate = Instantiate(gameObject, playerInvPos, Quaternion.identity);
+                        GameObject newDuplicate = Instantiate(gameObject, 
+                                                              playerInvPos, 
+                                                              Quaternion.identity, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform);
 
                         PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().inventory.Remove(newDuplicate);
                         PlayerInventoryScript.inventory.Add(newDuplicate);
@@ -2168,7 +2225,6 @@ public class Env_Item : MonoBehaviour
 
                         newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
                         newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
-                        newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
                         newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = true;
                         newDuplicate.GetComponent<Env_Item>().isInTraderShop = false;
 
@@ -2284,7 +2340,11 @@ public class Env_Item : MonoBehaviour
                 else if (int_confirmedCount < int_itemCount)
                 {
                     Vector3 pos_container = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().par_TraderItems.transform.position;
-                    GameObject newDuplicate = Instantiate(gameObject, pos_container, Quaternion.identity);
+                    GameObject newDuplicate = Instantiate(gameObject, 
+                                                         pos_container, 
+                                                         Quaternion.identity,
+                                                         PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().par_TraderItems.transform);
+
                     newDuplicate.transform.position = pos_container;
 
                     PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().inventory.Add(newDuplicate);
@@ -2294,7 +2354,6 @@ public class Env_Item : MonoBehaviour
 
                     newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
                     newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
-                    newDuplicate.transform.SetParent(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().par_TraderItems.transform);
                     newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = false;
                     newDuplicate.GetComponent<Env_Item>().isInTraderShop = true;
 
@@ -2435,7 +2494,11 @@ public class Env_Item : MonoBehaviour
                     }
                     else if (int_confirmedCount < int_itemCount)
                     {
-                        GameObject newDuplicate = Instantiate(gameObject, PlayerInventoryScript.par_PlayerItems.transform.position, Quaternion.identity);
+                        GameObject newDuplicate = Instantiate(gameObject, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform.position, 
+                                                              Quaternion.identity,
+                                                              PlayerInventoryScript.par_PlayerItems.transform);
+
                         theItem = newDuplicate;
 
                         PlayerInventoryScript.inventory.Add(newDuplicate);
@@ -2445,7 +2508,6 @@ public class Env_Item : MonoBehaviour
                         newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
                         newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
                         newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = true;
-                        newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
                         if (ConsoleScript.currentCell != null
                             && ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Contains(theItem))
@@ -2572,7 +2634,10 @@ public class Env_Item : MonoBehaviour
                     else if (int_confirmedCount < int_itemCount)
                     {
                         Vector3 playerInvPos = PlayerInventoryScript.par_PlayerItems.transform.position;
-                        GameObject newDuplicate = Instantiate(gameObject, playerInvPos, Quaternion.identity);
+                        GameObject newDuplicate = Instantiate(gameObject, 
+                                                              playerInvPos, 
+                                                              Quaternion.identity, 
+                                                              PlayerInventoryScript.par_PlayerItems.transform);
 
                         PlayerInventoryScript.Container.GetComponent<Inv_Container>().inventory.Remove(newDuplicate);
                         PlayerInventoryScript.inventory.Add(newDuplicate);
@@ -2582,7 +2647,6 @@ public class Env_Item : MonoBehaviour
 
                         newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
                         newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
-                        newDuplicate.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
                         newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = true;
                         newDuplicate.GetComponent<Env_Item>().isInContainer = false;
 
@@ -2693,7 +2757,11 @@ public class Env_Item : MonoBehaviour
                 else if (int_confirmedCount < int_itemCount)
                 {
                     Vector3 pos_container = PlayerInventoryScript.Container.GetComponent<Inv_Container>().par_ContainerItems.transform.position;
-                    GameObject newDuplicate = Instantiate(gameObject, pos_container, Quaternion.identity);
+                    GameObject newDuplicate = Instantiate(gameObject, 
+                                                          pos_container, 
+                                                          Quaternion.identity, 
+                                                          PlayerInventoryScript.Container.GetComponent<Inv_Container>().par_ContainerItems.transform);
+
                     newDuplicate.transform.position = pos_container;
 
                     PlayerInventoryScript.Container.GetComponent<Inv_Container>().inventory.Add(newDuplicate);
@@ -2703,7 +2771,6 @@ public class Env_Item : MonoBehaviour
 
                     newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
                     newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
-                    newDuplicate.transform.SetParent(PlayerInventoryScript.Container.GetComponent<Inv_Container>().par_ContainerItems.transform);
                     newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = false;
                     newDuplicate.GetComponent<Env_Item>().isInContainer = true;
 
@@ -2778,7 +2845,11 @@ public class Env_Item : MonoBehaviour
 
             else if (int_confirmedCount < int_itemCount)
             {
-                GameObject duplicate = Instantiate(gameObject, pos_HoldItem.position, Quaternion.identity);
+                GameObject duplicate = Instantiate(gameObject, 
+                                                   pos_HoldItem.position, 
+                                                   Quaternion.identity,
+                                                   par_DroppedItems.transform);
+
                 theItem = duplicate;
 
                 PlayerInventoryScript.invSpace += (int_ItemWeight * int_confirmedCount);
@@ -2799,7 +2870,6 @@ public class Env_Item : MonoBehaviour
                 {
                     ConsoleScript.currentCell.GetComponent<Manager_CurrentCell>().items.Add(theItem);
                 }
-                theItem.transform.parent = par_DroppedItems.transform;
 
                 theItem.name = theItem.GetComponent<Env_Item>().str_ItemName;
                 theItem.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
@@ -2910,8 +2980,8 @@ public class Env_Item : MonoBehaviour
             {
                 //fill the currently equipped guns ammo with the correct ammo type
                 if (item.GetComponent<Item_Ammo>() != null
-                    && PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoType.ToString()
-                    == item.GetComponent<Item_Ammo>().ammoType.ToString())
+                    && PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString()
+                    == item.GetComponent<Item_Ammo>().caseType.ToString())
                 {
                     PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoClip = item;
                     PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().AssignAmmoType();
@@ -2926,8 +2996,8 @@ public class Env_Item : MonoBehaviour
         {
             //remove current ammotype from all player inventory guns with same ammo type as this gameobject
             if (gun.GetComponent<Item_Gun>() != null
-                && gun.GetComponent<Item_Gun>().ammoType.ToString()
-                == gameObject.GetComponent<Item_Ammo>().ammoType.ToString())
+                && gun.GetComponent<Item_Gun>().caseType.ToString()
+                == gameObject.GetComponent<Item_Ammo>().caseType.ToString())
             {
                 gun.GetComponent<Item_Gun>().ammoClip = null;
             }
@@ -2953,8 +3023,8 @@ public class Env_Item : MonoBehaviour
             //looks for the same ammo from the players inventory as this gun
             foreach (GameObject item in PlayerInventoryScript.inventory)
             {
-                if (gameObject.GetComponent<Item_Gun>().ammoType.ToString()
-                    == item.GetComponent<Item_Ammo>().ammoType.ToString())
+                if (gameObject.GetComponent<Item_Gun>().caseType.ToString()
+                    == item.GetComponent<Item_Ammo>().caseType.ToString())
                 {
                     correctAmmo = item;
                     break;
@@ -2966,8 +3036,8 @@ public class Env_Item : MonoBehaviour
             {
                 foreach (GameObject item in PlayerInventoryScript.inventory)
                 {
-                    if (gameObject.GetComponent<Item_Gun>().ammoType.ToString()
-                        == item.GetComponent<Item_Ammo>().ammoType.ToString())
+                    if (gameObject.GetComponent<Item_Gun>().caseType.ToString()
+                        == item.GetComponent<Item_Ammo>().caseType.ToString())
                     {
                         item.GetComponent<Env_Item>().int_itemCount += removedAmmo;
                         gameObject.GetComponent<Item_Gun>().currentClipSize = 0;
@@ -2979,7 +3049,10 @@ public class Env_Item : MonoBehaviour
             //if no ammo clip for this gun was found in the players inventory then a new clip is created
             else if (correctAmmo == null)
             {
-                GameObject ammo = Instantiate(ConsoleScript.ammoTemplate, PlayerInventoryScript.transform.position, Quaternion.identity);
+                GameObject ammo = Instantiate(ConsoleScript.ammoTemplate, 
+                                              PlayerInventoryScript.transform.position, 
+                                              Quaternion.identity);
+
                 ammo.GetComponent<Env_Item>().int_itemCount = removedAmmo;
                 ammo.name = ammo.GetComponent<Env_Item>().str_ItemName;
                 PlayerInventoryScript.inventory.Add(ammo);

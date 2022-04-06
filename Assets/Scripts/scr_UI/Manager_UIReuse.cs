@@ -76,7 +76,8 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_ItemValue;
     public TMP_Text txt_ItemDurability;
     public TMP_Text txt_ItemRemainder;
-    public TMP_Text txt_ItemCount;
+    public TMP_Text txt_WeaponDamage;
+    public TMP_Text txt_AmmoCount;
     public TMP_Text txt_protected;
     public TMP_Text txt_notStackable;
     public TMP_Text txt_tooHeavy;
@@ -773,7 +774,8 @@ public class Manager_UIReuse : MonoBehaviour
         txt_ItemDescription.text = "";
         txt_ItemValue.text = "";
         txt_ItemWeight.text = "";
-        txt_ItemCount.text = "";
+        txt_WeaponDamage.text = "";
+        txt_AmmoCount.text = "";
         txt_CountInfo.text = "";
         txt_CountValue.text = "";
         txt_SliderInfo.text = "";

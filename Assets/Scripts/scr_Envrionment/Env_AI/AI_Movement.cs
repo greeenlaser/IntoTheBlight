@@ -93,17 +93,11 @@ public class AI_Movement : MonoBehaviour
                     {
                         if (hit.transform.gameObject == target)
                         {
-                            if (!targetInSight)
-                            {
-                                targetInSight = true;
-                            }
+                            targetInSight = true;
                         }
                         else
                         {
-                            if (targetInSight)
-                            {
-                                targetInSight = false;
-                            }
+                            targetInSight = false;
                         }
                     }
 

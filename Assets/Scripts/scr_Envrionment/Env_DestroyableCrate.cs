@@ -11,11 +11,7 @@ public class Env_DestroyableCrate : MonoBehaviour
     [SerializeField] private GameObject brokenCrate;
     [SerializeField] private Transform par_Cratespawns;
     [SerializeField] private Manager_CurrentCell CurrentCellScript;
-
-    [Header("Spawnables")]
-    [SerializeField] private GameObject repairKit;
-    [SerializeField] private GameObject healthkKit;
-    [SerializeField] private GameObject ammo_9mm;
+    [SerializeField] private Manager_Console ConsoleScript;
 
     //public but hidden variables
     [HideInInspector] public bool isActive;
@@ -46,94 +42,154 @@ public class Env_DestroyableCrate : MonoBehaviour
         brokenCrate.transform.position = completeCrate.transform.position;
         brokenCrate.SetActive(true);
 
-        //   repairkit spawn start
-
-        int randomRepairKitDropChance = Random.Range(0, 4);
-
-        if (thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>() != null)
+        foreach (GameObject item in ConsoleScript.spawnables)
         {
-            float gunDurabilityPercentage
-            = thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().durability
-            / thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().maxDurability
-            * 100;
-            //increases repair kit drop chance if players equipped gun condition is below 25%
-            if (thePlayer.GetComponent<Inv_Player>().equippedGun != null
-                && thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().repairKitTypeRequired.ToString()
-                == repairKit.GetComponent<Item_Consumable>().repairKitType.ToString()
-                && gunDurabilityPercentage < 25)
+            //spawns a consumable item
+            if (item.GetComponent<Item_Consumable>() != null)
             {
-                randomRepairKitDropChance += 2;
-            }
-        }
-        
-        if (randomRepairKitDropChance > 3)
-        {
-            GameObject spawnedRepairKit = Instantiate(repairKit, transform.position, Quaternion.identity, par_Cratespawns);
-            spawnedRepairKit.GetComponent<Env_Item>().itemActivated = true;
-            spawnedRepairKit.GetComponent<Env_Item>().droppedObject = true;
-            spawnedRepairKit.transform.position = completeCrate.transform.position;
-            spawnedRepairKit.SetActive(true);
-            Debug.Log("This destroyed crate spawned " + 1 + " " + repairKit.GetComponent<Item_Consumable>().repairKitType +  " repairkit!");
-        }
-
-        //   healthkit spawn start
-
-        int randomHealthKitDropChance = Random.Range(0, 4);
-        //increases health kit drop chance if players health is below 25
-        if (thePlayer.GetComponent<Player_Health>().health < 25)
-        {
-            randomHealthKitDropChance += 2;
-        }
-        //Debug.Log("final health kit drop chance: " + randomHealthKitDropChance);
-        if (randomHealthKitDropChance > 3)
-        {
-            GameObject spawnedHealthkit = Instantiate(healthkKit, transform.position, Quaternion.identity, par_Cratespawns);
-            spawnedHealthkit.GetComponent<Env_Item>().itemActivated = true;
-            spawnedHealthkit.GetComponent<Env_Item>().droppedObject = true;
-            spawnedHealthkit.transform.position = completeCrate.transform.position;
-            spawnedHealthkit.SetActive(true);
-            Debug.Log("This destroyed crate spawned " + 1 + " medkit!");
-        }
-        Destroy(healthkKit);
-
-        //   ammo spawn start
-
-        int randomAmmoDropChance = Random.Range(0, 5);
-
-        if (thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>() != null)
-        {
-            //increases ammo drop chance if players equipped gun ammo count is below 25
-            if (thePlayer.GetComponent<Inv_Player>().equippedGun != null
-            && thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().ammoType.ToString()
-            == ammo_9mm.name)
-            {
-                foreach (GameObject item in thePlayer.GetComponent<Inv_Player>().inventory)
+                //repairkit spawn
+                if (item.GetComponent<Item_Consumable>().consumableType
+                    == Item_Consumable.ConsumableType.Repairkit)
                 {
-                    if (item.GetComponent<Item_Ammo>() != null
-                        && item.GetComponent<Item_Ammo>().ammoType.ToString()
-                        == ammo_9mm.name
-                        && item.GetComponent<Env_Item>().int_itemCount < 25)
+                    int repairKitDropChance = Random.Range(0, 100);
+
+                    if (thePlayer.GetComponent<Inv_Player>().equippedGun != null)
                     {
-                        randomAmmoDropChance += 2;
-                        break;
+                        GameObject equippedWeapon = thePlayer.GetComponent<Inv_Player>().equippedGun;
+                        float durability = 0;
+                        float maxDurability = 0;
+
+                        if (equippedWeapon.GetComponent<Item_Gun>() != null)
+                        {
+                            durability = equippedWeapon.GetComponent<Item_Gun>().durability;
+                            maxDurability = equippedWeapon.GetComponent<Item_Gun>().maxDurability;
+
+                            if (durability < maxDurability / 10 * 3)
+                            {
+                                repairKitDropChance += 35;
+                            }
+                            else if (durability < maxDurability / 10 * 1)
+                            {
+                                repairKitDropChance = 60;
+                            }
+                        }
+                        else if (equippedWeapon.GetComponent<Item_Melee>() != null)
+                        {
+                            durability = equippedWeapon.GetComponent<Item_Melee>().durability;
+                            maxDurability = equippedWeapon.GetComponent<Item_Melee>().maxDurability;
+
+                            if (durability < maxDurability / 10 * 3)
+                            {
+                                repairKitDropChance += 35;
+                            }
+                            else if (durability < maxDurability / 10 * 1)
+                            {
+                                repairKitDropChance += 60;
+                            }
+                        }
+                    }
+
+                    if (repairKitDropChance > 84)
+                    {
+                        GameObject spawnedRepairKit = Instantiate(item,
+                                                                  completeCrate.transform.position,
+                                                                  Quaternion.identity,
+                                                                  par_Cratespawns);
+
+                        spawnedRepairKit.name = spawnedRepairKit.GetComponent<Env_Item>().str_ItemName;
+                        spawnedRepairKit.GetComponent<Env_Item>().itemActivated = true;
+                        spawnedRepairKit.GetComponent<Env_Item>().droppedObject = true;
+                        spawnedRepairKit.SetActive(true);
+
+                        //Debug.Log("This destroyed crate spawned a " + spawnedRepairKit.name + "!");
+                    }
+                }
+                //healthkit spawn
+                else if (item.GetComponent<Item_Consumable>().consumableType
+                         == Item_Consumable.ConsumableType.Healthkit)
+                {
+                    //healthkit spawn
+                    int healthKitDropChance = Random.Range(0, 100);
+
+                    float playerHealth = thePlayer.GetComponent<Player_Health>().health;
+                    float playerMaxHealth = thePlayer.GetComponent<Player_Health>().maxHealth;
+                    if (playerHealth < playerMaxHealth / 10 * 3)
+                    {
+                        healthKitDropChance += 35;
+                    }
+                    else if (playerHealth < playerMaxHealth / 10 * 1)
+                    {
+                        healthKitDropChance += 60;
+                    }
+
+                    if (healthKitDropChance > 89)
+                    {
+                        GameObject spawnedHealthKit = Instantiate(item,
+                                                      completeCrate.transform.position,
+                                                      Quaternion.identity,
+                                                      par_Cratespawns);
+
+                        spawnedHealthKit.name = spawnedHealthKit.GetComponent<Env_Item>().str_ItemName;
+                        spawnedHealthKit.GetComponent<Env_Item>().itemActivated = true;
+                        spawnedHealthKit.GetComponent<Env_Item>().droppedObject = true;
+                        spawnedHealthKit.SetActive(true);
+
+                        //Debug.Log("This destroyed crate spawned a " + spawnedHealthKit.name + "!");
                     }
                 }
             }
-        }
+            //spawns ammo
+            else if (item.GetComponent<Item_Ammo>() != null)
+            {
+                int ammoDropChance = Random.Range(0, 100);
+                string playerEquippedGunAmmoName = "";
 
-        //Debug.Log("final ammo drop chance: " + randomAmmoDropChance);
-        if (randomAmmoDropChance > 3)
-        {
-            int randomCount = Random.Range(5, 25);
-            GameObject spawnedAmmo = Instantiate(ammo_9mm, transform.position, Quaternion.identity, par_Cratespawns);
-            spawnedAmmo.GetComponent<Env_Item>().itemActivated = true;
-            spawnedAmmo.GetComponent<Env_Item>().droppedObject = true;
-            spawnedAmmo.GetComponent<Env_Item>().int_itemCount = randomCount;
-            spawnedAmmo.transform.position = completeCrate.transform.position;
-            spawnedAmmo.SetActive(true);
-            Debug.Log("This destroyed crate spawned " + randomCount + " 9mm bullets!");
+                if (thePlayer.GetComponent<Inv_Player>().equippedGun != null
+                    && thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>() != null
+                    && thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().ammoClip != null)
+                {
+                    playerEquippedGunAmmoName = thePlayer.GetComponent<Inv_Player>().equippedGun.GetComponent<Item_Gun>().ammoClip.ToString();
+                }
+
+                if (playerEquippedGunAmmoName != ""
+                    && item.name == playerEquippedGunAmmoName)
+                {
+                    foreach (GameObject ammo in thePlayer.GetComponent<Inv_Player>().inventory)
+                    {
+                        if (ammo.GetComponent<Item_Ammo>() != null
+                            && ammo.GetComponent<Item_Ammo>().caseType.ToString()
+                            == playerEquippedGunAmmoName)
+                        {
+                            if (ammo.GetComponent<Env_Item>().int_itemCount < 25)
+                            {
+                                ammoDropChance += 35;
+                            }
+                            else if (ammo.GetComponent<Env_Item>().int_itemCount < 5)
+                            {
+                                ammoDropChance += 60;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (ammoDropChance > 64)
+                {
+                    GameObject spawnedBullet = Instantiate(item,
+                              completeCrate.transform.position,
+                              Quaternion.identity,
+                              par_Cratespawns);
+
+                    spawnedBullet.name = spawnedBullet.GetComponent<Env_Item>().str_ItemName;
+                    spawnedBullet.GetComponent<Env_Item>().itemActivated = true;
+                    spawnedBullet.GetComponent<Env_Item>().droppedObject = true;
+                    spawnedBullet.GetComponent<Env_Item>().int_itemCount = Random.Range(1, 30);
+                    spawnedBullet.SetActive(true);
+
+                    //Debug.Log("This destroyed crate spawned " + spawnedBullet.GetComponent<Env_Item>().int_itemCount + " " + spawnedBullet.name + " bullet(s)!"); 
+                }
+            }
         }
-        Destroy(ammo_9mm);
 
         StartCoroutine(DestroyFragments());
     }

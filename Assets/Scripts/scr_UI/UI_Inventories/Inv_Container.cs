@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class Inv_Container : MonoBehaviour
 {
@@ -10,17 +11,21 @@ public class Inv_Container : MonoBehaviour
     public bool isProtected;
     public bool isLocked;
     public bool needsKey;
+    public bool randomizeAllContent;
     public string str_ContainerName;
 
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;
-    public GameObject discardableDeadNPC;
     public GameObject par_ContainerItems;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private Manager_UIReuse UIReuseScript;
     [SerializeField] private UI_PauseMenu PauseMenuScript;
     [SerializeField] private Env_Lock LockScript;
+    [SerializeField] private Manager_Console ConsoleScript;
     public List<GameObject> inventory = new List<GameObject>();
+
+    [Header("For lootable NPCs")]
+    public GameObject discardableDeadNPC;
 
     //public but hidden variables
     [HideInInspector] public bool containerActivated;
@@ -41,10 +46,23 @@ public class Inv_Container : MonoBehaviour
 
     private void Start()
     {
-        foreach (GameObject item in inventory)
+        if (gameObject.name != str_ContainerName)
         {
-            item.GetComponent<Env_Item>().isInContainer = true;
-            item.GetComponent<Env_Item>().DeactivateItem();
+            gameObject.name = str_ContainerName;
+        }
+
+        if (randomizeAllContent)
+        {
+            RandomizeAllContent();
+        }
+
+        if (inventory.Count > 0)
+        {
+            foreach (GameObject item in inventory)
+            {
+                item.GetComponent<Env_Item>().isInContainer = true;
+                item.GetComponent<Env_Item>().DeactivateItem();
+            }
         }
     }
 
@@ -272,12 +290,112 @@ public class Inv_Container : MonoBehaviour
         }
     }
 
+    //used only for dead AI
     public void DiscardDeadBody()
     {
         PauseMenuScript.isInventoryOpen = false;
         CloseContainerAndPlayerInventory();
         destroySelf = true;
         discardableDeadNPC.transform.position = new Vector3(0, -1000, 0);
+    }
+
+    //used to randomize this containers content
+    public void RandomizeAllContent()
+    {
+        //get total item count
+        int totalItemCount = ConsoleScript.spawnables.Count -1;
+        //get random amount of items we want to spawn
+        int selectedItemCount = Random.Range(1, 10);
+        //create list for selected item indexes
+        List<int> selectedItems = new List<int>();
+        //pick selectedItemCount amount of random item indexes and assign to list
+        for (int i = 0; i < selectedItemCount; i++)
+        {
+            selectedItems.Add(Random.Range(0, totalItemCount));
+        }
+        //look for duplicate indexes and remove them
+        selectedItems = selectedItems.Distinct().ToList();
+
+        //spawn items in container
+        foreach (int i in selectedItems)
+        {
+            if (i <= totalItemCount)
+            {
+                //get item by index
+                GameObject foundItem = null;
+                foreach (GameObject item in ConsoleScript.spawnables)
+                {
+                    if (ConsoleScript.spawnables.IndexOf(item) == i)
+                    {
+                        foundItem = item;
+                        break;
+                    }
+                }
+
+                //spawn item
+                GameObject newDuplicate = Instantiate(foundItem, 
+                                                      transform.position, 
+                                                      Quaternion.identity,
+                                                      par_ContainerItems.transform);
+
+                newDuplicate.name = newDuplicate.GetComponent<Env_Item>().str_ItemName;
+
+                inventory.Add(newDuplicate);
+
+                //item count
+                if (!newDuplicate.GetComponent<Env_Item>().isStackable
+                    || newDuplicate.GetComponent<Item_Consumable>() != null)
+                {
+                    newDuplicate.GetComponent<Env_Item>().int_itemCount = 1;
+                }
+                else
+                {
+                    newDuplicate.GetComponent<Env_Item>().int_itemCount = Random.Range(1, 35);
+                }
+
+                //item durability/remainder
+
+                //if this item is a gun
+                if (newDuplicate.GetComponent<Item_Gun>() != null)
+                {
+                    //gun durability
+                    float gunMaxDurability = newDuplicate.GetComponent<Item_Gun>().maxDurability;
+
+                    newDuplicate.GetComponent<Item_Gun>().durability = Mathf.Round(Random.Range(gunMaxDurability / 20, gunMaxDurability / 10 * 6) * 10) / 10;
+                }
+                //if this item is a melee weapon
+                else if (newDuplicate.GetComponent<Item_Melee>() != null)
+                {
+                    //melee weapon durability
+                    float meleeWeaponMaxDurability = newDuplicate.GetComponent<Item_Melee>().maxDurability;
+
+                    newDuplicate.GetComponent<Item_Melee>().durability = Mathf.Round(Random.Range(meleeWeaponMaxDurability / 20, meleeWeaponMaxDurability / 10 * 6) * 10) / 10;
+                }
+                //if this item is a consumable
+                else if (newDuplicate.GetComponent<Item_Consumable>() != null)
+                {
+                    float consumableMaxRemainder = newDuplicate.GetComponent<Item_Consumable>().maxConsumableAmount;
+
+                    newDuplicate.GetComponent<Item_Consumable>().currentConsumableAmount = Mathf.Round(Random.Range(consumableMaxRemainder / 20, consumableMaxRemainder / 10 * 6) * 10) / 10;
+                }
+
+                newDuplicate.GetComponent<Env_Item>().isInContainer = true;
+
+                newDuplicate.GetComponent<MeshRenderer>().enabled = false;
+                if (newDuplicate.GetComponent<Rigidbody>() != null)
+                {
+                    newDuplicate.GetComponent<Rigidbody>().isKinematic = true;
+                }
+
+                newDuplicate.GetComponent<Env_Item>().DeactivateItem();
+
+                //Debug.Log("Spawned item " + newDuplicate.name + " with count " + newDuplicate.GetComponent<Env_Item>().int_itemCount + " in container " + name + ".");
+            }
+            else
+            {
+                Debug.LogWarning("Error: Index " + i + " for item spawning in container " + name + " is out of range!");
+            }
+        }
     }
 
     private void RebuildInventory()

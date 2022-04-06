@@ -5,7 +5,7 @@ using UnityEngine;
 public class Item_Grenade : MonoBehaviour
 {
     [Header("Assignables")]
-    [SerializeField] private float grenadeDamage;
+    public float damage;
     [SerializeField] private float explosionStrength;
     [Range(0f, 50f)]
     [SerializeField] private float explosionRange;
@@ -294,23 +294,23 @@ public class Item_Grenade : MonoBehaviour
                                 && target.GetComponent<Player_Health>().health > 0
                                 && PlayerHealthScript.canTakeDamage)
                             {
-                                target.GetComponent<Player_Health>().health -= grenadeDamage;
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + grenadeDamage + " damage.");
+                                target.GetComponent<Player_Health>().health -= damage;
+                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                             //if AI was in explosion range
                             else if (target.GetComponent<AI_Health>() != null
                                      && target.GetComponent<AI_Health>().currentHealth > 0)
                             {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(grenadeDamage);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + grenadeDamage + " damage.");
+                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage);
+                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                             //if destroyable crate was in explosion range
                             else if (target.name == "completeCrate"
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
                             {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= grenadeDamage;
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + grenadeDamage + " damage.");
+                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= damage;
+                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                         }
                         //60% grenade damage
@@ -321,23 +321,23 @@ public class Item_Grenade : MonoBehaviour
                                 && target.GetComponent<Player_Health>().health > 0
                                 && PlayerHealthScript.canTakeDamage)
                             {
-                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(grenadeDamage / 3 * 2);
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(grenadeDamage / 3 * 2) + " damage.");
+                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(damage / 3 * 2);
+                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
                             }
                             //if AI was in explosion range
                             else if (target.GetComponent<AI_Health>() != null
                                      && target.GetComponent<AI_Health>().currentHealth > 0)
                             {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(grenadeDamage / 3 * 2);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(grenadeDamage / 3 * 2) + " damage.");
+                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage / 3 * 2);
+                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
                             }
                             //if destroyable crate was in explosion range
                             else if (target.name == "completeCrate"
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
                             {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(grenadeDamage / 3 * 2);
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(grenadeDamage / 3 * 2) + " damage.");
+                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(damage / 3 * 2);
+                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
                             }
                         }
                         //30% grenade damage
@@ -348,23 +348,23 @@ public class Item_Grenade : MonoBehaviour
                                 && target.GetComponent<Player_Health>().health > 0
                                 && PlayerHealthScript.canTakeDamage)
                             {
-                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(grenadeDamage / 3);
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(grenadeDamage / 3) + " damage.");
+                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(damage / 3);
+                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
                             }
                             //if AI was in explosion range
                             else if (target.GetComponent<AI_Health>() != null
                                      && target.GetComponent<AI_Health>().currentHealth > 0)
                             {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(grenadeDamage / 3);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag renade dealt " + Mathf.FloorToInt(grenadeDamage / 3) + " damage.");
+                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage / 3);
+                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag renade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
                             }
                             //if destroyable crate was in explosion range
                             else if (target.name == "completeCrate"
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
                             {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(grenadeDamage / 3);
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(grenadeDamage / 3) + " damage.");
+                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(damage / 3);
+                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
                             }
                         }
                     }
@@ -584,7 +584,11 @@ public class Item_Grenade : MonoBehaviour
 
     private void ThrowGrenade()
     {
-        thrownGrenade = Instantiate(gameObject, pos_GrenadeInstantiate.position, Quaternion.identity, par_ThrownGrenades);
+        thrownGrenade = Instantiate(gameObject, 
+                                    pos_GrenadeInstantiate.position, 
+                                    Quaternion.identity, 
+                                    par_ThrownGrenades);
+
         thrownGrenade.GetComponent<Env_Item>().int_itemCount = 1;
 
         GameManagerScript.thrownGrenades.Add(thrownGrenade);
@@ -686,7 +690,11 @@ public class Item_Grenade : MonoBehaviour
                 targetParent = contact.otherCollider.transform;
                 //Debug.Log("Target parent is " + targetParent.name);
                 //create new empty gameobject to use as guide where to move this grenade if the parent moves
-                GameObject stickyPos = Instantiate(new GameObject("pos_stickyGrenade"), stickyPosition, Quaternion.identity, targetParent);
+                GameObject stickyPos = Instantiate(new GameObject("pos_stickyGrenade"), 
+                                                   stickyPosition, 
+                                                   Quaternion.identity, 
+                                                   targetParent);
+
                 pos_sticky = stickyPos.transform;
                 //stop this grenade from moving any further
                 rb.velocity = new Vector3(0, 0, 0);
