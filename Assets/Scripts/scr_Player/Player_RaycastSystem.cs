@@ -6,9 +6,7 @@ public class Player_RaycastSystem : MonoBehaviour
 {
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private GameManager GameManagerScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public GameObject heldObject;
@@ -49,7 +47,7 @@ public class Player_RaycastSystem : MonoBehaviour
     {
         if (heldObject == null)
         {
-            if (!PauseMenuScript.isGamePaused
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
                 && transform.parent.GetComponent<Player_Health>().isPlayerAlive
                 && !PlayerMovementScript.isStunned)
             {
@@ -73,8 +71,8 @@ public class Player_RaycastSystem : MonoBehaviour
                             //Debug.Log(target.name);
                         }
 
-                        UIReuseScript.txt_HoverItemCount.text = "";
-                        UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                         timer = 0;
                         canInteract = true;
@@ -97,8 +95,8 @@ public class Player_RaycastSystem : MonoBehaviour
                                 deadAIContainer = child.transform.gameObject;
                                 //Debug.Log(deadAIContainer.name);
 
-                                UIReuseScript.txt_HoverItemCount.text = "";
-                                UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                                par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                                par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                                 timer = 0;
                                 canInteract = true;
@@ -117,13 +115,13 @@ public class Player_RaycastSystem : MonoBehaviour
 
                         if (target.GetComponent<Env_Item>().int_itemCount > 1)
                         {
-                            UIReuseScript.txt_HoverItemCount.text = "x" + target.GetComponent<Env_Item>().int_itemCount.ToString();
-                            UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(true);
+                            par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "x" + target.GetComponent<Env_Item>().int_itemCount.ToString();
+                            par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(true);
                         }
                         else
                         {
-                            UIReuseScript.txt_HoverItemCount.text = "";
-                            UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                            par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                            par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
                         }
 
                         //Debug.Log(target.name);
@@ -142,8 +140,8 @@ public class Player_RaycastSystem : MonoBehaviour
                             //Debug.Log(target.name);
                         }
 
-                        UIReuseScript.txt_HoverItemCount.text = "";
-                        UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                         timer = 0;
                         canInteract = true;
@@ -158,8 +156,8 @@ public class Player_RaycastSystem : MonoBehaviour
                             //Debug.Log(target.name);
                         }
 
-                        UIReuseScript.txt_HoverItemCount.text = "";
-                        UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                         timer = 0;
                         canInteract = true;
@@ -174,8 +172,8 @@ public class Player_RaycastSystem : MonoBehaviour
                             //Debug.Log(target.name);
                         }
 
-                        UIReuseScript.txt_HoverItemCount.text = "";
-                        UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                         timer = 0;
                         canInteract = true;
@@ -200,13 +198,29 @@ public class Player_RaycastSystem : MonoBehaviour
                                     //Debug.Log(target.name);
                                 }
 
-                                UIReuseScript.txt_HoverItemCount.text = "";
-                                UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+                                par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                                par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
                                 timer = 0;
                                 canInteract = true;
                             }
                         }
+                    }
+
+                    //if the target is a lift button
+                    else if (hitTarget.transform.GetComponent<Env_LiftButton>() != null)
+                    {
+                        if (target != hitTarget.transform.gameObject)
+                        {
+                            target = hitTarget.transform.gameObject;
+                            //Debug.Log(target.name);
+                        }
+
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
+
+                        timer = 0;
+                        canInteract = true;
                     }
                 }
             }
@@ -231,12 +245,12 @@ public class Player_RaycastSystem : MonoBehaviour
                 canInteract = false;
             }
 
-            if (!UIReuseScript.img_Interact.isActiveAndEnabled)
+            if (!par_Managers.GetComponent<Manager_UIReuse>().img_Interact.isActiveAndEnabled)
             {
-                UIReuseScript.InteractUIEnabled();
+                par_Managers.GetComponent<Manager_UIReuse>().InteractUIEnabled();
             }
 
-            if (!PauseMenuScript.isGamePaused
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
                 && transform.parent.GetComponent<Player_Health>().isPlayerAlive)
             {
                 //interacting with an object
@@ -289,6 +303,11 @@ public class Player_RaycastSystem : MonoBehaviour
                     {
                         target.GetComponent<Env_Door>().CheckIfKeyIsNeeded();
                     }
+                    //hit lift button
+                    else if (target.GetComponent<Env_LiftButton>() != null)
+                    {
+                        target.GetComponent<Env_LiftButton>().GoToTargetFloor();
+                    }
                 }
 
                 //holding an item
@@ -313,12 +332,12 @@ public class Player_RaycastSystem : MonoBehaviour
                 }
             }
         }
-        else if (!canInteract && (timer > 0 || UIReuseScript.img_Interact.isActiveAndEnabled))
+        else if (!canInteract && (timer > 0 || par_Managers.GetComponent<Manager_UIReuse>().img_Interact.isActiveAndEnabled))
         {
-            UIReuseScript.InteractUIDisabled();
+            par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
 
-            UIReuseScript.txt_HoverItemCount.text = "";
-            UIReuseScript.bgr_HoverItemCountBackground.gameObject.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
 
             timer = 0;
         }

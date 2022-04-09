@@ -13,9 +13,7 @@ public class Item_Melee : MonoBehaviour
     [SerializeField] private Player_MeleeRangeTargets MeleeTargetsScript;
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PauseMenu PausemenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool hasEquippedMeleeWeapon;
@@ -33,35 +31,16 @@ public class Item_Melee : MonoBehaviour
 
         durability = maxDurability;
 
-        //update weapon value and damage based off of current durability
-        if (durability < maxDurability / 100 * 75)
-        {
-            //get weapon max value
-            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-            //get weapon current durability percentage from max durability
-            float durabilityPercentage = (durability / maxDurability) * 100;
-            //calculate new weapon value according to weapon durability percentage
-            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
-            //assign weapon value
-            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
-
-            //calculate new weapon damage according to weapon durability percentage
-            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
-            //assign new damage to weapon
-            int_damage = Mathf.FloorToInt(itemDamage);
-        }
-        else
-        {
-            int_damage = int_maxDamage;
-        }
+        LoadValues();
     }
 
     private void Update()
     {
-        if (!ConsoleScript.consoleOpen
-            && !PausemenuScript.isGamePaused
+        if (!par_Managers.GetComponent<Manager_Console>().consoleOpen
+            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
             && PlayerHealthScript.health > 0
-            && hasEquippedMeleeWeapon)
+            && hasEquippedMeleeWeapon
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (Input.GetKeyDown(KeyCode.Mouse0)
                 && !isSwinging)
@@ -114,40 +93,45 @@ public class Item_Melee : MonoBehaviour
         {
             durability -= durabilityReducedPerHit;
 
-            //update weapon value and damage based off of current durability
-            if (durability < maxDurability / 100 * 75)
-            {
-                //get weapon max value
-                int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-                //get weapon current durability percentage from max durability
-                float durabilityPercentage = (durability / maxDurability) * 100;
-                //calculate new weapon value according to weapon durability percentage
-                itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
-                //assign weapon value
-                gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+            LoadValues();
 
-                //calculate new weapon damage according to weapon durability percentage
-                int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
-                //assign new damage to weapon
-                int_damage = itemDamage;
-            }
-            else
-            {
-                int_damage = int_maxDamage;
-            }
-
-            UIReuseScript.durability = durability;
-            UIReuseScript.maxDurability = maxDurability;
-            UIReuseScript.UpdateWeaponQuality();
+            par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+            par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
 
             hitSomething = false;
         }
     }
 
+    public void LoadValues()
+    {
+        //update weapon value and damage based off of current durability
+        if (durability < maxDurability / 100 * 75)
+        {
+            //get weapon max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get weapon current durability percentage from max durability
+            float durabilityPercentage = (durability / maxDurability) * 100;
+            //calculate new weapon value according to weapon durability percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+            //assign weapon value
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+            //calculate new weapon damage according to weapon durability percentage
+            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            //assign new damage to weapon
+            int_damage = Mathf.FloorToInt(itemDamage);
+        }
+        else
+        {
+            int_damage = int_maxDamage;
+        }
+    }
+
     public void EquipMeleeWeapon()
     {
-        UIReuseScript.ClearGrenadeUI();
-        UIReuseScript.ClearWeaponUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
         //unequips previously equipped melee weapon if there is any
         foreach (GameObject meleeWeapon in PlayerInventoryScript.inventory)
@@ -183,10 +167,10 @@ public class Item_Melee : MonoBehaviour
         hasEquippedMeleeWeapon = true;
 
         gameObject.GetComponent<Env_Item>().RemoveListeners();
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.ClearInventoryUI();
-        UIReuseScript.RebuildPlayerInventory();
-        UIReuseScript.txt_InventoryName.text = "Player inventory";
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         PlayerInventoryScript.equippedGun = gameObject;
 
@@ -197,9 +181,9 @@ public class Item_Melee : MonoBehaviour
         gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
         gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
 
-        UIReuseScript.durability = durability;
-        UIReuseScript.maxDurability = maxDurability;
-        UIReuseScript.UpdateWeaponQuality();
+        par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
 
         //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
     }
@@ -213,13 +197,13 @@ public class Item_Melee : MonoBehaviour
             rb.interpolation = RigidbodyInterpolation.Interpolate;
 
             gameObject.GetComponent<Env_Item>().RemoveListeners();
-            UIReuseScript.ClearAllInventories();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildPlayerInventory();
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             PlayerInventoryScript.equippedGun = null;
-            UIReuseScript.ClearWeaponUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
             gameObject.SetActive(false);
             gameObject.GetComponent<MeshRenderer>().enabled = false;

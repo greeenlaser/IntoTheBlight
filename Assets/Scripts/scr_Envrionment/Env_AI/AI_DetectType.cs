@@ -12,7 +12,7 @@ public class AI_DetectType : MonoBehaviour
     [SerializeField] private Transform target;
     [SerializeField] private AI_Combat AICombatScript;
     [SerializeField] private AI_Health AIHealthScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //private variables
     private bool finishedWaiting;
@@ -52,7 +52,7 @@ public class AI_DetectType : MonoBehaviour
         if (finishedWaiting && AIHealthScript.isAlive && AIHealthScript.canBeHostile)
         {
             if (other.CompareTag("Player")
-                && ConsoleScript.toggleAIDetection
+                && par_Managers.GetComponent<Manager_Console>().toggleAIDetection
                 && other.GetComponent<Player_Health>().health > 0
                 && !AICombatScript.collidingObjects.Contains(other.gameObject))
             {

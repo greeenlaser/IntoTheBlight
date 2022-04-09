@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 public class UI_MainMenu : MonoBehaviour
 {
@@ -9,8 +11,9 @@ public class UI_MainMenu : MonoBehaviour
     [SerializeField] private GameObject par_MainMenuContent;
     [SerializeField] private GameObject par_KeyCommands;
     [SerializeField] private GameObject par_TeamMembers;
+    [SerializeField] private GameObject par_Managers;
 
-    private void Start()
+    private void Awake()
     {
         ReturnToMainMenu();
     }

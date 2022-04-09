@@ -9,7 +9,7 @@ public class UI_RadioStation : MonoBehaviour
     [Range(89.0f, 107.0f)]
     public float radioFrequency;
     public AudioSource RadioSource;
-    [SerializeField] private UI_RadioManager RadioManagerScript;
+    [SerializeField] private GameObject par_Managers;
     [SerializeField] private List<AudioClip> songs = new List<AudioClip>();
 
     //public but hidden variables
@@ -17,8 +17,8 @@ public class UI_RadioStation : MonoBehaviour
 
     private void Start()
     {
-        RadioManagerScript.radioStationNames.Add(radioName);
-        RadioManagerScript.radioStationFrequencies.Add(radioFrequency);
+        par_Managers.GetComponent<UI_RadioManager>().radioStationNames.Add(radioName);
+        par_Managers.GetComponent<UI_RadioManager>().radioStationFrequencies.Add(radioFrequency);
 
         RadioSource.volume = 0;
     }
@@ -44,7 +44,7 @@ public class UI_RadioStation : MonoBehaviour
         isPlaying = true;
 
         //all other radiostations are silenced
-        foreach (GameObject radio in RadioManagerScript.radioStations)
+        foreach (GameObject radio in par_Managers.GetComponent<UI_RadioManager>().radioStations)
         {
             if (radio != gameObject)
             {
@@ -53,40 +53,40 @@ public class UI_RadioStation : MonoBehaviour
         }
 
         //outer frequency range
-        if ((RadioManagerScript.currentRadioFrequency >= radioFrequency - 0.9f
-            && RadioManagerScript.currentRadioFrequency < radioFrequency - 0.6f)
-            || (RadioManagerScript.currentRadioFrequency >= radioFrequency + 0.6f
-            && RadioManagerScript.currentRadioFrequency < radioFrequency + 0.9f))
+        if ((par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency >= radioFrequency - 0.9f
+            && par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency < radioFrequency - 0.6f)
+            || (par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency >= radioFrequency + 0.6f
+            && par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency < radioFrequency + 0.9f))
         {
-            RadioManagerScript.txt_radioConnection.text = "Connection: Poor";
-            RadioManagerScript.txt_radioConnection.color = new Color32(255, 0, 0, 255);
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.text = "Connection: Poor";
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.color = new Color32(255, 0, 0, 255);
 
             RadioSource.volume = 0.3f;
-            RadioManagerScript.staticAudio.volume = 0.6f;
+            par_Managers.GetComponent<UI_RadioManager>().staticAudio.volume = 0.6f;
         }
 
         //middle frequency range
-        else if ((RadioManagerScript.currentRadioFrequency >= radioFrequency - 0.6f
-                 && RadioManagerScript.currentRadioFrequency < radioFrequency - 0.3f)
-                 || (RadioManagerScript.currentRadioFrequency >= radioFrequency + 0.3f 
-                 && RadioManagerScript.currentRadioFrequency < radioFrequency + 0.6f))
+        else if ((par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency >= radioFrequency - 0.6f
+                 && par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency < radioFrequency - 0.3f)
+                 || (par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency >= radioFrequency + 0.3f 
+                 && par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency < radioFrequency + 0.6f))
         {
-            RadioManagerScript.txt_radioConnection.text = "Connection: Average";
-            RadioManagerScript.txt_radioConnection.color = new Color32(255, 215, 0, 255);
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.text = "Connection: Average";
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.color = new Color32(255, 215, 0, 255);
 
             RadioSource.volume = 0.6f;
-            RadioManagerScript.staticAudio.volume = 0.3f;
+            par_Managers.GetComponent<UI_RadioManager>().staticAudio.volume = 0.3f;
         }
 
         //inner frequency range
-        else if (RadioManagerScript.currentRadioFrequency >= radioFrequency - 0.3f
-                 && RadioManagerScript.currentRadioFrequency < radioFrequency + 0.3f)
+        else if (par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency >= radioFrequency - 0.3f
+                 && par_Managers.GetComponent<UI_RadioManager>().currentRadioFrequency < radioFrequency + 0.3f)
         {
-            RadioManagerScript.txt_radioConnection.text = "Connection: Excellent";
-            RadioManagerScript.txt_radioConnection.color = new Color32(0, 255, 0, 255);
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.text = "Connection: Excellent";
+            par_Managers.GetComponent<UI_RadioManager>().txt_radioConnection.color = new Color32(0, 255, 0, 255);
 
             RadioSource.volume = 1f;
-            RadioManagerScript.staticAudio.volume = 0f;
+            par_Managers.GetComponent<UI_RadioManager>().staticAudio.volume = 0f;
         }
     }
 }

@@ -11,7 +11,7 @@ public class Env_DestroyableCrate : MonoBehaviour
     [SerializeField] private GameObject brokenCrate;
     [SerializeField] private Transform par_Cratespawns;
     [SerializeField] private Manager_CurrentCell CurrentCellScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isActive;
@@ -42,7 +42,7 @@ public class Env_DestroyableCrate : MonoBehaviour
         brokenCrate.transform.position = completeCrate.transform.position;
         brokenCrate.SetActive(true);
 
-        foreach (GameObject item in ConsoleScript.spawnables)
+        foreach (GameObject item in par_Managers.GetComponent<Manager_Console>().spawnables)
         {
             //spawns a consumable item
             if (item.GetComponent<Item_Consumable>() != null)
@@ -89,7 +89,7 @@ public class Env_DestroyableCrate : MonoBehaviour
                         }
                     }
 
-                    if (repairKitDropChance > 84)
+                    if (repairKitDropChance > 89)
                     {
                         GameObject spawnedRepairKit = Instantiate(item,
                                                                   completeCrate.transform.position,
@@ -100,6 +100,12 @@ public class Env_DestroyableCrate : MonoBehaviour
                         spawnedRepairKit.GetComponent<Env_Item>().itemActivated = true;
                         spawnedRepairKit.GetComponent<Env_Item>().droppedObject = true;
                         spawnedRepairKit.SetActive(true);
+
+                        float consumableMaxRemainder = spawnedRepairKit.GetComponent<Item_Consumable>().maxConsumableAmount;
+
+                        spawnedRepairKit.GetComponent<Item_Consumable>().currentConsumableAmount =
+                            Mathf.Round(Random.Range(consumableMaxRemainder / 20, consumableMaxRemainder / 10 * 6) * 10) / 10;
+                        spawnedRepairKit.GetComponent<Item_Consumable>().LoadValues();
 
                         //Debug.Log("This destroyed crate spawned a " + spawnedRepairKit.name + "!");
                     }
@@ -133,6 +139,12 @@ public class Env_DestroyableCrate : MonoBehaviour
                         spawnedHealthKit.GetComponent<Env_Item>().itemActivated = true;
                         spawnedHealthKit.GetComponent<Env_Item>().droppedObject = true;
                         spawnedHealthKit.SetActive(true);
+
+                        float consumableMaxRemainder = spawnedHealthKit.GetComponent<Item_Consumable>().maxConsumableAmount;
+
+                        spawnedHealthKit.GetComponent<Item_Consumable>().currentConsumableAmount =
+                            Mathf.Round(Random.Range(consumableMaxRemainder / 20, consumableMaxRemainder / 10 * 6) * 10) / 10;
+                        spawnedHealthKit.GetComponent<Item_Consumable>().LoadValues();
 
                         //Debug.Log("This destroyed crate spawned a " + spawnedHealthKit.name + "!");
                     }
@@ -173,7 +185,7 @@ public class Env_DestroyableCrate : MonoBehaviour
                     }
                 }
 
-                if (ammoDropChance > 64)
+                if (ammoDropChance > 89)
                 {
                     GameObject spawnedBullet = Instantiate(item,
                               completeCrate.transform.position,

@@ -27,7 +27,7 @@ public class UI_AbilityStatus : MonoBehaviour
         envProtection
     }
     [SerializeField] private Player_Exoskeleton ExoskeletonScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isUnlocked;
@@ -192,7 +192,7 @@ public class UI_AbilityStatus : MonoBehaviour
                 if (requirementsMet)
                 {
                     ExoskeletonScript.UpgradeAbility_jumpBoost_Tier3();
-                    UIReuseScript.btn_JumpBoost.interactable = false;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_JumpBoost.interactable = false;
 
                     //Debug.Log("Upgraded " + ability.ToString() + " to tier 3!");
                     isTier3 = true;
@@ -220,7 +220,7 @@ public class UI_AbilityStatus : MonoBehaviour
                 if (requirementsMet)
                 {
                     ExoskeletonScript.UpgradeAbility_sprintBoost_Tier3();
-                    UIReuseScript.btn_SprintBoost.interactable = false;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_SprintBoost.interactable = false;
 
                     //Debug.Log("Upgraded " + ability.ToString() + " to tier 3!");
                     isTier3 = true;
@@ -248,7 +248,7 @@ public class UI_AbilityStatus : MonoBehaviour
                 if (requirementsMet)
                 {
                     ExoskeletonScript.UpgradeAbility_healthRegen_Tier3();
-                    UIReuseScript.btn_HealthRegen.interactable = false;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_HealthRegen.interactable = false;
 
                     //Debug.Log("Upgraded " + ability.ToString() + " to tier 3!");
                     isTier3 = true;
@@ -276,7 +276,7 @@ public class UI_AbilityStatus : MonoBehaviour
                 if (requirementsMet)
                 {
                     ExoskeletonScript.UpgradeAbility_staminaRegen_Tier3();
-                    UIReuseScript.btn_StaminaRegen.interactable = false;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_StaminaRegen.interactable = false;
 
                     //Debug.Log("Upgraded " + ability.ToString() + " to tier 3!");
                     isTier3 = true;
@@ -304,7 +304,7 @@ public class UI_AbilityStatus : MonoBehaviour
                 if (requirementsMet)
                 {
                     ExoskeletonScript.UpgradeAbility_envProtection_Tier3();
-                    UIReuseScript.btn_EnvProtection.interactable = false;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_EnvProtection.interactable = false;
 
                     //Debug.Log("Upgraded " + ability.ToString() + " to tier 3!");
                     isTier3 = true;

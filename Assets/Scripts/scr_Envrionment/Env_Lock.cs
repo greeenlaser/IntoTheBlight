@@ -14,10 +14,7 @@ public class Env_Lock : MonoBehaviour
         container
     }
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     [Header("For doors")]
     [SerializeField] private Env_Door DoorScript;
@@ -86,7 +83,7 @@ public class Env_Lock : MonoBehaviour
                         foundLockpick = true;
                         lockpick = item;
                         item.GetComponent<Item_Lockpick>().LockScript = gameObject.GetComponent<Env_Lock>();
-                        UIReuseScript.txt_RemainingLockpicks.text = lockpick.GetComponent<Env_Item>().int_itemCount.ToString();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_RemainingLockpicks.text = lockpick.GetComponent<Env_Item>().int_itemCount.ToString();
                         break;
                     }
                 }
@@ -96,9 +93,9 @@ public class Env_Lock : MonoBehaviour
                     if (target == Target.door)
                     {
                         //reset lock rotation
-                        UIReuseScript.lockpick_Body.transform.eulerAngles
-                        = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                                      UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                        par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                        = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                      par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                                       0);
 
                         //close lock UI because player cant rotate lock without lockpicks
@@ -114,13 +111,13 @@ public class Env_Lock : MonoBehaviour
                     && lockZRot < 180)
                 {
                     //get current lock z rotation
-                    lockZRot = UIReuseScript.lockpick_Body.transform.eulerAngles.z;
+                    lockZRot = par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.z;
                     //rotate lock z rotation to left
                     lockZRot += 1.5f;
                     //assign new rotation to lock rotation
-                    UIReuseScript.lockpick_Body.transform.eulerAngles
-                    = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                                  UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                    par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                    = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                  par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                                   lockZRot);
 
                     //lockpick durability degrades over time
@@ -140,17 +137,17 @@ public class Env_Lock : MonoBehaviour
                 }
                 //rotate lock right
                 else if (Input.GetKey(KeyCode.D) && !Input.GetKey(KeyCode.A)
-                         && UIReuseScript.lockpick_Body.GetComponent<RectTransform>().rotation.z > -0.02f
-                         && UIReuseScript.lockpick_Body.GetComponent<RectTransform>().rotation.z < 0.9998f)
+                         && par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.GetComponent<RectTransform>().rotation.z > -0.02f
+                         && par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.GetComponent<RectTransform>().rotation.z < 0.9998f)
                 {
                     //get current lock z rotation
-                    lockZRot = UIReuseScript.lockpick_Body.transform.eulerAngles.z;
+                    lockZRot = par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.z;
                     //rotate lock z rotation to right
                     lockZRot -= 1.5f;
                     //assign new rotation to lock rotation
-                    UIReuseScript.lockpick_Body.transform.eulerAngles
-                    = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                                  UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                    par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                    = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                  par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                                   lockZRot);
 
                     //lockpick durability degrades over time
@@ -177,22 +174,22 @@ public class Env_Lock : MonoBehaviour
                     }
 
                     //get current lock z rotation
-                    lockZRot = UIReuseScript.lockpick_Body.transform.eulerAngles.z;
+                    lockZRot = par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.z;
                     //rotates left
                     if (lockZRot >= 180.1f)
                     {
                         lockZRot += 10;
-                        UIReuseScript.lockpick_Body.transform.eulerAngles
-                        = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                                      UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                        par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                        = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                      par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                                       lockZRot);
                         //fixes rotation to 0
                         if (lockZRot > 359.9f)
                         {
                             lockZRot = 0;
-                            UIReuseScript.lockpick_Body.transform.eulerAngles
-                            = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                            UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                            par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                            = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                            par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                             0);
                         }
                     }
@@ -200,17 +197,17 @@ public class Env_Lock : MonoBehaviour
                     else if (lockZRot < 180.1f)
                     {
                         lockZRot -= 10;
-                        UIReuseScript.lockpick_Body.transform.eulerAngles
-                        = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                                      UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                        par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                        = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                      par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                                       lockZRot);
                         //fixes rotation to 0
                         if (lockZRot <= 0.1f)
                         {
                             lockZRot = 0;
-                            UIReuseScript.lockpick_Body.transform.eulerAngles
-                            = new Vector3(UIReuseScript.lockpick_Body.transform.eulerAngles.x,
-                            UIReuseScript.lockpick_Body.transform.eulerAngles.y,
+                            par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+                            = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                            par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                             0);
                         }
                     }
@@ -238,43 +235,43 @@ public class Env_Lock : MonoBehaviour
     }
     public void OpenLockUI()
     {
-        PauseMenuScript.PauseGameAndCloseUIAndResetBools();
-        PauseMenuScript.canPauseGame = false;
-        PlayerMenuScript.lockpickUI = gameObject;
-        ConsoleScript.lockpickUI = gameObject;
+        par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
+        par_Managers.GetComponent<UI_PauseMenu>().canPauseGame = false;
+        par_Managers.GetComponent<UI_PlayerMenu>().lockpickUI = gameObject;
+        par_Managers.GetComponent<Manager_Console>().lockpickUI = gameObject;
 
-        UIReuseScript.par_Lock.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Lock.SetActive(true);
 
         if (lockpickingDifficulty == 1)
         {
-            UIReuseScript.txt_LockDifficulty.text = "easy";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_LockDifficulty.text = "easy";
         }
         else if (lockpickingDifficulty == 2)
         {
-            UIReuseScript.txt_LockDifficulty.text = "moderate";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_LockDifficulty.text = "moderate";
         }
         else if (lockpickingDifficulty == 1)
         {
-            UIReuseScript.txt_LockDifficulty.text = "hard";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_LockDifficulty.text = "hard";
         }
 
         if (target == Target.door)
         {
-            UIReuseScript.txt_LockStatus.text = "Picking door lock";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_LockStatus.text = "Picking door lock";
         }
         else if (target == Target.container)
         {
-            UIReuseScript.txt_LockStatus.text = "Picking container lock";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_LockStatus.text = "Picking container lock";
         }
-        UIReuseScript.btn_CancelLockpicking.onClick.AddListener(CloseLockUI);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CancelLockpicking.onClick.AddListener(CloseLockUI);
 
         isPickingLock = true;
     }
     public void CloseLockUI()
     {
-        UIReuseScript.btn_CancelLockpicking.onClick.RemoveAllListeners();
-        UIReuseScript.txt_LockStatus.text = "";
-        UIReuseScript.par_Lock.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CancelLockpicking.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_LockStatus.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().par_Lock.SetActive(false);
 
         if (timer > 0)
         {
@@ -288,11 +285,11 @@ public class Env_Lock : MonoBehaviour
         lockpick = null;
         isPickingLock = false;
 
-        PauseMenuScript.callPMCloseOnce = false;
-        PauseMenuScript.UnpauseGame();
-        PauseMenuScript.canPauseGame = true;
-        PlayerMenuScript.lockpickUI = null;
-        ConsoleScript.lockpickUI = null;
+        par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = false;
+        par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
+        par_Managers.GetComponent<UI_PauseMenu>().canPauseGame = true;
+        par_Managers.GetComponent<UI_PlayerMenu>().lockpickUI = null;
+        par_Managers.GetComponent<Manager_Console>().lockpickUI = null;
     }
 
     //assigns a new correct rotation until current rotation min and max value is 5 units over correct rotation

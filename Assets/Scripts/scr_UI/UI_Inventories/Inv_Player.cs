@@ -13,10 +13,7 @@ public class Inv_Player : MonoBehaviour
     [Header("Assignables")]
     public GameObject par_PlayerItems;
     public Transform pos_EquippedItem;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
+    [SerializeField] private GameObject par_Managers;
     public List<GameObject> inventory = new List<GameObject>();
 
     //public but hidden variables
@@ -56,14 +53,14 @@ public class Inv_Player : MonoBehaviour
             int itemWeight = item.GetComponent<Env_Item>().int_ItemWeight;
             invSpace -= itemWeight;
             item.GetComponent<Env_Item>().isInPlayerInventory = true;
-            ConsoleScript.playeritemnames.Add(item.GetComponent<Env_Item>().str_ItemName);
+            par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(item.GetComponent<Env_Item>().str_ItemName);
             item.GetComponent<Env_Item>().DeactivateItem();
         }
     }
 
     public void UpdatePlayerInventoryStats()
     {
-        UIReuseScript.txt_PlayerMoney.text = money.ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_PlayerMoney.text = money.ToString();
 
         int takenSpace = 0;
 
@@ -80,7 +77,7 @@ public class Inv_Player : MonoBehaviour
                 takenSpace += item.GetComponent<Env_Item>().int_ItemWeight * item.GetComponent<Env_Item>().int_itemCount;
             }
         }
-        UIReuseScript.txt_PlayerInventorySpace.text = takenSpace + " / " + maxInvSpace;
+        par_Managers.GetComponent<Manager_UIReuse>().txt_PlayerInventorySpace.text = takenSpace + " / " + maxInvSpace;
     }
 
     public void CloseContainer()
@@ -89,11 +86,11 @@ public class Inv_Player : MonoBehaviour
         {
             Container.GetComponent<Inv_Container>().CloseInventory();
 
-            UIReuseScript.btn_PlaceIntoContainer.interactable = false;
-            UIReuseScript.btn_PlaceIntoContainer.onClick.RemoveAllListeners();
-            UIReuseScript.btn_TakeFromContainer.interactable = true;
-            UIReuseScript.btn_TakeFromContainer.onClick.RemoveAllListeners();
-            UIReuseScript.btn_TakeFromContainer.onClick.AddListener(Container.GetComponent<Inv_Container>().CheckIfLocked);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(Container.GetComponent<Inv_Container>().CheckIfLocked);
         }
 
         isPlayerInventoryOpenWithContainerOrTrader = true;
@@ -110,11 +107,11 @@ public class Inv_Player : MonoBehaviour
 
             Trader.GetComponent<UI_ShopContent>().CloseShopUI();
 
-            UIReuseScript.btn_SellToTrader.interactable = false;
-            UIReuseScript.btn_SellToTrader.onClick.RemoveAllListeners();
-            UIReuseScript.btn_BuyFromTrader.interactable = true;
-            UIReuseScript.btn_BuyFromTrader.onClick.RemoveAllListeners();
-            UIReuseScript.btn_BuyFromTrader.onClick.AddListener(Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(Trader.GetComponent<UI_ShopContent>().OpenShopUI);
         }
 
         OpenInventory();
@@ -133,9 +130,9 @@ public class Inv_Player : MonoBehaviour
     {
         if (!hasOpenedInventoryOnce && !closedInventoryThroughContainer)
         {
-            UIReuseScript.par_Inventory.SetActive(true);
-            UIReuseScript.par_Stats.SetActive(true);
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             UpdatePlayerInventoryStats();
 
             showingAllItems = true;
@@ -146,25 +143,25 @@ public class Inv_Player : MonoBehaviour
             showingAllGear = false;
             showingAllMisc = false;
 
-            UIReuseScript.btn_ShowAll.interactable = false;
-            UIReuseScript.btn_ShowWeapons.interactable = true;
-            UIReuseScript.btn_ShowArmor.interactable = true;
-            UIReuseScript.btn_ShowConsumables.interactable = true;
-            UIReuseScript.btn_ShowAmmo.interactable = true;
-            UIReuseScript.btn_ShowGear.interactable = true;
-            UIReuseScript.btn_ShowMisc.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
             RebuildInventory();
 
-            UIReuseScript.EnableInventorySortButtons();
+            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
 
-            UIReuseScript.btn_ShowAll.onClick.AddListener(ShowAll);
-            UIReuseScript.btn_ShowWeapons.onClick.AddListener(ShowWeapons);
-            UIReuseScript.btn_ShowArmor.onClick.AddListener(ShowArmor);
-            UIReuseScript.btn_ShowConsumables.onClick.AddListener(ShowConsumables);
-            UIReuseScript.btn_ShowAmmo.onClick.AddListener(ShowAmmo);
-            UIReuseScript.btn_ShowGear.onClick.AddListener(ShowGear);
-            UIReuseScript.btn_ShowMisc.onClick.AddListener(ShowMisc);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.onClick.AddListener(ShowAll);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.onClick.AddListener(ShowWeapons);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.onClick.AddListener(ShowArmor);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.onClick.AddListener(ShowConsumables);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.onClick.AddListener(ShowAmmo);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.onClick.AddListener(ShowGear);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.onClick.AddListener(ShowMisc);
 
             foreach (GameObject item in inventory)
             {
@@ -184,15 +181,15 @@ public class Inv_Player : MonoBehaviour
             if (!isPlayerInventoryOpen
                 && canOpenPlayerInventory
                 && !closedInventoryThroughContainer
-                && !PauseMenuScript.isUIOpen)
+                && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen)
             {
-                PauseMenuScript.isInventoryOpen = true;
+                par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = true;
             }
 
-            PauseMenuScript.PauseGameAndCloseUIAndResetBools();
+            par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
             if (!isPlayerAndContainerOpen && !isPlayerAndTraderOpen && !isPlayerAndRepairOpen)
             {
-                PlayerMenuScript.OpenPlayerMenuUI();
+                par_Managers.GetComponent<UI_PlayerMenu>().OpenPlayerMenuUI();
                 isPlayerInventoryOpen = true;
             }
             //Debug.Log("Player inventory is open!");
@@ -211,33 +208,33 @@ public class Inv_Player : MonoBehaviour
             showingAllGear = false;
             showingAllMisc = false;
 
-            UIReuseScript.btn_ShowAll.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowWeapons.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowArmor.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowConsumables.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowAmmo.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowGear.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ShowMisc.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.onClick.RemoveAllListeners();
 
-            UIReuseScript.par_Inventory.SetActive(false);
-            UIReuseScript.par_Stats.SetActive(false);
-            UIReuseScript.ClearAllInventories();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
 
-            if (!PauseMenuScript.isTalkingToAI && !PlayerMenuScript.isPlayerMenuOpen)
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI && !par_Managers.GetComponent<UI_PlayerMenu>().isPlayerMenuOpen)
             {
-                PauseMenuScript.callPMCloseOnce = false;
-                PauseMenuScript.UnpauseGame();
+                par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = false;
+                par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
             }
-            else if (PauseMenuScript.isTalkingToAI)
+            else if (par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI)
             {
-                PauseMenuScript.callPMCloseOnce = false;
-                PauseMenuScript.CloseUI();
+                par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = false;
+                par_Managers.GetComponent<UI_PauseMenu>().CloseUI();
             }
 
             isPlayerInventoryOpen = false;
-            UIReuseScript.ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
             if (closedInventoryThroughContainer)
             {
                 isPlayerAndContainerOpen = false;
@@ -265,8 +262,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -311,8 +308,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowAll()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = true;
         showingAllWeapons = false;
         showingAllArmor = false;
@@ -321,13 +318,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = false;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         RebuildInventory();
@@ -335,8 +332,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowWeapons()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = true;
         showingAllArmor = false;
@@ -345,13 +342,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = false;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -369,8 +366,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -416,8 +413,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowArmor()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = false;
         showingAllArmor = true;
@@ -426,13 +423,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = false;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -448,8 +445,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -495,8 +492,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowConsumables()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = false;
         showingAllArmor = false;
@@ -505,13 +502,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = false;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -526,8 +523,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -573,8 +570,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowAmmo()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = false;
         showingAllArmor = false;
@@ -583,13 +580,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = false;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -604,8 +601,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -651,8 +648,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowGear()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = false;
         showingAllArmor = false;
@@ -661,13 +658,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = true;
         showingAllMisc = false;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = false;
-        UIReuseScript.btn_ShowMisc.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -683,8 +680,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {
@@ -730,8 +727,8 @@ public class Inv_Player : MonoBehaviour
     }
     public void ShowMisc()
     {
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.EnableInventorySortButtons();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
         showingAllItems = false;
         showingAllWeapons = false;
         showingAllArmor = false;
@@ -740,13 +737,13 @@ public class Inv_Player : MonoBehaviour
         showingAllGear = false;
         showingAllMisc = true;
 
-        UIReuseScript.btn_ShowAll.interactable = true;
-        UIReuseScript.btn_ShowWeapons.interactable = true;
-        UIReuseScript.btn_ShowArmor.interactable = true;
-        UIReuseScript.btn_ShowConsumables.interactable = true;
-        UIReuseScript.btn_ShowAmmo.interactable = true;
-        UIReuseScript.btn_ShowGear.interactable = true;
-        UIReuseScript.btn_ShowMisc.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = false;
 
         UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -768,8 +765,8 @@ public class Inv_Player : MonoBehaviour
                 }
                 else
                 {
-                    Button btn_New = Instantiate(UIReuseScript.btn_Template);
-                    btn_New.transform.SetParent(UIReuseScript.par_Panel.transform, false);
+                    Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                    btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
                     for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
                     {

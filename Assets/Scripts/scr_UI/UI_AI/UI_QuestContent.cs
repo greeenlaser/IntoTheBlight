@@ -22,13 +22,11 @@ public class UI_QuestContent : MonoBehaviour
     public List<GameObject> questStages = new List<GameObject>();
     public List<GameObject> questRewards = new List<GameObject>();
     [SerializeField] private UI_AIContent AIScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_AcceptedQuests PlayerQuestsScript;
+    [SerializeField] private GameObject par_Managers;
 
     [Header("Quest give stage assignables")]
     [SerializeField] private QuestStage_General QuestStage_Give;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_Console ConsoleScript;
 
     //public but hidden variables
     [HideInInspector] public bool startedQuest;
@@ -45,38 +43,38 @@ public class UI_QuestContent : MonoBehaviour
 
     public void ShowStats()
     {
-        UIReuseScript.txt_QuestName.text = str_questTitle;
-        UIReuseScript.txt_QuestGiver.text = AIScript.str_NPCName;
-        UIReuseScript.txt_QuestGiverClan.text = AIScript.faction.ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestName.text = str_questTitle;
+        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestGiver.text = AIScript.str_NPCName;
+        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestGiverClan.text = AIScript.faction.ToString();
         if (startedQuest)
         {
-            UIReuseScript.txt_QuestStatus.text = "Started";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Started";
         }
         else if (completedQuest)
         {
-            UIReuseScript.txt_QuestStatus.text = "Completed";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Completed";
         }
         else if (turnedInQuest)
         {
-            UIReuseScript.txt_QuestStatus.text = "Finished";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Finished";
         }
         else if (failedQuest)
         {
-            UIReuseScript.txt_QuestStatus.text = "Failed";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Failed";
         }
-        UIReuseScript.txt_QuestRewards.text = "None";
-        UIReuseScript.txt_QuestDescription.text = str_questDescription;
+        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestRewards.text = "None";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestDescription.text = str_questDescription;
     }
 
     public void AcceptedQuest()
     {
         startedQuest = true;
-        UIReuseScript.questTitle = str_questTitle;
-        UIReuseScript.StartCoroutine("StartedQuestUI");
+        par_Managers.GetComponent<Manager_UIReuse>().questTitle = str_questTitle;
+        par_Managers.GetComponent<Manager_UIReuse>().StartCoroutine("StartedQuestUI");
         questCurrentStage = 1;
         Debug.Log("Accepted " + str_questTitle + "!");
 
-        PlayerQuestsScript.acceptedQuests.Add(gameObject);
+        par_Managers.GetComponent<UI_AcceptedQuests>().acceptedQuests.Add(gameObject);
 
         //start first stage
         questStages[0].GetComponent<QuestStage_General>().StartStage();
@@ -85,18 +83,18 @@ public class UI_QuestContent : MonoBehaviour
     {
         //completed quest but need to turn it in first from the npc who gave the quest
         completedQuest = true;
-        UIReuseScript.questTitle = str_questTitle;
-        UIReuseScript.StartCoroutine("CompletedQuestUI");
+        par_Managers.GetComponent<Manager_UIReuse>().questTitle = str_questTitle;
+        par_Managers.GetComponent<Manager_UIReuse>().StartCoroutine("CompletedQuestUI");
         Debug.Log("Completed " + str_questTitle + "! Waiting until player turns it in...");
     }
     public void TurnedInQuest()
     {
         //add all quest rewards to players inventory if player has enough inventory space
 
-        PlayerQuestsScript.acceptedQuests.Remove(gameObject);
+        par_Managers.GetComponent<UI_AcceptedQuests>().acceptedQuests.Remove(gameObject);
         if (!canReDoQuest)
         {
-            PlayerQuestsScript.finishedQuests.Add(gameObject);
+            par_Managers.GetComponent<UI_AcceptedQuests>().finishedQuests.Add(gameObject);
         }
 
         startedQuest = false;
@@ -125,7 +123,7 @@ public class UI_QuestContent : MonoBehaviour
             int givenItemWeight = givenItem.GetComponent<Env_Item>().int_ItemWeight;
             int givenItemCount = givenItem.GetComponent<Env_Item>().int_itemCount;
             PlayerInventoryScript.invSpace += givenItemWeight * givenItemCount;
-            ConsoleScript.playeritemnames.Remove(givenItem.GetComponent<Env_Item>().str_ItemName);
+            par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(givenItem.GetComponent<Env_Item>().str_ItemName);
             Destroy(givenItem);
             QuestStage_Give.pickupItem = null;
         }
@@ -135,7 +133,7 @@ public class UI_QuestContent : MonoBehaviour
     public void FailedQuest()
     {
         //this quest can never be redone
-        PlayerQuestsScript.acceptedQuests.Remove(gameObject);
+        par_Managers.GetComponent<UI_AcceptedQuests>().acceptedQuests.Remove(gameObject);
         failedQuest = true;
         Debug.Log("Failed " + str_questTitle + "!");
     }

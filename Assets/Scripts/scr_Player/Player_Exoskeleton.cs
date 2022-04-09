@@ -85,9 +85,7 @@ public class Player_Exoskeleton : MonoBehaviour
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
     public List<GameObject> abilities = new List<GameObject>();
 
     //public but hidden variables
@@ -128,8 +126,8 @@ public class Player_Exoskeleton : MonoBehaviour
 
     private void Update()
     {
-        if (!PauseMenuScript.isGamePaused
-            && !ConsoleScript.consoleOpen
+        if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
+            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
             && PlayerHealthScript.health > 0)
         {
             if (usingAbility_jumpBoost)
@@ -138,15 +136,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.jumpBoost)
                 {
-                    UIReuseScript.txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
                 }
                 else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.jumpBoost)
                 {
-                    UIReuseScript.txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
                 }
                 else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.jumpBoost)
                 {
-                    UIReuseScript.txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_jumpBoost + 1).ToString();
                 }
 
                 if (remainingCooldown_jumpBoost <= 0)
@@ -157,15 +155,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                     if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.jumpBoost)
                     {
-                        UIReuseScript.txt_timerSlot1.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = "0";
                     }
                     else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.jumpBoost)
                     {
-                        UIReuseScript.txt_timerSlot2.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = "0";
                     }
                     else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.jumpBoost)
                     {
-                        UIReuseScript.txt_timerSlot3.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
 
                     usingAbility_jumpBoost = false;
@@ -178,15 +176,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.sprintBoost)
                 {
-                    UIReuseScript.txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
                 }
                 else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.sprintBoost)
                 {
-                    UIReuseScript.txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
                 }
                 else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.sprintBoost)
                 {
-                    UIReuseScript.txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_sprintBoost + 1).ToString();
                 }
 
                 if (remainingCooldown_sprintBoost <= 0)
@@ -197,15 +195,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                     if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.sprintBoost)
                     {
-                        UIReuseScript.txt_timerSlot1.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = "0";
                     }
                     else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.sprintBoost)
                     {
-                        UIReuseScript.txt_timerSlot2.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = "0";
                     }
                     else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.sprintBoost)
                     {
-                        UIReuseScript.txt_timerSlot3.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
 
                     usingAbility_sprintBoost = false;
@@ -218,15 +216,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.healthRegen)
                 {
-                    UIReuseScript.txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
                 }
                 else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.healthRegen)
                 {
-                    UIReuseScript.txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
                 }
                 else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.healthRegen)
                 {
-                    UIReuseScript.txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_healthRegen + 1).ToString();
                 }
 
                 //healing ability only works if players health is below max health
@@ -238,7 +236,7 @@ public class Player_Exoskeleton : MonoBehaviour
                     PlayerHealthScript.health += abilityBuff_healthRegen * Time.deltaTime;
                 }
 
-                UIReuseScript.txt_playerStatsHealthRegen.text = "+ " + abilityBuff_healthRegen +"/s";
+                par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsHealthRegen.text = "+ " + abilityBuff_healthRegen +"/s";
 
                 if (remainingCooldown_healthRegen <= 0)
                 {
@@ -246,18 +244,18 @@ public class Player_Exoskeleton : MonoBehaviour
 
                     if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.healthRegen)
                     {
-                        UIReuseScript.txt_timerSlot1.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = "0";
                     }
                     else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.healthRegen)
                     {
-                        UIReuseScript.txt_timerSlot2.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = "0";
                     }
                     else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.healthRegen)
                     {
-                        UIReuseScript.txt_timerSlot3.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
 
-                    UIReuseScript.txt_playerStatsHealthRegen.text = "+ 0/s";
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsHealthRegen.text = "+ 0/s";
 
                     usingAbility_healthRegen = false;
                 }
@@ -269,19 +267,19 @@ public class Player_Exoskeleton : MonoBehaviour
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.staminaRegen)
                 {
-                    UIReuseScript.txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
                 }
                 else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.staminaRegen)
                 {
-                    UIReuseScript.txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
                 }
                 else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.staminaRegen)
                 {
-                    UIReuseScript.txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_staminaRegen + 1).ToString();
                 }
 
                 float result = (PlayerMovementScript.staminaRecharge + abilityBuff_staminaRegen) * Time.deltaTime;
-                UIReuseScript.txt_playerStatsStaminaRegen.text = "+ " + Mathf.Round(result * 100.0f) / 100.0f + "/s";
+                par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsStaminaRegen.text = "+ " + Mathf.Round(result * 100.0f) / 100.0f + "/s";
 
                 if (remainingCooldown_staminaRegen <= 0)
                 {
@@ -291,18 +289,18 @@ public class Player_Exoskeleton : MonoBehaviour
 
                     if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.staminaRegen)
                     {
-                        UIReuseScript.txt_timerSlot1.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = "0";
                     }
                     else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.staminaRegen)
                     {
-                        UIReuseScript.txt_timerSlot2.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = "0";
                     }
                     else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.staminaRegen)
                     {
-                        UIReuseScript.txt_timerSlot3.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
 
-                    UIReuseScript.txt_playerStatsStaminaRegen.text = "+ 0/s";
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsStaminaRegen.text = "+ 0/s";
 
                     usingAbility_staminaRegen = false;
                 }
@@ -329,20 +327,20 @@ public class Player_Exoskeleton : MonoBehaviour
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
                 {
-                    UIReuseScript.txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
                 }
                 else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.envProtection)
                 {
-                    UIReuseScript.txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
                 }
                 else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.envProtection)
                 {
-                    UIReuseScript.txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = Mathf.FloorToInt(remainingCooldown_envProtection + 1).ToString();
                 }
 
-                UIReuseScript.txt_playerStatsHealthProtection.text = "+" + abilityBuff_generalResistance.ToString();
-                UIReuseScript.txt_playerStatsMentalProtection.text = "-" + abilityBuff_mentalResistance.ToString();
-                UIReuseScript.txt_playerStatsRadiationProtection.text = "-" + abilityBuff_radResistance.ToString();
+                par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsHealthProtection.text = "+" + abilityBuff_generalResistance.ToString();
+                par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsMentalProtection.text = "-" + abilityBuff_mentalResistance.ToString();
+                par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsRadiationProtection.text = "-" + abilityBuff_radResistance.ToString();
 
                 if (remainingCooldown_envProtection <= 0)
                 {
@@ -350,15 +348,15 @@ public class Player_Exoskeleton : MonoBehaviour
 
                     if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
                     {
-                        UIReuseScript.txt_timerSlot1.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot1.text = "0";
                     }
                     else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.envProtection)
                     {
-                        UIReuseScript.txt_timerSlot2.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot2.text = "0";
                     }
                     else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.envProtection)
                     {
-                        UIReuseScript.txt_timerSlot3.text = "0";
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
 
                     foreach (GameObject damageDealer in damageDealers)
@@ -369,9 +367,9 @@ public class Player_Exoskeleton : MonoBehaviour
                     }
                     damageDealers.Clear();
 
-                    UIReuseScript.txt_playerStatsHealthProtection.text = "+0";
-                    UIReuseScript.txt_playerStatsMentalProtection.text = "-0";
-                    UIReuseScript.txt_playerStatsRadiationProtection.text = "-0";
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsHealthProtection.text = "+0";
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsMentalProtection.text = "-0";
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsRadiationProtection.text = "-0";
 
                     usingAbility_envProtection = false;
                 }
@@ -414,7 +412,7 @@ public class Player_Exoskeleton : MonoBehaviour
                 if (item.name == "Upgrade_cell")
                 {
                     remainingUpgradeCells = item.GetComponent<Env_Item>().int_itemCount;
-                    UIReuseScript.txt_UpgradeCellCount.text = remainingUpgradeCells.ToString();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_UpgradeCellCount.text = remainingUpgradeCells.ToString();
 
                     upgradeCell = item;
                 }
@@ -457,8 +455,8 @@ public class Player_Exoskeleton : MonoBehaviour
             remainingUpgradeCells = 0;
         }
 
-        UIReuseScript.txt_UpgradeCellCount.text = remainingUpgradeCells.ToString();
-        UIReuseScript.txt_RadCellPowerValue.text = Mathf.FloorToInt(remainingRadCellPower).ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_UpgradeCellCount.text = remainingUpgradeCells.ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_RadCellPowerValue.text = Mathf.FloorToInt(remainingRadCellPower).ToString();
     }
 
     // --------
@@ -483,43 +481,43 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = false;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = false;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = false;
         }
     }
     private void EnablejumpBoostSlotButton()
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = true;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = true;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = true;
         }
     }
 
     public void UnlockAbility_jumpBoost()
     {
-        UIReuseScript.img_UpgradeTier1_JumpBoost.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier1_JumpBoost.gameObject.SetActive(true);
         unlockedAbility_jumpBoost = true;
     }
     public void UpgradeAbility_jumpBoost_Tier2()
     {
         if (!usingAbility_jumpBoost)
         {
-            UIReuseScript.img_UpgradeTier2_JumpBoost.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier2_JumpBoost.gameObject.SetActive(true);
 
             abilityBuff_jumpBoost = upgrade1_jumpBoost;
         }
@@ -532,7 +530,7 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (!usingAbility_jumpBoost)
         {
-            UIReuseScript.img_UpgradeTier3_JumpBoost.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier3_JumpBoost.gameObject.SetActive(true);
 
             abilityBuff_jumpBoost = upgrade2_jumpBoost;
         }
@@ -565,43 +563,43 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = false;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = false;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = false;
         }
     }
     private void EnablesprintBoostSlotButton()
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = true;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = true;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = true;
         }
     }
 
     public void UnlockAbility_sprintBoost()
     {
-        UIReuseScript.img_UpgradeTier1_SprintBoost.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier1_SprintBoost.gameObject.SetActive(true);
         unlockedAbility_sprintBoost = true;
     }
     public void UpgradeAbility_sprintBoost_Tier2()
     {
         if (!usingAbility_sprintBoost)
         {
-            UIReuseScript.img_UpgradeTier2_SprintBoost.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier2_SprintBoost.gameObject.SetActive(true);
 
             abilityBuff_sprintBoost = upgrade1_sprintBoost;
         }
@@ -614,7 +612,7 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (!usingAbility_sprintBoost)
         {
-            UIReuseScript.img_UpgradeTier3_SprintBoost.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier3_SprintBoost.gameObject.SetActive(true);
 
             abilityBuff_sprintBoost = upgrade2_sprintBoost;
         }
@@ -645,43 +643,43 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = false;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = false;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = false;
         }
     }
     private void EnablehealthRegenSlotButton()
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = true;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = true;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.healthRegen)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = true;
         }
     }
 
     public void UnlockAbility_healthRegen()
     {
-        UIReuseScript.img_UpgradeTier1_HealthRegen.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier1_HealthRegen.gameObject.SetActive(true);
         unlockedAbility_healthRegen = true;
     }
     public void UpgradeAbility_healthRegen_Tier2()
     {
         if (!usingAbility_healthRegen)
         {
-            UIReuseScript.img_UpgradeTier2_HealthRegen.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier2_HealthRegen.gameObject.SetActive(true);
 
             abilityBuff_healthRegen = upgrade1_healthRegen;
         }
@@ -694,7 +692,7 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (!usingAbility_healthRegen)
         {
-            UIReuseScript.img_UpgradeTier3_HealthRegen.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier3_HealthRegen.gameObject.SetActive(true);
 
             abilityBuff_healthRegen = upgrade2_healthRegen;
         }
@@ -727,43 +725,43 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = false;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = false;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = false;
         }
     }
     private void EnablestaminaRegenSlotButton()
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = true;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = true;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = true;
         }
     }
 
     public void UnlockAbility_staminaRegen()
     {
-        UIReuseScript.img_UpgradeTier1_StaminaRegen.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier1_StaminaRegen.gameObject.SetActive(true);
         unlockedAbility_staminaRegen = true;
     }
     public void UpgradeAbility_staminaRegen_Tier2()
     {
         if (!usingAbility_staminaRegen)
         {
-            UIReuseScript.img_UpgradeTier2_StaminaRegen.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier2_StaminaRegen.gameObject.SetActive(true);
 
             abilityBuff_staminaRegen = upgrade1_staminaRegen;
         }
@@ -776,7 +774,7 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (!usingAbility_staminaRegen)
         {
-            UIReuseScript.img_UpgradeTier3_StaminaRegen.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier3_StaminaRegen.gameObject.SetActive(true);
 
             abilityBuff_staminaRegen = upgrade2_staminaRegen;
         }
@@ -807,43 +805,43 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = false;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = false;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = false;
         }
     }
     private void EnableenvProtectionSlotButton()
     {
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot1.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.interactable = true;
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot2.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.interactable = true;
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.envProtection)
         {
-            UIReuseScript.btn_AbilitySlot3.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.interactable = true;
         }
     }
 
     public void UnlockAbility_envProtection()
     {
-        UIReuseScript.img_UpgradeTier1_EnvProtection.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier1_EnvProtection.gameObject.SetActive(true);
         unlockedAbility_envProtection = true;
     }
     public void UpgradeAbility_envProtection_Tier2()
     {
         if (!usingAbility_envProtection)
         {
-            UIReuseScript.img_UpgradeTier2_EnvProtection.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier2_EnvProtection.gameObject.SetActive(true);
 
             abilityBuff_generalResistance = upgrade1_generalResistance;
             abilityBuff_mentalResistance = upgrade1_mentalResistance;
@@ -858,7 +856,7 @@ public class Player_Exoskeleton : MonoBehaviour
     {
         if (!usingAbility_envProtection)
         {
-            UIReuseScript.img_UpgradeTier3_EnvProtection.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().img_UpgradeTier3_EnvProtection.gameObject.SetActive(true);
 
             abilityBuff_generalResistance = upgrade2_generalResistance;
             abilityBuff_mentalResistance = upgrade2_mentalResistance;

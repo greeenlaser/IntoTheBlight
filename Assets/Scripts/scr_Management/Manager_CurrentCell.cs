@@ -7,7 +7,7 @@ public class Manager_CurrentCell : MonoBehaviour
     [Header("Assignables")]
     public string str_CellName;
     public Transform currentCellSpawnpoint;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     [Header("Teleportable cell")]
     public bool canBeTeleportedTo;
@@ -21,6 +21,12 @@ public class Manager_CurrentCell : MonoBehaviour
     [SerializeField] private bool isInteriorCell;
     [SerializeField] private GameObject GlobalVolume;
 
+    [Header("Respawnable NPCs")]
+    public GameObject AITemplate;
+    public Transform par_CellNPCs;
+    public List<Transform> respawnPositions = new List<Transform>(); 
+
+    [Header("Main cell lists")]
     public List<GameObject> items = new List<GameObject>();
     public List<GameObject> containers = new List<GameObject>();
     public List<GameObject> workbenches = new List<GameObject>();
@@ -32,6 +38,7 @@ public class Manager_CurrentCell : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool discoveredCell;
     [HideInInspector] public bool isPlayerInCell;
+    [HideInInspector] public int respawnableNPCCount;
 
     private void Awake()
     {
@@ -118,8 +125,8 @@ public class Manager_CurrentCell : MonoBehaviour
             }
             discoveredCell = true;
         }
-        ConsoleScript.currentCell = gameObject;
-        ConsoleScript.lastCell = gameObject;
+        par_Managers.GetComponent<Manager_Console>().currentCell = gameObject;
+        par_Managers.GetComponent<Manager_Console>().lastCell = gameObject;
 
         if (toggleEntireCell)
         {
@@ -182,8 +189,8 @@ public class Manager_CurrentCell : MonoBehaviour
     }
     private void UnloadCell()
     {
-        ConsoleScript.currentCell = null;
-        ConsoleScript.lastCell = gameObject;
+        par_Managers.GetComponent<Manager_Console>().currentCell = null;
+        par_Managers.GetComponent<Manager_Console>().lastCell = gameObject;
 
         if (!GlobalVolume.activeInHierarchy)
         {

@@ -36,11 +36,7 @@ public class UI_AIContent : MonoBehaviour
     [SerializeField] private UI_DialogueContent DialogueScript;
     [SerializeField] private UI_ShopContent ShopScript;
     [SerializeField] private UI_RepairContent RepairScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_FactionReputation FactionScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private GameManager GameManagerScript;
+    [SerializeField] private GameObject par_Managers;
 
     [Header("Quest assignables")]
     [SerializeField] private UI_QuestContent QuestContentScript;
@@ -58,10 +54,10 @@ public class UI_AIContent : MonoBehaviour
     public void CheckIfAnyQuestIsCompleted()
     {
         isAIUIOpen = true;
-        PauseMenuScript.isTalkingToAI = true;
+        par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI = true;
 
-        UIReuseScript.par_Dialogue.SetActive(true);
-        UIReuseScript.txt_NPCName.text = str_NPCName;
+        par_Managers.GetComponent<Manager_UIReuse>().par_Dialogue.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().txt_NPCName.text = str_NPCName;
 
         //if has no quests 
         if (!hasQuests)
@@ -80,66 +76,66 @@ public class UI_AIContent : MonoBehaviour
             //if has first quest and first quest is completed
             else if (QuestContentScript != null && QuestContentScript.completedQuest)
             {
-                UIReuseScript.txt_NPCDialogue.text = QuestContentScript.str_questEndNPCResponse;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_NPCDialogue.text = QuestContentScript.str_questEndNPCResponse;
 
-                UIReuseScript.btn_DiaButton1.gameObject.SetActive(true);
-                UIReuseScript.btn_DiaButton1.onClick.AddListener(QuestContentScript.TurnedInQuest);
-                UIReuseScript.btn_DiaButton1.onClick.AddListener(CloseStartContent);
-                UIReuseScript.btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = QuestContentScript.str_questEndPlayerResponse;
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.onClick.AddListener(QuestContentScript.TurnedInQuest);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.onClick.AddListener(CloseStartContent);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = QuestContentScript.str_questEndPlayerResponse;
             }
             //if has second quest and second quest is completed
             else if (QuestContentScript2 != null && QuestContentScript2.completedQuest)
             {
-                UIReuseScript.txt_NPCDialogue.text = QuestContentScript2.str_questEndNPCResponse;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_NPCDialogue.text = QuestContentScript2.str_questEndNPCResponse;
 
-                UIReuseScript.btn_DiaButton1.gameObject.SetActive(true);
-                UIReuseScript.btn_DiaButton1.onClick.AddListener(QuestContentScript2.TurnedInQuest);
-                UIReuseScript.btn_DiaButton1.onClick.AddListener(CloseStartContent);
-                UIReuseScript.btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = QuestContentScript2.str_questEndPlayerResponse;
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.onClick.AddListener(QuestContentScript2.TurnedInQuest);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.onClick.AddListener(CloseStartContent);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = QuestContentScript2.str_questEndPlayerResponse;
             }
         }
 
-        if (!PauseMenuScript.isUIOpen)
+        if (!par_Managers.GetComponent<UI_PauseMenu>().isUIOpen)
         {
-            PauseMenuScript.PauseGameAndCloseUIAndResetBools();
-            PauseMenuScript.callPMCloseOnce = true;
+            par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
+            par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = true;
         }
 
         thePlayer.GetComponent<Inv_Player>().canOpenPlayerInventory = false;
     }
     private void LoadStartContent()
     {
-        UIReuseScript.txt_NPCDialogue.text = str_startNPCDialogue;
+        par_Managers.GetComponent<Manager_UIReuse>().txt_NPCDialogue.text = str_startNPCDialogue;
         if (hasDialogue)
         {
-            UIReuseScript.btn_DiaButton1.gameObject.SetActive(true);
-            UIReuseScript.btn_DiaButton1.onClick.AddListener(DialogueScript.ShowDialogue);
-            UIReuseScript.btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = str_Dialogue;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.onClick.AddListener(DialogueScript.ShowDialogue);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = str_Dialogue;
         }
         if (canRepair)
         {
-            UIReuseScript.btn_DiaButton2.gameObject.SetActive(true);
-            UIReuseScript.btn_DiaButton2.onClick.AddListener(RepairScript.OpenRepairUI);
-            UIReuseScript.btn_DiaButton2.GetComponentInChildren<TMP_Text>().text = str_Repair;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton2.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton2.onClick.AddListener(RepairScript.OpenRepairUI);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton2.GetComponentInChildren<TMP_Text>().text = str_Repair;
         }
         if (hasShop)
         {
-            UIReuseScript.btn_DiaButton3.gameObject.SetActive(true);
-            UIReuseScript.btn_DiaButton3.onClick.AddListener(ShopScript.OpenShopUI);
-            UIReuseScript.btn_DiaButton3.GetComponentInChildren<TMP_Text>().text = str_Shop;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton3.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton3.onClick.AddListener(ShopScript.OpenShopUI);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiaButton3.GetComponentInChildren<TMP_Text>().text = str_Shop;
         }
 
-        UIReuseScript.btn_DialogueReturn.gameObject.SetActive(true);
-        UIReuseScript.btn_DialogueReturn.onClick.AddListener(CloseStartContent);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_DialogueReturn.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_DialogueReturn.onClick.AddListener(CloseStartContent);
     }
 
     public void CloseStartContent()
     {
-        UIReuseScript.CloseDialogueUI();
+        par_Managers.GetComponent<Manager_UIReuse>().CloseDialogueUI();
 
-        PauseMenuScript.isTalkingToAI = false;
-        PauseMenuScript.callPMCloseOnce = false;
-        PauseMenuScript.UnpauseGame();
+        par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI = false;
+        par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = false;
+        par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
 
         thePlayer.GetComponent<Inv_Player>().canOpenPlayerInventory = true;
 

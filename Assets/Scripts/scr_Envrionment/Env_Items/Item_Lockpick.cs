@@ -19,8 +19,7 @@ public class Item_Lockpick : MonoBehaviour
     public float maxLockpickDurability;
 
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public float lockpickDurability;
@@ -49,11 +48,11 @@ public class Item_Lockpick : MonoBehaviour
         {
             PlayerInventoryScript.inventory.Remove(gameObject);
 
-            ConsoleScript.playeritemnames.Remove(gameObject.GetComponent<Env_Item>().str_ItemName);
+            par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(gameObject.GetComponent<Env_Item>().str_ItemName);
 
             gameObject.GetComponent<Env_Item>().isInPlayerInventory = false;
 
-            UIReuseScript.txt_RemainingLockpicks.text = "0";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_RemainingLockpicks.text = "0";
 
             LockScript.CloseLockUI();
 
@@ -64,7 +63,7 @@ public class Item_Lockpick : MonoBehaviour
         else if (gameObject.GetComponent<Env_Item>().int_itemCount > 1)
         {
             gameObject.GetComponent<Env_Item>().int_itemCount--;
-            UIReuseScript.txt_RemainingLockpicks.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_RemainingLockpicks.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
             lockpickDurability = maxLockpickDurability;
             //Debug.Log("Broke a lockpick! Remaining lockpicks: " + gameObject.GetComponent<Env_Item>().int_itemCount + ".");
         }

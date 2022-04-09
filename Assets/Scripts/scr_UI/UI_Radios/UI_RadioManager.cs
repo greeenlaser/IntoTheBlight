@@ -13,8 +13,6 @@ public class UI_RadioManager : MonoBehaviour
     public TMP_Text txt_radioConnection;
     [SerializeField] private Slider radioFrequencySlider;
     public AudioSource staticAudio;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
     public List<GameObject> radioStations = new List<GameObject>();
 
     //public but hidden variables
@@ -55,7 +53,6 @@ public class UI_RadioManager : MonoBehaviour
         isRadioMuted = true;
         btn_MuteRadio.interactable = false;
         btn_UnmuteRadio.interactable = true;
-
 
         staticAudio.volume = 0;
 

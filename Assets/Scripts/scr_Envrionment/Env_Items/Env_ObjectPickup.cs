@@ -19,7 +19,7 @@ public class Env_ObjectPickup : MonoBehaviour
     [SerializeField] private Rigidbody RigidBody;
     [SerializeField] private Player_Movement playerMovementScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isHolding;
@@ -117,6 +117,6 @@ public class Env_ObjectPickup : MonoBehaviour
         isColliding = false;
         isHolding = false;
         gameObject.GetComponent<Env_Item>().droppedObject = true;
-        UIReuseScript.InteractUIDisabled();
+        par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
     }
 }

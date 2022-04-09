@@ -26,7 +26,7 @@ public class Env_DamageType : MonoBehaviour
     [Tooltip("How many times a second does this damageType deal damage?")]
     [Range(1, 10)]
     [SerializeField] private int damageTimer = 1;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public float damageProtection;
@@ -164,75 +164,75 @@ public class Env_DamageType : MonoBehaviour
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorRadiationDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().minorRadiationDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateRadiationDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateRadiationDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeRadiationDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().severeRadiationDamage.gameObject.SetActive(true);
             }
         }
         else if (damageType == DamageType.fire)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorFireDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().minorFireDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateFireDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateFireDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeFireDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().severeFireDamage.gameObject.SetActive(true);
             }
         }
         else if (damageType == DamageType.electricity)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorElectricityDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().minorElectricityDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateElectricityDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateElectricityDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeElectricityDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().severeElectricityDamage.gameObject.SetActive(true);
             }
         }
         else if (damageType == DamageType.gas)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorGasDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().minorGasDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateGasDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateGasDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeGasDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().severeGasDamage.gameObject.SetActive(true);
             }
         }
         else if (damageType == DamageType.psy)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorPsyDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().minorPsyDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderatePsyDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().moderatePsyDamage.gameObject.SetActive(true);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severePsyDamage.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().severePsyDamage.gameObject.SetActive(true);
             }
         }
     }
@@ -242,75 +242,75 @@ public class Env_DamageType : MonoBehaviour
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorRadiationDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().minorRadiationDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateRadiationDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateRadiationDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeRadiationDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().severeRadiationDamage.gameObject.SetActive(false);
             }
         }
         else if (damageType == DamageType.fire)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorFireDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().minorFireDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateFireDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateFireDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeFireDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().severeFireDamage.gameObject.SetActive(false);
             }
         }
         else if (damageType == DamageType.electricity)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorElectricityDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().minorElectricityDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateElectricityDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateElectricityDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeElectricityDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().severeElectricityDamage.gameObject.SetActive(false);
             }
         }
         else if (damageType == DamageType.gas)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorGasDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().minorGasDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderateGasDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().moderateGasDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severeGasDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().severeGasDamage.gameObject.SetActive(false);
             }
         }
         else if (damageType == DamageType.psy)
         {
             if (damageSeverity == DamageSeverity.minor)
             {
-                UIReuseScript.minorPsyDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().minorPsyDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.moderate)
             {
-                UIReuseScript.moderatePsyDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().moderatePsyDamage.gameObject.SetActive(false);
             }
             else if (damageSeverity == DamageSeverity.severe)
             {
-                UIReuseScript.severePsyDamage.gameObject.SetActive(false);
+                par_Managers.GetComponent<Manager_UIReuse>().severePsyDamage.gameObject.SetActive(false);
             }
         }
     }

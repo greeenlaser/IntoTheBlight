@@ -17,14 +17,14 @@ public class UI_PauseMenu : MonoBehaviour
 
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Player_Camera PlayerCameraScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //hidden but public variables
     [HideInInspector] public bool canPauseGame;
     [HideInInspector] public bool isGamePaused;
     [HideInInspector] public bool isUIOpen;
     [HideInInspector] public bool isInventoryOpen;
+    [HideInInspector] public bool isWaitableUIOpen;
     [HideInInspector] public bool isTalkingToAI;
     [HideInInspector] public bool callPMOpenOnce;
     [HideInInspector] public bool callPMCloseOnce;
@@ -41,7 +41,9 @@ public class UI_PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && canPauseGame)
+        if (Input.GetKeyDown(KeyCode.Escape) 
+            && canPauseGame
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             //pauses game and opens pause menu UI
             if (!isGamePaused && !isUIOpen)
@@ -51,7 +53,7 @@ public class UI_PauseMenu : MonoBehaviour
 
             //closes console but keeps game paused
             else if (isGamePaused
-                && ConsoleScript.consoleOpen
+                && par_Managers.GetComponent<Manager_Console>().consoleOpen
                 && (isInventoryOpen || isTalkingToAI))
             {
                 PauseGameAndCloseUIAndResetBools();
@@ -59,9 +61,10 @@ public class UI_PauseMenu : MonoBehaviour
 
             //unpauses game
             else if (isGamePaused
-                && !ConsoleScript.consoleOpen
+                && !par_Managers.GetComponent<Manager_Console>().consoleOpen
                 && !thePlayer.GetComponent<Inv_Player>().isPlayerInventoryOpen
                 && !thePlayer.GetComponent<Inv_Player>().isPlayerAndContainerOpen
+                && !isWaitableUIOpen
                 && !isInventoryOpen
                 && !isTalkingToAI
                 && isUIOpen)
@@ -90,14 +93,14 @@ public class UI_PauseMenu : MonoBehaviour
 
         if (isUIOpen && isInventoryOpen && !calledOnce)
         {
-            UIReuseScript.btn_ReturnToGame.onClick.AddListener(CloseUI);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToGame.onClick.AddListener(CloseUI);
             //Debug.Log("Added return button function to only close pause menu UI.");
             calledOnce = true;
         }
 
         else if (isUIOpen && !isInventoryOpen && !calledOnce)
         {
-            UIReuseScript.btn_ReturnToGame.onClick.AddListener(UnpauseGame);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToGame.onClick.AddListener(UnpauseGame);
             //Debug.Log("Added return button function to unpause the game.");
             calledOnce = true;
         }
@@ -139,12 +142,12 @@ public class UI_PauseMenu : MonoBehaviour
             PlayerMovementScript.canCrouch = false;
             PlayerCameraScript.isCamEnabled = false;
 
-            UIReuseScript.par_PauseMenu.SetActive(true);
-            UIReuseScript.par_PauseMenuContent.SetActive(true);
-            UIReuseScript.par_KeyCommandsContent.SetActive(false);
-            UIReuseScript.par_ConsoleCommandsContent.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
 
-            UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
             PauseSFX();
 
@@ -163,21 +166,21 @@ public class UI_PauseMenu : MonoBehaviour
 
     public void OpenKeyCommands()
     {
-        UIReuseScript.par_KeyCommandsContent.SetActive(true);
-        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
     }
     public void OpenConsoleCommands()
     {
-        UIReuseScript.par_ConsoleCommandsContent.SetActive(true);
-        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
     }
     public void CloseKeyAndConsoleCommands()
     {
-        UIReuseScript.par_KeyCommandsContent.SetActive(false);
-        UIReuseScript.par_ConsoleCommandsContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
 
-        UIReuseScript.btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
     }
 
     //keeps the game paused, closes UI and fixes bools to be able to re-open pause menu again
@@ -189,8 +192,8 @@ public class UI_PauseMenu : MonoBehaviour
         PlayerMovementScript.canCrouch = false;
         PlayerCameraScript.isCamEnabled = false;
 
-        UIReuseScript.par_PauseMenu.SetActive(false);
-        UIReuseScript.par_PauseMenuContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -216,8 +219,8 @@ public class UI_PauseMenu : MonoBehaviour
             PlayerMovementScript.canCrouch = true;
             PlayerCameraScript.isCamEnabled = true;
 
-            UIReuseScript.par_PauseMenu.SetActive(false);
-            UIReuseScript.par_PauseMenuContent.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
 
             //unpauses all paused player SFX audiosources
             for (int i = 0; i < pausedSFX.Count; i++)
@@ -281,8 +284,8 @@ public class UI_PauseMenu : MonoBehaviour
     //only opens the UI
     public void OpenUI()
     {
-        UIReuseScript.par_PauseMenu.SetActive(true);
-        UIReuseScript.par_PauseMenuContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
 
         calledOnce = false;
         isUIOpen = true;
@@ -292,8 +295,8 @@ public class UI_PauseMenu : MonoBehaviour
     //only closes the UI but keeps the game paused
     public void CloseUI()
     {
-        UIReuseScript.par_PauseMenu.SetActive(false);
-        UIReuseScript.par_PauseMenuContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
 
         calledOnce = false;
         isUIOpen = false;
@@ -302,7 +305,7 @@ public class UI_PauseMenu : MonoBehaviour
 
     public void BackToPauseMenu()
     {
-        UIReuseScript.par_PauseMenuContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
     }
 
     public void BackToMainMenu()

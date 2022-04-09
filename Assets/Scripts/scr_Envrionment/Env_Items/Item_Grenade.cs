@@ -38,11 +38,8 @@ public class Item_Grenade : MonoBehaviour
     [SerializeField] private Transform par_ThrownGrenades;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Player_Health PlayerHealthScript; 
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PauseMenu PausemenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private GameManager GameManagerScript;
+    [SerializeField] private Player_Health PlayerHealthScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool hasEquippedGrenade;
@@ -99,9 +96,10 @@ public class Item_Grenade : MonoBehaviour
 
     private void Update()
     {
-        if (!PausemenuScript.isGamePaused
-            && !ConsoleScript.consoleOpen
-            && PlayerHealthScript.health > 0)
+        if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
+            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
+            && PlayerHealthScript.health > 0
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (hasEquippedGrenade
                 && !isThrownGrenade
@@ -148,23 +146,23 @@ public class Item_Grenade : MonoBehaviour
 
                     if (cookingGrenadeTimer >= 1)
                     {
-                        UIReuseScript.bgr_grenadeTimer1.color = new Color32(150, 150, 150, 255);
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer1.color = new Color32(150, 150, 150, 255);
                     }
                     if (cookingGrenadeTimer >= 2)
                     {
-                        UIReuseScript.bgr_grenadeTimer2.color = new Color32(150, 150, 150, 255);
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer2.color = new Color32(150, 150, 150, 255);
                     }
                     if (cookingGrenadeTimer >= 3)
                     {
-                        UIReuseScript.bgr_grenadeTimer3.color = new Color32(150, 150, 150, 255);
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer3.color = new Color32(150, 150, 150, 255);
                     }
                     if (cookingGrenadeTimer >= 4)
                     {
-                        UIReuseScript.bgr_grenadeTimer4.color = new Color32(150, 150, 150, 255);
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer4.color = new Color32(150, 150, 150, 255);
                     }
                     if (cookingGrenadeTimer >= 5)
                     {
-                        UIReuseScript.bgr_grenadeTimer5.color = new Color32(150, 150, 150, 255);
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer5.color = new Color32(150, 150, 150, 255);
 
                         //if time runs out and player doesnt throw grenade
                         if (!threwUpperHandGrenade
@@ -474,16 +472,16 @@ public class Item_Grenade : MonoBehaviour
         }
         else if (!isCookingGrenade)
         {
-            UIReuseScript.ClearGrenadeUI();
-            UIReuseScript.ClearWeaponUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
-            UIReuseScript.bgr_grenadeTimer1.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer2.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer3.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer4.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer5.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer1.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer2.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer3.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer4.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer5.gameObject.SetActive(true);
 
-            UIReuseScript.txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
 
             //unequips previously equipped melee weapon if there is any
             foreach (GameObject meleeWeapon in PlayerInventoryScript.inventory)
@@ -522,10 +520,10 @@ public class Item_Grenade : MonoBehaviour
             grenadeEquipWaitTimer = 0;
 
             gameObject.GetComponent<Env_Item>().RemoveListeners();
-            UIReuseScript.ClearAllInventories();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildPlayerInventory();
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             PlayerInventoryScript.equippedGun = gameObject;
 
@@ -553,18 +551,18 @@ public class Item_Grenade : MonoBehaviour
             startedCookingGrenadeTimer = false;
             cookingGrenadeTimer = 0;
 
-            UIReuseScript.ClearGrenadeUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
 
-            UIReuseScript.txt_ammoForGun.text = "";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "";
 
             //enables interpolation on the unequipped gun
             rb.interpolation = RigidbodyInterpolation.Interpolate;
 
             gameObject.GetComponent<Env_Item>().RemoveListeners();
-            UIReuseScript.ClearAllInventories();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildPlayerInventory();
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             PlayerInventoryScript.equippedGun = null;
 
@@ -591,7 +589,7 @@ public class Item_Grenade : MonoBehaviour
 
         thrownGrenade.GetComponent<Env_Item>().int_itemCount = 1;
 
-        GameManagerScript.thrownGrenades.Add(thrownGrenade);
+        par_Managers.GetComponent<GameManager>().thrownGrenades.Add(thrownGrenade);
 
         PlayerInventoryScript.inventory.Remove(thrownGrenade);
         PlayerInventoryScript.invSpace += gameObject.GetComponent<Env_Item>().int_ItemWeight;
@@ -637,15 +635,15 @@ public class Item_Grenade : MonoBehaviour
         {
             gameObject.GetComponent<Env_Item>().int_itemCount--;
 
-            UIReuseScript.txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
 
-            UIReuseScript.ClearGrenadeUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
 
-            UIReuseScript.bgr_grenadeTimer1.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer2.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer3.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer4.gameObject.SetActive(true);
-            UIReuseScript.bgr_grenadeTimer5.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer1.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer2.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer3.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer4.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer5.gameObject.SetActive(true);
 
             //Debug.Log("Grenades left: " + gameObject.GetComponent<Env_Item>().int_itemCount + ".");
         }
@@ -653,15 +651,15 @@ public class Item_Grenade : MonoBehaviour
         else if (foundGrenade
                  && gameObject.GetComponent<Env_Item>().int_itemCount == 1)
         {
-            UIReuseScript.ClearGrenadeUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
 
-            UIReuseScript.txt_ammoForGun.text = "";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "";
 
             //Debug.Log("No more grenades left!");
 
             PlayerInventoryScript.inventory.Remove(gameObject);
 
-            ConsoleScript.playeritemnames.Remove(gameObject.GetComponent<Env_Item>().str_ItemName);
+            par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(gameObject.GetComponent<Env_Item>().str_ItemName);
             Destroy(gameObject);
         }
     }
@@ -706,7 +704,7 @@ public class Item_Grenade : MonoBehaviour
     {
         //Debug.Log("Exploded " + stickyType + " " +  grenadeType.ToString() + " grenade!");
 
-        GameManagerScript.thrownGrenades.Remove(gameObject);
+        par_Managers.GetComponent<GameManager>().thrownGrenades.Remove(gameObject);
 
         //get all colliders in sphere radius and add effects
         Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRange);

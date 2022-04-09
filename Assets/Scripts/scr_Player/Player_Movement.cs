@@ -43,9 +43,7 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PauseMenu PausemenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool canMove;
@@ -103,31 +101,32 @@ public class Player_Movement : MonoBehaviour
 
         alphaValue = 255;
 
-        UIReuseScript.stamina = currentStamina;
-        UIReuseScript.maxStamina = maxStamina;
-        UIReuseScript.UpdatePlayerStamina();
+        par_Managers.GetComponent<Manager_UIReuse>().stamina = currentStamina;
+        par_Managers.GetComponent<Manager_UIReuse>().maxStamina = maxStamina;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
 
         nc_moveSpeed = walkSpeed * 2.5f;
     }
 
     private void Update()
     {
-        if (UIReuseScript.stamina != currentStamina)
+        if (par_Managers.GetComponent<Manager_UIReuse>().stamina != currentStamina)
         {
-            UIReuseScript.stamina = currentStamina;
-            UIReuseScript.UpdatePlayerStamina();
+            par_Managers.GetComponent<Manager_UIReuse>().stamina = currentStamina;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
         }
-        if (UIReuseScript.maxStamina != maxStamina)
+        if (par_Managers.GetComponent<Manager_UIReuse>().maxStamina != maxStamina)
         {
-            UIReuseScript.maxStamina = maxStamina;
-            UIReuseScript.UpdatePlayerStamina();
+            par_Managers.GetComponent<Manager_UIReuse>().maxStamina = maxStamina;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
         }
 
         //toggles players flashlight if flashlight item was picked up
         if (Input.GetKeyDown(KeyCode.F)
-            && !ConsoleScript.consoleOpen
-            && !PausemenuScript.isGamePaused
-            && PlayerHealthScript.isPlayerAlive)
+            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
+            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
+            && PlayerHealthScript.isPlayerAlive
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (!hasFlashlight)
             {
@@ -150,7 +149,8 @@ public class Player_Movement : MonoBehaviour
             }
         }
 
-        if (canMove)
+        if (canMove
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (!isNoclipping)
             {
@@ -177,7 +177,7 @@ public class Player_Movement : MonoBehaviour
                             minVelocity = velocity.y;
                         }
                         //check if smallest velocity is less than or equal to -10f
-                        if (minVelocity <= -10f
+                        if (minVelocity <= -15f
                             && PlayerHealthScript.canTakeDamage)
                         {
                             ApplyFallDamage();
@@ -514,7 +514,7 @@ public class Player_Movement : MonoBehaviour
     //deal damage based off of velocity when hitting ground
     private void ApplyFallDamage()
     {
-        float damageDealt = Mathf.Round(Mathf.Abs(velocity.y * 1.5f) * 10) / 10;
+        float damageDealt = Mathf.Round(Mathf.Abs(velocity.y * 1.2f) * 10) / 10;
         if (damageDealt >= PlayerHealthScript.health)
         {
             string deathMessage = "You took " + damageDealt + " damage from that fall and fell to your death! Shouldve brought rocket boots...";
@@ -523,7 +523,7 @@ public class Player_Movement : MonoBehaviour
         else
         {
             PlayerHealthScript.health -= damageDealt;
-            UIReuseScript.UpdatePlayerHealth();
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
         }
 
         //Debug.Log("Applied fall damage " + damageDealt + " to player.");
@@ -538,8 +538,8 @@ public class Player_Movement : MonoBehaviour
         {
             gameObject.GetComponent<CharacterController>().Move(new Vector3(0, 0, 0));
 
-            UIReuseScript.bgr_PlayerStun.color = new Color32(255, 255, 255, 255);
-            UIReuseScript.bgr_PlayerStun.transform.localPosition = new Vector3(0, 0, 0);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, 255);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.transform.localPosition = new Vector3(0, 0, 0);
 
             StartCoroutine(Stunned());
         }
@@ -552,13 +552,13 @@ public class Player_Movement : MonoBehaviour
         while (alphaValue > 0)
         {
             alphaValue -= 1;
-            UIReuseScript.bgr_PlayerStun.color = new Color32(255, 255, 255, (byte)alphaValue);
+            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, (byte)alphaValue);
             //Debug.Log(alphaValue);
             yield return new WaitForSeconds(0.01f);
         }
 
-        UIReuseScript.bgr_PlayerStun.color = new Color32(255, 255, 255, 0);
-        UIReuseScript.bgr_PlayerStun.transform.localPosition = new Vector3(0, -1200, 0);
+        par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, 0);
+        par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.transform.localPosition = new Vector3(0, -1200, 0);
 
         alphaValue = 255;
 

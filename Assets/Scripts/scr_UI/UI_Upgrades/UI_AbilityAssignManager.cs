@@ -13,9 +13,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
     //----
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Player_Exoskeleton ExoskeletonScript;
-    [SerializeField] private UI_PauseMenu PausemenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool hasExosuit;
@@ -31,8 +29,8 @@ public class UI_AbilityAssignManager : MonoBehaviour
     private void Update()
     {
         if (PlayerHealthScript.health > 0
-            && !PausemenuScript.isGamePaused
-            && !ConsoleScript.consoleOpen
+            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
+            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
             && hasExosuit)
         {
             //assinging ability to slot 1
@@ -48,7 +46,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
                 else if (timer > maxWait)
                 {
                     canIncreaseTimer = false;
-                    PausemenuScript.PauseGame();
+                    par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
                     AssignToSlot1();
                 }
             }
@@ -65,7 +63,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
                 else if (timer > maxWait)
                 {
                     canIncreaseTimer = false;
-                    PausemenuScript.PauseGame();
+                    par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
                     AssignToSlot2();
                 }
             }
@@ -82,7 +80,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
                 else if (timer > maxWait)
                 {
                     canIncreaseTimer = false;
-                    PausemenuScript.PauseGame();
+                    par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
                     AssignToSlot3();
                 }
             }
@@ -157,7 +155,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
             && !Input.GetKey(KeyCode.C))
         {
             CloseAbilityUI();
-            PausemenuScript.UnpauseGame();
+            par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
         }
         //resets timer if ability keys were released
         //and timer was over 0 and no ability was actually assigned
@@ -177,37 +175,37 @@ public class UI_AbilityAssignManager : MonoBehaviour
 
         assingingToSlot1 = true;
 
-        UIReuseScript.par_AbilityUI.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_AbilityUI.SetActive(true);
 
         if (ExoskeletonScript.unlockedAbility_jumpBoost)
         {
-            UIReuseScript.btn_assignJumpBoost.interactable = true;
-            UIReuseScript.btn_assignJumpBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignJumpBoost.onClick.AddListener(UIReuseScript.btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
         }
         if (ExoskeletonScript.unlockedAbility_sprintBoost)
         {
-            UIReuseScript.btn_assignSprintBoost.interactable = true;
-            UIReuseScript.btn_assignSprintBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignSprintBoost.onClick.AddListener(UIReuseScript.btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
         }
         if (ExoskeletonScript.unlockedAbility_healthRegen)
         {
-            UIReuseScript.btn_assignHealthRegen.interactable = true;
-            UIReuseScript.btn_assignHealthRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignHealthRegen.onClick.AddListener(UIReuseScript.btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
         }
         if (ExoskeletonScript.unlockedAbility_staminaRegen)
         {
-            UIReuseScript.btn_assignStaminaRegen.interactable = true;
-            UIReuseScript.btn_assignStaminaRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignStaminaRegen.onClick.AddListener(UIReuseScript.btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
         }
         if (ExoskeletonScript.unlockedAbility_envProtection)
         {
-            UIReuseScript.btn_assignEnvProtection.interactable = true;
-            UIReuseScript.btn_assignEnvProtection.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignEnvProtection.onClick.AddListener(UIReuseScript.btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1);
         }
 
         calledAbilityAssignLoadOnce = true;
@@ -219,37 +217,37 @@ public class UI_AbilityAssignManager : MonoBehaviour
 
         assingingToSlot2 = true;
 
-        UIReuseScript.par_AbilityUI.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_AbilityUI.SetActive(true);
 
         if (ExoskeletonScript.unlockedAbility_jumpBoost)
         {
-            UIReuseScript.btn_assignJumpBoost.interactable = true;
-            UIReuseScript.btn_assignJumpBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignJumpBoost.onClick.AddListener(UIReuseScript.btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
         }
         if (ExoskeletonScript.unlockedAbility_sprintBoost)
         {
-            UIReuseScript.btn_assignSprintBoost.interactable = true;
-            UIReuseScript.btn_assignSprintBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignSprintBoost.onClick.AddListener(UIReuseScript.btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
         }
         if (ExoskeletonScript.unlockedAbility_healthRegen)
         {
-            UIReuseScript.btn_assignHealthRegen.interactable = true;
-            UIReuseScript.btn_assignHealthRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignHealthRegen.onClick.AddListener(UIReuseScript.btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
         }
         if (ExoskeletonScript.unlockedAbility_staminaRegen)
         {
-            UIReuseScript.btn_assignStaminaRegen.interactable = true;
-            UIReuseScript.btn_assignStaminaRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignStaminaRegen.onClick.AddListener(UIReuseScript.btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
         }
         if (ExoskeletonScript.unlockedAbility_envProtection)
         {
-            UIReuseScript.btn_assignEnvProtection.interactable = true;
-            UIReuseScript.btn_assignEnvProtection.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignEnvProtection.onClick.AddListener(UIReuseScript.btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2);
         }
 
         calledAbilityAssignLoadOnce = true;
@@ -261,37 +259,37 @@ public class UI_AbilityAssignManager : MonoBehaviour
 
         assingingToSlot3 = true;
 
-        UIReuseScript.par_AbilityUI.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_AbilityUI.SetActive(true);
 
         if (ExoskeletonScript.unlockedAbility_jumpBoost)
         {
-            UIReuseScript.btn_assignJumpBoost.interactable = true;
-            UIReuseScript.btn_assignJumpBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignJumpBoost.onClick.AddListener(UIReuseScript.btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
         }
         if (ExoskeletonScript.unlockedAbility_sprintBoost)
         {
-            UIReuseScript.btn_assignSprintBoost.interactable = true;
-            UIReuseScript.btn_assignSprintBoost.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignSprintBoost.onClick.AddListener(UIReuseScript.btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
         }
         if (ExoskeletonScript.unlockedAbility_healthRegen)
         {
-            UIReuseScript.btn_assignHealthRegen.interactable = true;
-            UIReuseScript.btn_assignHealthRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignHealthRegen.onClick.AddListener(UIReuseScript.btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
         }
         if (ExoskeletonScript.unlockedAbility_staminaRegen)
         {
-            UIReuseScript.btn_assignStaminaRegen.interactable = true;
-            UIReuseScript.btn_assignStaminaRegen.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignStaminaRegen.onClick.AddListener(UIReuseScript.btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
         }
         if (ExoskeletonScript.unlockedAbility_envProtection)
         {
-            UIReuseScript.btn_assignEnvProtection.interactable = true;
-            UIReuseScript.btn_assignEnvProtection.onClick.RemoveAllListeners();
-            UIReuseScript.btn_assignEnvProtection.onClick.AddListener(UIReuseScript.btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.interactable = true;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.AddListener(par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3);
         }
 
         calledAbilityAssignLoadOnce = true;
@@ -302,7 +300,7 @@ public class UI_AbilityAssignManager : MonoBehaviour
         timer = 0;
         canIncreaseTimer = false;
 
-        UIReuseScript.ClearAssignUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAssignUI();
 
         assingingToSlot1 = false;
         assingingToSlot2 = false;

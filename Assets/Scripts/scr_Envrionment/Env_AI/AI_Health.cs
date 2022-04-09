@@ -7,10 +7,11 @@ public class AI_Health : MonoBehaviour
 {
     [Header("Assignables")]
     public bool isKillable;
-    [SerializeField] private int maxHealth;
+    public bool isRespawnable;
+    public int maxHealth;
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private GameObject par_deadAILoot;
-    [SerializeField] private UI_PauseMenu PausemenuScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isAlive;
@@ -58,14 +59,14 @@ public class AI_Health : MonoBehaviour
         //if time runs out or player is further than 25 meters from the looted dead AI
         //then the dead AI is deleted
         if (!isAlive 
-            && !PausemenuScript.isGamePaused
+            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
             && par_deadAILoot.GetComponent<Inv_Container>().hasLootedDeadAIInventoryOnce)
         {
             timer += Time.deltaTime;
 
             if (timer > 120)
             {
-                Debug.Log("Perf: " + gameObject.GetComponent<UI_AIContent>().str_NPCName + " was destroyed after timer ran out.");
+                Debug.Log("System: " + gameObject.GetComponent<UI_AIContent>().str_NPCName + " was destroyed after timer ran out.");
                 Destroy(par_deadAILoot.GetComponent<Inv_Container>().discardableDeadNPC);
             }
         }

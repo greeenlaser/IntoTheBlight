@@ -65,10 +65,7 @@ public class Item_Gun : MonoBehaviour
     [SerializeField] private Camera PlayerCamera;
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private GameManager GameManagerScript;
+    [SerializeField] private GameObject par_Managers;
 
     [Header("Gun fire cursor")]
     [SerializeField] private GameObject gunHitCursorTemplate;
@@ -117,33 +114,14 @@ public class Item_Gun : MonoBehaviour
 
         durability = maxDurability;
 
-        //update weapon value and damage based off of current durability
-        if (durability < maxDurability / 100 * 75)
-        {
-            //get weapon max value
-            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-            //get weapon current durability percentage from max durability
-            float durabilityPercentage = (durability / maxDurability) * 100;
-            //calculate new weapon value according to weapon durability percentage
-            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
-            //assign weapon value
-            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
-
-            //calculate new weapon damage according to weapon durability percentage
-            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
-            //assign new damage to weapon
-            int_damage = itemDamage;
-        }
-        else
-        {
-            int_damage = int_maxDamage;
-        }
+        LoadValues();
     }
 
     private void Update()
     {
         if (hasEquippedGun
-            && !PlayerMovementScript.isStunned)
+            && !PlayerMovementScript.isStunned
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             //unequips the gun if the player is no longer alive
             if (!thePlayer.GetComponent<Player_Health>().isPlayerAlive)
@@ -155,7 +133,7 @@ public class Item_Gun : MonoBehaviour
             //the player is still alive and the game isn't paused
             if (durability > 0
                 && thePlayer.GetComponent<Player_Health>().isPlayerAlive
-                && !PauseMenuScript.isGamePaused)
+                && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused)
             {
                 //when the gun is single shot
                 if (Input.GetKeyDown(KeyCode.Mouse0)
@@ -170,11 +148,11 @@ public class Item_Gun : MonoBehaviour
                     if (!gameObject.GetComponent<Env_Item>().isProtected)
                     {   
                         currentClipSize--;
-                        UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_ammoInClip.text = currentClipSize.ToString();
                         durability -= singleShotDegrade;
-                        UIReuseScript.durability = durability;
-                        UIReuseScript.maxDurability = maxDurability;
-                        UIReuseScript.UpdateWeaponQuality();
+                        par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
                     }
                 }
                 //when the gun is automatic fire
@@ -263,7 +241,7 @@ public class Item_Gun : MonoBehaviour
             }
             else if ((durability == 0
                 || !thePlayer.GetComponent<Player_Health>().isPlayerAlive
-                || PauseMenuScript.isGamePaused
+                || par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
                 || isGunJammed)
                 && !clearedCursorsList)
             {
@@ -276,7 +254,7 @@ public class Item_Gun : MonoBehaviour
             }
 
             //plays gun jam sfx
-            if (!PauseMenuScript.isGamePaused
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
                 && thePlayer.GetComponent<Player_Health>().isPlayerAlive
                 && !sfx_gunJam.isPlaying)
             {
@@ -293,7 +271,7 @@ public class Item_Gun : MonoBehaviour
                 }
             }
 
-            if (PauseMenuScript.isGamePaused)
+            if (par_Managers.GetComponent<UI_PauseMenu>().isGamePaused)
             {
                 //resets aim if game is paused and player is aiming down sights
                 if (isAimingDownSights)
@@ -371,7 +349,7 @@ public class Item_Gun : MonoBehaviour
         //finishes gun reload after gun reload SFX finishes playing
         if (isReloading 
             && !sfx_gunReload.isPlaying
-            && !PauseMenuScript.isGamePaused
+            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
             && thePlayer.GetComponent<Player_Health>().isPlayerAlive)
         {
             isReloading = false;
@@ -386,11 +364,11 @@ public class Item_Gun : MonoBehaviour
         if (!gameObject.GetComponent<Env_Item>().isProtected)
         {
             currentClipSize--;
-            UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoInClip.text = currentClipSize.ToString();
             durability -= automaticFireDegrade;
-            UIReuseScript.durability = durability;
-            UIReuseScript.maxDurability = maxDurability;
-            UIReuseScript.UpdateWeaponQuality();
+            par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+            par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
         }
     }
 
@@ -420,27 +398,8 @@ public class Item_Gun : MonoBehaviour
 
         spawnedBullet.SetActive(true);
         spawnedBulletCases.Add(spawnedBullet);
-        //update weapon value and damage based off of current durability
-        if (durability < maxDurability / 100 * 75)
-        {
-            //get weapon max value
-            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-            //get weapon current durability percentage from max durability
-            float durabilityPercentage = (durability / maxDurability) * 100;
-            //calculate new weapon value according to weapon durability percentage
-            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
-            //assign weapon value
-            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
 
-            //calculate new weapon damage according to weapon durability percentage
-            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
-            //assign new damage to weapon
-            int_damage = Mathf.FloorToInt(itemDamage);
-        }
-        else
-        {
-            int_damage = int_maxDamage;
-        }
+        LoadValues();
 
         //did the gun shoot anything
         RaycastHit hit;
@@ -462,7 +421,7 @@ public class Item_Gun : MonoBehaviour
                     //and this AI is not currently chasing or attacking another target
                     if (target.GetComponent<AI_Combat>() != null
                         && target.GetComponent<AI_Combat>().confirmedTarget == null
-                        && ConsoleScript.toggleAIDetection)
+                        && par_Managers.GetComponent<Manager_Console>().toggleAIDetection)
                     {
                         target.GetComponent<AI_Combat>().finishedHostileSearch = true;
                         target.GetComponent<AI_Combat>().foundPossibleHostiles = true;
@@ -550,6 +509,31 @@ public class Item_Gun : MonoBehaviour
         }
     }
 
+    public void LoadValues()
+    {
+        //update weapon value and damage based off of current durability
+        if (durability < maxDurability / 100 * 75)
+        {
+            //get weapon max value
+            int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+            //get weapon current durability percentage from max durability
+            float durabilityPercentage = (durability / maxDurability) * 100;
+            //calculate new weapon value according to weapon durability percentage
+            itemValue = Mathf.FloorToInt(itemValue / 100 * durabilityPercentage);
+            //assign weapon value
+            gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
+
+            //calculate new weapon damage according to weapon durability percentage
+            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            //assign new damage to weapon
+            int_damage = itemDamage;
+        }
+        else
+        {
+            int_damage = int_maxDamage;
+        }
+    }
+
     public void EquipGun()
     {
         //unequips previously equipped melee weapon if there is any
@@ -585,23 +569,23 @@ public class Item_Gun : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.None;
 
         hasEquippedGun = true;
-        UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_ammoInClip.text = currentClipSize.ToString();
         if (ammoClip != null)
         {
-            UIReuseScript.txt_ammoForGun.text = ammoClip.GetComponent<Env_Item>().int_itemCount.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = ammoClip.GetComponent<Env_Item>().int_itemCount.ToString();
         }
         else if (ammoClip == null)
         {
-            UIReuseScript.txt_ammoForGun.text = "0";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "0";
             AssignAmmoType();
         }
 
         gameObject.GetComponent<Env_Item>().RemoveListeners();
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.ClearInventoryUI();
-        UIReuseScript.ClearWeaponUI();
-        UIReuseScript.RebuildPlayerInventory();
-        UIReuseScript.txt_InventoryName.text = "Player inventory";
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         PlayerInventoryScript.equippedGun = gameObject;
 
@@ -612,9 +596,9 @@ public class Item_Gun : MonoBehaviour
         gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
         gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
 
-        UIReuseScript.durability = durability;
-        UIReuseScript.maxDurability = maxDurability;
-        UIReuseScript.UpdateWeaponQuality();
+        par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
 
         //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
     }
@@ -648,13 +632,13 @@ public class Item_Gun : MonoBehaviour
             spawnedBulletCaseSFX.Clear();
 
             gameObject.GetComponent<Env_Item>().RemoveListeners();
-            UIReuseScript.ClearAllInventories();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildPlayerInventory();
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             PlayerInventoryScript.equippedGun = null;
-            UIReuseScript.ClearWeaponUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
             gameObject.SetActive(false);
             gameObject.GetComponent<MeshRenderer>().enabled = false;
@@ -687,19 +671,19 @@ public class Item_Gun : MonoBehaviour
             ammoClip.GetComponent<Env_Item>().int_itemCount -= ammoUntilFullReload;
             currentClipSize = maxClipSize;
 
-            UIReuseScript.txt_ammoInClip.text = maxClipSize.ToString();
-            UIReuseScript.txt_ammoForGun.text = ammoClip.GetComponent<Env_Item>().int_itemCount.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoInClip.text = maxClipSize.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = ammoClip.GetComponent<Env_Item>().int_itemCount.ToString();
             //Debug.Log("Fully reloaded " + gameObject.GetComponent<Env_Item>().str_ItemName + "! Remaining reloadable ammo is " + ammoClip.GetComponent<Env_Item>().int_itemCount + ".");
         }
         //if there is not enough ammo to fully reload the gun
         else if (usableAmmo <= ammoUntilFullReload)
         {
             currentClipSize += usableAmmo;
-            UIReuseScript.txt_ammoInClip.text = currentClipSize.ToString();
-            UIReuseScript.txt_ammoForGun.text = "0";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoInClip.text = currentClipSize.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "0";
 
             PlayerInventoryScript.inventory.Remove(ammoClip);
-            ConsoleScript.playeritemnames.Remove(ammoClip.GetComponent<Env_Item>().str_ItemName);
+            par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(ammoClip.GetComponent<Env_Item>().str_ItemName);
             ammoClip.GetComponent<Env_Item>().isInPlayerInventory = false;
 
             //Debug.Log("Reloaded " + gameObject.GetComponent<Env_Item>().str_ItemName + " and added " + usableAmmo + " ammo. Destroyed the ammo gameobject because there was no more ammo left to use.");
@@ -725,7 +709,7 @@ public class Item_Gun : MonoBehaviour
 
         if (ammoClip == null)
         {
-            UIReuseScript.txt_ammoForGun.text = "0";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "0";
 
             //finds the correct ammo type
             foreach (GameObject item in PlayerInventoryScript.inventory)
@@ -742,7 +726,7 @@ public class Item_Gun : MonoBehaviour
         else if (ammoClip != null)
         {
             int ammoInInventory = ammoClip.GetComponent<Env_Item>().int_itemCount;
-            UIReuseScript.txt_ammoForGun.text = ammoInInventory.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = ammoInInventory.ToString();
         }
     }
 }

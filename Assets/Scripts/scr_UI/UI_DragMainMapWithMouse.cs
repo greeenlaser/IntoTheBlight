@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class UI_DragMainMapWithMouse : MonoBehaviour, IDragHandler, IEndDragHandler
 {
     [Header("Assignables")]
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //private variables
     //map dragging
@@ -28,8 +28,8 @@ public class UI_DragMainMapWithMouse : MonoBehaviour, IDragHandler, IEndDragHand
             //get the difference between mouse original and current position
             Vector3 difference = dragOrigin - Input.mousePosition;
             //move the map
-            UIReuseScript.Minimap.transform.position -= difference / 40;
-            UIReuseScript.MinimapPlayerPosition.transform.position -= difference / 40;
+            par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.position -= difference / 40;
+            par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position -= difference / 40;
         }
     }
 

@@ -14,7 +14,7 @@ public class AI_Combat : MonoBehaviour
     //[Tooltip("How far can this AI detect the target from?")]
     //public float detectRange;
     //[SerializeField] private Manager_FactionReputation FactionScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool searchingForHostiles;
@@ -45,7 +45,8 @@ public class AI_Combat : MonoBehaviour
     private void Update()
     {
         if (gameObject.GetComponent<AI_Health>() != null 
-            && gameObject.GetComponent<AI_Health>().isAlive)
+            && gameObject.GetComponent<AI_Health>().isAlive
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (lastListCount != collidingObjects.Count)
             {
@@ -72,7 +73,7 @@ public class AI_Combat : MonoBehaviour
                 lastListCount = collidingObjects.Count;
             }
 
-            if (!lostTarget && ConsoleScript.toggleAIDetection && gameObject.GetComponent<AI_Health>().canBeHostile)
+            if (!lostTarget && par_Managers.GetComponent<Manager_Console>().toggleAIDetection && gameObject.GetComponent<AI_Health>().canBeHostile)
             {
                 if (collidingObjects.Count > 0
                     && !searchingForHostiles
@@ -144,7 +145,7 @@ public class AI_Combat : MonoBehaviour
                     }
                 }
             }
-            else if (lostTarget || !ConsoleScript.toggleAIDetection || !gameObject.GetComponent<AI_Health>().canBeHostile)
+            else if (lostTarget || !par_Managers.GetComponent<Manager_Console>().toggleAIDetection || !gameObject.GetComponent<AI_Health>().canBeHostile)
             {
                 if (!calledResetOnce)
                 {
@@ -206,7 +207,7 @@ public class AI_Combat : MonoBehaviour
 
     private void Reset()
     {
-        if ((ConsoleScript.toggleAIDetection
+        if ((par_Managers.GetComponent<Manager_Console>().toggleAIDetection
             || lostTarget)
             && calledResetOnce)
         {

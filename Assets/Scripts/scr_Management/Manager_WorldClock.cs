@@ -7,8 +7,9 @@ using UnityEngine.UI;
 public class Manager_WorldClock : MonoBehaviour
 {
     [Header("Assignables")]
-    [SerializeField] private Manager_WorldCalendar CalendarScript;
+    public int hoursUntilCellReset;
     [SerializeField] private TMP_Text txt_time;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public string time;
@@ -31,10 +32,18 @@ public class Manager_WorldClock : MonoBehaviour
             if (minute >= 60)
             {
                 hour++;
+
+                hoursUntilCellReset--;
+                if (hoursUntilCellReset <= 0)
+                {
+                    par_Managers.GetComponent<GameManager>().GlobalCellReset();
+                    hoursUntilCellReset = 72;
+                }
+
                 minute = 0;
                 if (hour >= 24)
                 {
-                    CalendarScript.UpdateDate();
+                    par_Managers.GetComponent<Manager_WorldCalendar>().UpdateDate();
                     hour = 0;
                 }
             }
@@ -56,7 +65,7 @@ public class Manager_WorldClock : MonoBehaviour
         while (hour > 24)
         {
             hour -= 24;
-            CalendarScript.UpdateDate();
+            par_Managers.GetComponent<Manager_WorldCalendar>().UpdateDate();
         }
     }
 }

@@ -43,8 +43,7 @@ public class Item_Consumable : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private Player_Health PlayerHealthScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public float currentConsumableAmount;
@@ -54,6 +53,11 @@ public class Item_Consumable : MonoBehaviour
     {
         currentConsumableAmount = maxConsumableAmount;
 
+        LoadValues();
+    }
+
+    public void LoadValues()
+    {
         //update consumable value based off of current consumable amount
         if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
         {
@@ -82,22 +86,46 @@ public class Item_Consumable : MonoBehaviour
             {
                 PlayerHealthScript.health = PlayerHealthScript.maxHealth;
 
-                PlayerInventoryScript.inventory.Remove(gameObject);
-                PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
-                ConsoleScript.playeritemnames.Remove(str_healthKitName);
+                int itemCount = gameObject.GetComponent<Env_Item>().int_itemCount;
+                if (itemCount > 1)
+                {
+                    gameObject.GetComponent<Env_Item>().int_itemCount -= 1;
+                    PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
 
-                UIReuseScript.ClearStatsUI();
-                UIReuseScript.ClearInventoryUI();
-                gameObject.GetComponent<Env_Item>().RemoveListeners();
-                UIReuseScript.RebuildPlayerInventory();
-                UIReuseScript.txt_InventoryName.text = "Player inventory";
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    gameObject.GetComponent<Env_Item>().RemoveListeners();
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
 
-                PlayerInventoryScript.UpdatePlayerInventoryStats();
-                UIReuseScript.health = PlayerHealthScript.health;
-                UIReuseScript.maxHealth = PlayerHealthScript.maxHealth;
-                UIReuseScript.UpdatePlayerHealth();
+                    PlayerInventoryScript.UpdatePlayerInventoryStats();
+                    par_Managers.GetComponent<Manager_UIReuse>().health += currentConsumableAmount;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxConsumableAmount;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
-                Destroy(gameObject);
+                    currentConsumableAmount = maxConsumableAmount;
+
+                    LoadValues();
+                }
+                else
+                {
+                    PlayerInventoryScript.inventory.Remove(gameObject);
+                    PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
+                    par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_healthKitName);
+
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    gameObject.GetComponent<Env_Item>().RemoveListeners();
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+
+                    PlayerInventoryScript.UpdatePlayerInventoryStats();
+                    par_Managers.GetComponent<Manager_UIReuse>().health = PlayerHealthScript.health;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxConsumableAmount;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
+
+                    Destroy(gameObject);
+                }
             }
             //if player health is less than or more than or equal to health kit remainder
             else if (playerHealth < currentConsumableAmount 
@@ -110,50 +138,63 @@ public class Item_Consumable : MonoBehaviour
                     PlayerHealthScript.health = playerMaxHealth;
                     currentConsumableAmount -= remainderToMax;
 
-                    UIReuseScript.ClearStatsUI();
-                    UIReuseScript.ClearInventoryUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
-                    UIReuseScript.RebuildPlayerInventory();
-                    UIReuseScript.txt_InventoryName.text = "Player inventory";
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
 
                     PlayerInventoryScript.UpdatePlayerInventoryStats();
-                    UIReuseScript.health = PlayerHealthScript.health;
-                    UIReuseScript.maxHealth = PlayerHealthScript.maxHealth;
-                    UIReuseScript.UpdatePlayerHealth();
+                    par_Managers.GetComponent<Manager_UIReuse>().health = PlayerHealthScript.health;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = PlayerHealthScript.maxHealth;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
-                    //update consumable value based off of current consumable amount
-                    if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
-                    {
-                        //get item max value
-                        int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-                        //get consumbale current consumable percentage from max consumable amount
-                        float consumablePercentage = (currentConsumableAmount / maxConsumableAmount) * 100;
-                        //calculate new item value according to item consumable percentage
-                        itemValue = Mathf.FloorToInt(itemValue / 100 * consumablePercentage);
-                        //assign item value to consumable
-                        gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
-                    }
+                    LoadValues();
                 }
                 else if (playerHealth + currentConsumableAmount <= playerMaxHealth)
                 {
                     PlayerHealthScript.health += currentConsumableAmount;
 
-                    PlayerInventoryScript.inventory.Remove(gameObject);
-                    PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
-                    ConsoleScript.playeritemnames.Remove(str_healthKitName);
+                    int itemCount = gameObject.GetComponent<Env_Item>().int_itemCount;
+                    if (itemCount > 1)
+                    {
+                        gameObject.GetComponent<Env_Item>().int_itemCount -= 1;
+                        PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
 
-                    UIReuseScript.ClearStatsUI();
-                    UIReuseScript.ClearInventoryUI();
-                    gameObject.GetComponent<Env_Item>().RemoveListeners();
-                    UIReuseScript.RebuildPlayerInventory();
-                    UIReuseScript.txt_InventoryName.text = "Player inventory";
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        gameObject.GetComponent<Env_Item>().RemoveListeners();
+                        par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
 
-                    PlayerInventoryScript.UpdatePlayerInventoryStats();
-                    UIReuseScript.health += currentConsumableAmount;
-                    UIReuseScript.maxHealth = maxConsumableAmount;
-                    UIReuseScript.UpdatePlayerHealth();
+                        PlayerInventoryScript.UpdatePlayerInventoryStats();
+                        par_Managers.GetComponent<Manager_UIReuse>().health += currentConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
-                    Destroy(gameObject);
+                        currentConsumableAmount = maxConsumableAmount;
+
+                        LoadValues();
+                    }
+                    else
+                    {
+                        PlayerInventoryScript.inventory.Remove(gameObject);
+                        PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
+                        par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_healthKitName);
+
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        gameObject.GetComponent<Env_Item>().RemoveListeners();
+                        par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+
+                        PlayerInventoryScript.UpdatePlayerInventoryStats();
+                        par_Managers.GetComponent<Manager_UIReuse>().health += currentConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
+
+                        Destroy(gameObject);
+                    }
                 }
             }
         }
@@ -169,22 +210,46 @@ public class Item_Consumable : MonoBehaviour
             {
                 item.GetComponent<Item_Gun>().durability = maxDurability;
 
-                PlayerInventoryScript.inventory.Remove(gameObject);
-                PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
-                ConsoleScript.playeritemnames.Remove(str_repairKitName);
+                int itemCount = gameObject.GetComponent<Env_Item>().int_itemCount;
+                if (itemCount > 1)
+                {
+                    gameObject.GetComponent<Env_Item>().int_itemCount -= 1;
+                    PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
 
-                UIReuseScript.ClearStatsUI();
-                UIReuseScript.ClearInventoryUI();
-                gameObject.GetComponent<Env_Item>().RemoveListeners();
-                UIReuseScript.RebuildRepairMenu();
-                UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    gameObject.GetComponent<Env_Item>().RemoveListeners();
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
 
-                PlayerInventoryScript.UpdatePlayerInventoryStats();
-                UIReuseScript.durability = item.GetComponent<Item_Gun>().maxDurability;
-                UIReuseScript.maxDurability = item.GetComponent<Item_Gun>().maxDurability;
-                UIReuseScript.UpdateWeaponQuality();
+                    PlayerInventoryScript.UpdatePlayerInventoryStats();
+                    par_Managers.GetComponent<Manager_UIReuse>().durability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
 
-                Destroy(gameObject);
+                    currentConsumableAmount = maxConsumableAmount;
+
+                    LoadValues();
+                }
+                else
+                {
+                    PlayerInventoryScript.inventory.Remove(gameObject);
+                    PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
+                    par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_repairKitName);
+
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    gameObject.GetComponent<Env_Item>().RemoveListeners();
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+
+                    PlayerInventoryScript.UpdatePlayerInventoryStats();
+                    par_Managers.GetComponent<Manager_UIReuse>().durability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+
+                    Destroy(gameObject);
+                }
             }
             //if repairable item durability is less than or more than or equal to repairkit remainder
             else if (durability < currentConsumableAmount 
@@ -197,49 +262,62 @@ public class Item_Consumable : MonoBehaviour
                     item.GetComponent<Item_Gun>().durability = maxDurability;
                     currentConsumableAmount -= remainderToMax;
 
-                    UIReuseScript.ClearStatsUI();
-                    UIReuseScript.ClearInventoryUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
-                    UIReuseScript.RebuildRepairMenu();
-                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+                    par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
 
                     PlayerInventoryScript.UpdatePlayerInventoryStats();
-                    UIReuseScript.durability = item.GetComponent<Item_Gun>().maxDurability;
-                    UIReuseScript.maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().durability = item.GetComponent<Item_Gun>().maxDurability;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxDurability = item.GetComponent<Item_Gun>().maxDurability;
 
-                    //update consumable value based off of current consumable amount
-                    if (currentConsumableAmount < maxConsumableAmount / 100 * 75)
-                    {
-                        //get item max value
-                        int itemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
-                        //get consumbale current consumable percentage from max consumable amount
-                        float consumablePercentage = (currentConsumableAmount / maxConsumableAmount) * 100;
-                        //calculate new item value according to item consumable percentage
-                        itemValue = Mathf.FloorToInt(itemValue / 100 * consumablePercentage);
-                        //assign item value to consumable
-                        gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
-                    }
+                    LoadValues();
                 }
                 else if (durability + currentConsumableAmount <= maxDurability)
                 {
                     item.GetComponent<Item_Gun>().durability += currentConsumableAmount;
-
-                    PlayerInventoryScript.inventory.Remove(gameObject);
                     PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
-                    ConsoleScript.playeritemnames.Remove(str_repairKitName);
 
-                    UIReuseScript.ClearStatsUI();
-                    UIReuseScript.ClearInventoryUI();
-                    gameObject.GetComponent<Env_Item>().RemoveListeners();
-                    UIReuseScript.RebuildRepairMenu();
-                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+                    int itemCount = gameObject.GetComponent<Env_Item>().int_itemCount;
+                    if (itemCount > 1)
+                    {
+                        gameObject.GetComponent<Env_Item>().int_itemCount -= 1;
 
-                    PlayerInventoryScript.UpdatePlayerInventoryStats();
-                    UIReuseScript.durability += currentConsumableAmount;
-                    UIReuseScript.maxDurability = item.GetComponent<Item_Gun>().maxDurability;
-                    UIReuseScript.UpdateWeaponQuality();
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        gameObject.GetComponent<Env_Item>().RemoveListeners();
+                        par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
 
-                    Destroy(gameObject);
+                        PlayerInventoryScript.UpdatePlayerInventoryStats();
+                        par_Managers.GetComponent<Manager_UIReuse>().durability += currentConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+
+                        currentConsumableAmount = maxConsumableAmount;
+
+                        LoadValues();
+                    }
+                    else
+                    {
+                        PlayerInventoryScript.inventory.Remove(gameObject);
+                        PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
+                        par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_repairKitName);
+
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        gameObject.GetComponent<Env_Item>().RemoveListeners();
+                        par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
+
+                        PlayerInventoryScript.UpdatePlayerInventoryStats();
+                        par_Managers.GetComponent<Manager_UIReuse>().durability += currentConsumableAmount;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+
+                        Destroy(gameObject);
+                    }
                 }
             }
         }

@@ -7,23 +7,21 @@ public class UI_TeleportToCellFromMap : MonoBehaviour, IPointerClickHandler
 { 
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private Manager_CurrentCell CurrentCellScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (PlayerMenuScript.openedMapUI)
+        if (par_Managers.GetComponent<UI_PlayerMenu>().openedMapUI)
         {
-            UIReuseScript.par_TeleportCheck.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().par_TeleportCheck.SetActive(true);
 
-            UIReuseScript.txt_Teleport.text = "Teleport to " + CurrentCellScript.str_CellName + "?";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_Teleport.text = "Teleport to " + CurrentCellScript.str_CellName + "?";
 
-            UIReuseScript.btn_ConfirmTeleport.onClick.RemoveAllListeners();
-            UIReuseScript.btn_ConfirmTeleport.onClick.AddListener(ConfirmTeleport);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmTeleport.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmTeleport.onClick.AddListener(ConfirmTeleport);
 
-            UIReuseScript.btn_CancelTeleport.onClick.RemoveAllListeners();
-            UIReuseScript.btn_CancelTeleport.onClick.AddListener(CancelTeleport);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_CancelTeleport.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_CancelTeleport.onClick.AddListener(CancelTeleport);
         }
     }
 
@@ -31,13 +29,13 @@ public class UI_TeleportToCellFromMap : MonoBehaviour, IPointerClickHandler
     {
         thePlayer.transform.position = CurrentCellScript.currentCellSpawnpoint.position;
 
-        UIReuseScript.par_TeleportCheck.SetActive(false);
-        PlayerMenuScript.ClosePlayerMenuUI();
+        par_Managers.GetComponent<Manager_UIReuse>().par_TeleportCheck.SetActive(false);
+        par_Managers.GetComponent<UI_PlayerMenu>().ClosePlayerMenuUI();
 
         Debug.Log("Teleported to cell " + CurrentCellScript.str_CellName + "!");
     }
     public void CancelTeleport()
     {
-        UIReuseScript.par_TeleportCheck.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_TeleportCheck.SetActive(false);
     }
 }

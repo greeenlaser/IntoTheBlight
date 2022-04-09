@@ -13,7 +13,7 @@ public class AI_Movement : MonoBehaviour
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private UI_AIContent AIContentScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //these two bools are only used when the AI has combat mechanics, otherwise theyre always false by default
     [HideInInspector] public bool canMove;
@@ -45,7 +45,8 @@ public class AI_Movement : MonoBehaviour
 
     private void Update()
     {
-        if (canMove)
+        if (canMove
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (!isStunned)
             {
@@ -64,7 +65,7 @@ public class AI_Movement : MonoBehaviour
                         && AIContentScript.AIActivated
                         && !AIContentScript.isAIUIOpen
                         && AIContentScript.hasDialogue
-                        && ConsoleScript.toggleAIDetection)
+                        && par_Managers.GetComponent<Manager_Console>().toggleAIDetection)
                     {
                         agent.isStopped = true;
 
@@ -167,8 +168,7 @@ public class AI_Movement : MonoBehaviour
                 }
             }
         }
-        else if (!canMove
-                 && !agent.isStopped)
+        else
         {
             agent.isStopped = true;
         }

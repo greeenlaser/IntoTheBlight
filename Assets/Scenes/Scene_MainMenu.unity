@@ -661,9 +661,15 @@ MonoBehaviour:
   fpsUpdateSpeed: 0.1
   txt_fpsValue: {fileID: 1483036526}
   logo: {fileID: 0}
-  TabletMessagesScript: {fileID: 0}
-  ConsoleScript: {fileID: 0}
-  PauseMenuScript: {fileID: 0}
+  par_Managers: {fileID: 0}
+  tips:
+  - aaa
+  - bbb
+  - ccc
+  - ddd
+  - eee
+  respawnNPCs: 0
+  respawnCount: 0
   thrownGrenades: []
 --- !u!114 &188475529
 MonoBehaviour:
@@ -680,6 +686,7 @@ MonoBehaviour:
   par_MainMenuContent: {fileID: 1032108186}
   par_KeyCommands: {fileID: 1407422805}
   par_TeamMembers: {fileID: 42748712}
+  par_Managers: {fileID: 188475526}
 --- !u!82 &188475530
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3794,6 +3801,7 @@ MonoBehaviour:
 
     press f
 
+
     press z/x/c
 
     hold z/x/c
@@ -3836,7 +3844,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.7
+  m_fontSize: 25.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

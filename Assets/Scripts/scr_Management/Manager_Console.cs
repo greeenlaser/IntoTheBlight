@@ -25,12 +25,7 @@ public class Manager_Console : MonoBehaviour
     [Header("Scripts")]
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private GameManager GameManagerScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_WorldClock ClockScript;
-    [SerializeField] private Manager_FactionReputation FactionScript;
-    [SerializeField] private UI_PlayerMenuStats PlayerMenuStatsScript; 
+    [SerializeField] private GameObject par_Managers;
     
     //public but hidden variables
     [HideInInspector] public bool consoleOpen;
@@ -142,7 +137,7 @@ public class Manager_Console : MonoBehaviour
         //start recieving unity logs
         Application.logMessageReceived += HandleLog;
 
-        consoleText = "---GAME VERSION: " + GameManagerScript.str_GameVersion + "---";
+        consoleText = "---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---";
         CreateNewConsoleLine();
         consoleText = "";
         CreateNewConsoleLine();
@@ -184,7 +179,7 @@ public class Manager_Console : MonoBehaviour
         }
 
         //updates player camera and position values on debug screen if game isnt paused and debug menu is being displayed
-        if (!PauseMenuScript.isGamePaused && displayDebugMenu)
+        if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused && displayDebugMenu)
         {
             playerPos = new Vector3(
                 Mathf.FloorToInt(thePlayer.transform.position.x),
@@ -209,7 +204,7 @@ public class Manager_Console : MonoBehaviour
 
         if (isSelectingTarget)
         {
-            PauseMenuScript.canPauseGame = false;
+            par_Managers.GetComponent<UI_PauseMenu>().canPauseGame = false;
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
@@ -227,9 +222,9 @@ public class Manager_Console : MonoBehaviour
                         target = hit.transform.gameObject;
                         txt_SelectedTargetName.text = "selected target: " + target.name.ToString();
 
-                        UIReuseScript.par_Console.transform.localPosition = new Vector3(0, 0, 0);
+                        par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, 0, 0);
 
-                        UIReuseScript.txt_InsertedTextSlot.ActivateInputField();
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.ActivateInputField();
 
                         isSelectingTarget = false;
                     }
@@ -244,9 +239,9 @@ public class Manager_Console : MonoBehaviour
             txt_SelectedTargetName.text = "";
             target = null;
 
-            UIReuseScript.par_Console.transform.localPosition = new Vector3(0, 0, 0);
+            par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, 0, 0);
 
-            PauseMenuScript.canPauseGame = true;
+            par_Managers.GetComponent<UI_PauseMenu>().canPauseGame = true;
             isSelectingTarget = false;
         }
     }
@@ -262,16 +257,18 @@ public class Manager_Console : MonoBehaviour
     {
         if (!consoleOpen)
         {
-            if (!PauseMenuScript.isInventoryOpen 
-                && !PauseMenuScript.isUIOpen 
-                && !PauseMenuScript.isTalkingToAI
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen 
+                && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen 
+                && !par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI
+                && !par_Managers.GetComponent<UI_PauseMenu>().isWaitableUIOpen
+                && !par_Managers.GetComponent<Manager_GameSaving>().isLoading
                 && lockpickUI == null)
             {
-                PauseMenuScript.PauseGame();
+                par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
             }
 
-            UIReuseScript.par_Console.SetActive(true);
-            UIReuseScript.txt_InsertedTextSlot.ActivateInputField();
+            par_Managers.GetComponent<Manager_UIReuse>().par_Console.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.ActivateInputField();
 
             if (target != null)
             {
@@ -282,21 +279,21 @@ public class Manager_Console : MonoBehaviour
         }
         else if (consoleOpen)
         {
-            if (!PauseMenuScript.isInventoryOpen 
-                && !PauseMenuScript.isUIOpen 
-                && !PauseMenuScript.isTalkingToAI
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen 
+                && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen 
+                && !par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI
                 && lockpickUI == null)
             {
-                PauseMenuScript.UnpauseGame();
+                par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
             }
 
-            UIReuseScript.par_Console.transform.localPosition = new Vector3(0, 0, 0);
+            par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, 0, 0);
 
             //resets all target-related variables except last selected target
             txt_SelectedTargetName.text = "";
             isSelectingTarget = false;
 
-            UIReuseScript.par_Console.SetActive(false);
+            par_Managers.GetComponent<Manager_UIReuse>().par_Console.SetActive(false);
 
             consoleOpen = false;
         }
@@ -315,9 +312,9 @@ public class Manager_Console : MonoBehaviour
             //check inserted text
             CheckInsertedText();
             //clear inserted text
-            UIReuseScript.txt_InsertedTextSlot.text = "";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.text = "";
             //enable input field
-            UIReuseScript.txt_InsertedTextSlot.ActivateInputField();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.ActivateInputField();
         }
     }
 
@@ -390,6 +387,11 @@ public class Manager_Console : MonoBehaviour
                 {
                     Command_ToggleAIDetection();
                 }
+                else if (separatedWords[0] == "gcr" && separatedWords.Count == 1
+                         && PlayerHealthScript.isPlayerAlive)
+                {
+                    Command_GlobalCellReset();
+                }
                 //clear the console
                 else if (separatedWords[0] == "clear" && separatedWords.Count == 1)
                 {
@@ -412,11 +414,6 @@ public class Manager_Console : MonoBehaviour
                          && PlayerHealthScript.isPlayerAlive)
                 {
                     Command_EditTarget();
-                }
-                else if (separatedWords[0] == "addtime" && separatedWords.Count == 2
-                         && PlayerHealthScript.isPlayerAlive)
-                {
-                    Command_AddTime();
                 }
                 //shows all spawnable items
                 else if (separatedWords.Count == 1 && separatedWords[0] == "sasi")
@@ -463,9 +460,9 @@ public class Manager_Console : MonoBehaviour
                     if (separatedWords[0] == "tgm" && separatedWords.Count == 1
                         || separatedWords[0] == "tnc" && separatedWords.Count == 1
                         || separatedWords[0] == "taid" && separatedWords.Count == 1
+                        || separatedWords[0] == "gcr" && separatedWords.Count == 1
                         || separatedWords[0] == "selecttarget" && separatedWords.Count == 1
                         || separatedWords[0] == "target" && separatedWords.Count >= 2
-                        || separatedWords[0] == "addtime" && separatedWords.Count == 2
                         || separatedWords[0] == "setrep" && separatedWords.Count == 4
                         || separatedWords[0] == "tp" && separatedWords.Count == 4
                         || separatedWords[0] == "tpcell" && separatedWords.Count == 2)
@@ -639,10 +636,10 @@ public class Manager_Console : MonoBehaviour
     //create a new text object
     private void CreateNewConsoleLine()
     {
-        if (UIReuseScript.txt_InsertedTextTemplate != null)
+        if (par_Managers != null)
         {
             //create text object
-            GameObject newConsoleText = Instantiate(UIReuseScript.txt_InsertedTextTemplate.gameObject);
+            GameObject newConsoleText = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextTemplate.gameObject);
             //add created text object to list
             createdTexts.Add(newConsoleText);
 
@@ -655,7 +652,7 @@ public class Manager_Console : MonoBehaviour
                 Destroy(oldestText);
             }
 
-            newConsoleText.transform.SetParent(UIReuseScript.par_Content.transform, false);
+            newConsoleText.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Content.transform, false);
             newConsoleText.GetComponent<TMP_Text>().text = consoleText;
         }
     }
@@ -684,6 +681,8 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             consoleText = "taid - toggles ai detection for player.";
             CreateNewConsoleLine();
+            consoleText = "gcr - Global cell reset.";
+            CreateNewConsoleLine();
             consoleText = "clear - Clears the console log.";
             CreateNewConsoleLine();
             consoleText = "quit - Quits the game.";
@@ -697,8 +696,6 @@ public class Manager_Console : MonoBehaviour
             consoleText = "target ... - Special command which must have more words after it - use target showinfo to show target states and commands.";
             CreateNewConsoleLine();
             consoleText = "target showinfo - Shows target states and commands.";
-            CreateNewConsoleLine();
-            consoleText = "addtime timeValue - Advance game time by timeValue.";
             CreateNewConsoleLine();
             consoleText = "sasi - shows all items that can be spawned.";
             CreateNewConsoleLine();
@@ -800,7 +797,7 @@ public class Manager_Console : MonoBehaviour
         consoleText = "--" + input + "--";
         CreateNewConsoleLine();
 
-        consoleText = "---GAME VERSION: " + GameManagerScript.str_GameVersion + "---";
+        consoleText = "---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---";
         CreateNewConsoleLine();
 
         consoleText = "";
@@ -855,6 +852,18 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             displayUnityLogs = false;
         }
+        separatedWords.Clear();
+    }
+    //adds time in hours
+    private void Command_GlobalCellReset()
+    {
+        insertedCommands.Add("gcr");
+        currentSelectedInsertedCommand = insertedCommands.Count;
+        consoleText = "--gcr--";
+        CreateNewConsoleLine();
+
+        par_Managers.GetComponent<GameManager>().GlobalCellReset();
+
         separatedWords.Clear();
     }
     //deletes all saves
@@ -926,9 +935,9 @@ public class Manager_Console : MonoBehaviour
         CreateNewConsoleLine();
 
         txt_SelectedTargetName.text = "Click on a GameObject to select it as a target.";
-        UIReuseScript.par_Console.transform.localPosition = new Vector3(0, -3000, 0);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, -3000, 0);
 
-        UIReuseScript.txt_InsertedTextSlot.DeactivateInputField();
+        par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.DeactivateInputField();
 
         isSelectingTarget = true;
 
@@ -1537,51 +1546,6 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
 
-    //adds time in hours
-    private void Command_AddTime()
-    {
-        insertedCommands.Add("addtime " + separatedWords[1]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + " " + separatedWords[1] + "--";
-        CreateNewConsoleLine();
-
-        string commandName = separatedWords[0];
-
-        bool isInt = int.TryParse(commandName, out _);
-        bool isInsertedValueInt = int.TryParse(separatedWords[1], out _);
-        insertedValue = int.Parse(separatedWords[1]);
-        if (isInt)
-        {
-            consoleText = "Error: Time command name cannot be a number!";
-            CreateNewConsoleLine();
-        }
-        else if (!isInsertedValueInt)
-        {
-            consoleText = "Error: Inserted value must be a whole number!";
-            CreateNewConsoleLine();
-        }
-        else if (!isInt && isInsertedValueInt)
-        {
-            if (insertedValue > 0 && insertedValue < 673)
-            {
-                ClockScript.hour += insertedValue;
-                ClockScript.UpdateDate();
-                consoleText = "Advanced time by " + separatedWords[1] + " hours.";
-                CreateNewConsoleLine();
-            }
-            else if (insertedValue >= 673)
-            {
-                consoleText = "Error: Hour value must be set below 673!";
-                CreateNewConsoleLine();
-            }
-            else
-            {
-                consoleText = "Error: Hour value must be set over 0!";
-                CreateNewConsoleLine();
-            }
-        }
-        separatedWords.Clear();
-    }
     //shows all game factions
     private void Command_ShowFactions()
     {
@@ -1652,512 +1616,512 @@ public class Manager_Console : MonoBehaviour
                     //scientists vs others
                     if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep1v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep1v2 = value;
-                        FactionScript.rep2v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep1v3 = value;
-                        FactionScript.rep3v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep1v4 = value;
-                        FactionScript.rep4v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep1v5 = value;
-                        FactionScript.rep5v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep1v6 = value;
-                        FactionScript.rep6v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep1v7 = value;
-                        FactionScript.rep7v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep1v8 = value;
-                        FactionScript.rep8v1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //geifers vs others
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep2v1 = value;
-                        FactionScript.rep1v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep2v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep2v3 = value;
-                        FactionScript.rep3v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep2v4 = value;
-                        FactionScript.rep4v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep2v5 = value;
-                        FactionScript.rep5v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep2v6 = value;
-                        FactionScript.rep6v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep2v7 = value;
-                        FactionScript.rep7v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep2v8 = value;
-                        FactionScript.rep8v2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //annies vs others
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep3v1 = value;
-                        FactionScript.rep1v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep3v2 = value;
-                        FactionScript.rep2v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep3v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep3v4 = value;
-                        FactionScript.rep4v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep3v5 = value;
-                        FactionScript.rep5v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep3v6 = value;
-                        FactionScript.rep6v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep3v7 = value;
-                        FactionScript.rep7v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep3v8 = value;
-                        FactionScript.rep8v3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //verbannte vs others
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep4v1 = value;
-                        FactionScript.rep1v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep4v2 = value;
-                        FactionScript.rep2v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep4v3 = value;
-                        FactionScript.rep3v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep4v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep4v5 = value;
-                        FactionScript.rep5v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep4v6 = value;
-                        FactionScript.rep6v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep4v7 = value;
-                        FactionScript.rep7v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep4v8 = value;
-                        FactionScript.rep8v4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //raiders vs others
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep5v1 = value;
-                        FactionScript.rep1v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep5v2 = value;
-                        FactionScript.rep2v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep5v3 = value;
-                        FactionScript.rep5v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep5v4 = value;
-                        FactionScript.rep5v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep5v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep5v6 = value;
-                        FactionScript.rep6v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep5v7 = value;
-                        FactionScript.rep7v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep5v8 = value;
-                        FactionScript.rep8v5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //military vs others
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep6v1 = value;
-                        FactionScript.rep1v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep6v2 = value;
-                        FactionScript.rep2v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep6v3 = value;
-                        FactionScript.rep3v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep6v4 = value;
-                        FactionScript.rep4v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep6v5 = value;
-                        FactionScript.rep5v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep6v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep6v7 = value;
-                        FactionScript.rep7v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep6v8 = value;
-                        FactionScript.rep8v6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //verteidiger vs others
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep7v1 = value;
-                        FactionScript.rep1v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep7v2 = value;
-                        FactionScript.rep2v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep7v3 = value;
-                        FactionScript.rep3v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep7v4 = value;
-                        FactionScript.rep4v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep7v5 = value;
-                        FactionScript.rep5v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep7v6 = value;
-                        FactionScript.rep6v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep7v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep7v8 = value;
-                        FactionScript.rep8v7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v8 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     //others vs others
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "scientists")
                     {
-                        FactionScript.rep8v1 = value;
-                        FactionScript.rep1v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v1 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "geifers")
                     {
-                        FactionScript.rep8v2 = value;
-                        FactionScript.rep2v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v2 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "annies")
                     {
-                        FactionScript.rep8v3 = value;
-                        FactionScript.rep3v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v3 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "verbannte")
                     {
-                        FactionScript.rep8v4 = value;
-                        FactionScript.rep4v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v4 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "raiders")
                     {
-                        FactionScript.rep8v5 = value;
-                        FactionScript.rep5v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v5 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "military")
                     {
-                        FactionScript.rep8v6 = value;
-                        FactionScript.rep6v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v6 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "verteidiger")
                     {
-                        FactionScript.rep8v7 = value;
-                        FactionScript.rep7v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v7 = value;
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "others")
                     {
-                        FactionScript.rep8v8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
@@ -2529,7 +2493,7 @@ public class Manager_Console : MonoBehaviour
             thePlayer.GetComponent<Player_Movement>().speedIncrease = originalSpeed;
             thePlayer.GetComponent<Player_Movement>().jumpHeight = originalJumpHeight + 0.75f; //increasing the jump height to the real original jump height
             thePlayer.GetComponent<Inv_Player>().maxInvSpace = originalMaxInvspace;
-            PlayerMenuStatsScript.GetStats();
+            par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
         }
 
         separatedWords.Clear();
@@ -2568,7 +2532,7 @@ public class Manager_Console : MonoBehaviour
                     string health = thePlayer.GetComponent<Player_Health>().health.ToString();
                     consoleText = "Changed player current health to " + health + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Health>().maxHealth)
                 {
@@ -2591,7 +2555,7 @@ public class Manager_Console : MonoBehaviour
                     string maxhealth = thePlayer.GetComponent<Player_Health>().maxHealth.ToString();
                     consoleText = "Changed player max health to " + maxhealth + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Health>().health)
                 {
@@ -2614,7 +2578,7 @@ public class Manager_Console : MonoBehaviour
                     string stamina = thePlayer.GetComponent<Player_Movement>().currentStamina.ToString();
                     consoleText = "Changed player current stamina to " + stamina + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
                 {
@@ -2637,7 +2601,7 @@ public class Manager_Console : MonoBehaviour
                     string maxstamina = thePlayer.GetComponent<Player_Movement>().maxStamina.ToString();
                     consoleText = "Changed player max stamina to " + maxstamina + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
                 {
@@ -2660,7 +2624,7 @@ public class Manager_Console : MonoBehaviour
                     string mentalstate = thePlayer.GetComponent<Player_Health>().mentalState.ToString();
                     consoleText = "Changed player current mental state to " + mentalstate + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
                 {
@@ -2683,7 +2647,7 @@ public class Manager_Console : MonoBehaviour
                     string maxmentalstate = thePlayer.GetComponent<Player_Health>().maxMentalState.ToString();
                     consoleText = "Changed player max mental state to " + maxmentalstate + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
                 {
@@ -2706,7 +2670,7 @@ public class Manager_Console : MonoBehaviour
                     string radiation = thePlayer.GetComponent<Player_Health>().radiation.ToString();
                     consoleText = "Changed player current radiation to " + radiation + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
                 {
@@ -2729,7 +2693,7 @@ public class Manager_Console : MonoBehaviour
                     string maxradiation = thePlayer.GetComponent<Player_Health>().maxRadiation.ToString();
                     consoleText = "Changed player max radiation to " + maxradiation + ".";
                     CreateNewConsoleLine();
-                    PlayerMenuStatsScript.GetStats();
+                    par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
                 {
@@ -3396,9 +3360,9 @@ public class Manager_Console : MonoBehaviour
 
                     if (displayableItem.GetComponent<Item_Gun>().hasEquippedGun)
                     {
-                        UIReuseScript.durability = displayableItem.GetComponent<Item_Gun>().durability;
-                        UIReuseScript.maxDurability = displayableItem.GetComponent<Item_Gun>().maxDurability;
-                        UIReuseScript.UpdateWeaponQuality();
+                        par_Managers.GetComponent<Manager_UIReuse>().durability = displayableItem.GetComponent<Item_Gun>().durability;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = displayableItem.GetComponent<Item_Gun>().maxDurability;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
                     }
 
                     consoleText = "Fully repaired " + displayableItem.GetComponent<Env_Item>().str_ItemName + "!";
@@ -3469,57 +3433,57 @@ public class Manager_Console : MonoBehaviour
                 {
                     if (confirmedFactionName == "scientists")
                     {
-                        FactionScript.pv1 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv1 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "geifers")
                     {
-                        FactionScript.pv2 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv2 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "annies")
                     {
-                        FactionScript.pv3 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv3 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "verbannte")
                     {
-                        FactionScript.pv4 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv4 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "raiders")
                     {
-                        FactionScript.pv5 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv5 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "military")
                     {
-                        FactionScript.pv6 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv6 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "verteidiger")
                     {
-                        FactionScript.pv7 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv7 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
                     else if (confirmedFactionName == "others")
                     {
-                        FactionScript.pv8 = value;
-                        UIReuseScript.UpdatePlayerFactionUI();
+                        par_Managers.GetComponent<Manager_FactionReputation>().pv8 = value;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
                         consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
                         CreateNewConsoleLine();
                     }
@@ -3548,40 +3512,40 @@ public class Manager_Console : MonoBehaviour
     {
         if (PlayerInventoryScript.isPlayerInventoryOpen)
         {
-            UIReuseScript.ClearStatsUI();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildPlayerInventory();
-            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
         }
         else if (PlayerInventoryScript.Container != null && PlayerInventoryScript.Container.GetComponent<Inv_Container>().isContainerInventoryOpen)
         {
-            UIReuseScript.ClearStatsUI();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildContainerInventory();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
         }
         else if (PlayerInventoryScript.Trader != null && PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().isShopOpen)
         {
-            UIReuseScript.ClearStatsUI();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildShopInventory();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
         }
         else if (PlayerInventoryScript.Trader != null && PlayerInventoryScript.Trader.GetComponent<UI_RepairContent>().isNPCRepairUIOpen)
         {
-            UIReuseScript.ClearStatsUI();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildRepairMenu();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
         }
         else if (PlayerInventoryScript.Workbench != null && PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().isActive)
         {
-            UIReuseScript.ClearStatsUI();
-            UIReuseScript.ClearInventoryUI();
-            UIReuseScript.RebuildRepairMenu();
-            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.GetComponent<Env_Workbench>().str_workbenchName;
+            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<Env_Workbench>().str_workbenchName;
         }
-        UIReuseScript.UpdateWeaponQuality();
+        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
     }
 
     private void ResetAmmoAndGun()
@@ -3592,7 +3556,7 @@ public class Manager_Console : MonoBehaviour
             == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
         {
             PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().ammoClip = null;
-            UIReuseScript.txt_ammoForGun.text = "0";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "0";
         }
         //unequips this item if it is a gun
         if (selectedItem.GetComponent<Item_Gun>() != null
@@ -3656,7 +3620,7 @@ public class Manager_Console : MonoBehaviour
                 CreateNewConsoleLine();
             }
         }
-        UIReuseScript.UpdateWeaponQuality();
+        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
     }
 
     private IEnumerator SpawnMultipleNonStackables()
@@ -3715,7 +3679,7 @@ public class Manager_Console : MonoBehaviour
 
     private void HandleLog(string logString, string stackTrace, LogType type)
     {
-        if (UIReuseScript.txt_InsertedTextTemplate != null)
+        if (par_Managers != null)
         {
             output = logString;
             stack = stackTrace;

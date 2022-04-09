@@ -13,6 +13,7 @@ public class Player_Camera : MonoBehaviour
     [SerializeField] private Slider MouseSpeedSlider;
     public Slider FOVSlider;
     [SerializeField] private Player_Movement PlayerMovementScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isCamEnabled;
@@ -45,7 +46,8 @@ public class Player_Camera : MonoBehaviour
     private void Update()
     {
         if (isCamEnabled 
-            && !PlayerMovementScript.isStunned)
+            && !PlayerMovementScript.isStunned
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (!isAimingDownSights)
             {

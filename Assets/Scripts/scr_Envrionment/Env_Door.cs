@@ -8,6 +8,7 @@ public class Env_Door : MonoBehaviour
     public bool isProtected;
     public bool isLocked;
     public bool needsKey;
+    public bool controlledByLift;
     [Range(1, 10)]
     [SerializeField] private float doorMoveSpeed;
     public Vector3 trigger_Open;
@@ -36,11 +37,13 @@ public class Env_Door : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool isActive;
+    [HideInInspector] public bool openDoor;
+    [HideInInspector] public bool closeDoor;
+    [HideInInspector] public bool forceCloseDoor;
+    [HideInInspector] public bool isClosed;
 
     //private variables
-    private bool openDoor;
-    private bool closeDoor;
-    private bool isClosed;
+
     private float doorDistanceFromEndPos;
     private List<GameObject> targetsInTrigger = new List<GameObject>();
 
@@ -81,7 +84,9 @@ public class Env_Door : MonoBehaviour
                 closeDoor = true;
             }
         }
-        if (closeDoor)
+        if ((closeDoor
+            && !controlledByLift)
+            || forceCloseDoor)
         {
             openDoor = false;
 
@@ -107,7 +112,10 @@ public class Env_Door : MonoBehaviour
             }
         }
 
-        if (targetsInTrigger.Count == 0 && !isClosed && !closeDoor)
+        if (targetsInTrigger.Count == 0 
+            && !isClosed 
+            && !closeDoor
+            && !controlledByLift)
         {
             closeDoor = true;
         }
@@ -118,7 +126,8 @@ public class Env_Door : MonoBehaviour
         if (isActive
             && !isLocked 
             && (other.CompareTag("Player") 
-            || other.CompareTag("NPC")))
+            || other.CompareTag("NPC"))
+            && !controlledByLift)
         {
             if (!targetsInTrigger.Contains(other.gameObject))
             {
@@ -136,7 +145,8 @@ public class Env_Door : MonoBehaviour
         if (isActive
             && !isLocked
             && (other.CompareTag("Player") 
-            || other.CompareTag("NPC")))
+            || other.CompareTag("NPC"))
+            && !controlledByLift)
         {
             if (targetsInTrigger.Contains(other.gameObject))
             {
@@ -208,6 +218,7 @@ public class Env_Door : MonoBehaviour
         closeDoor = false;
         openDoor = false;
         isClosed = true;
+        forceCloseDoor = false;
 
         //Debug.Log("Door is closed!");
     }

@@ -6,10 +6,7 @@ using UnityEngine.UI;
 public class UI_AcceptedQuests : MonoBehaviour
 {
     [Header("Assignables")]
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
-    [SerializeField] private Manager_Console ConsoleScript;
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isQuestsListOpen;
@@ -19,27 +16,27 @@ public class UI_AcceptedQuests : MonoBehaviour
 
     public void OpenQuests()
     {
-        UIReuseScript.par_RealQuestUI.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_RealQuestUI.SetActive(true);
         ShowAcceptedQuests();
     }
 
     public void ShowAcceptedQuests()
     {
-        UIReuseScript.ClearQuestUI();
-        UIReuseScript.RebuildAcceptedQuestsList();
-        UIReuseScript.btn_AcceptedQuests.interactable = false;
-        UIReuseScript.btn_FinishedQuests.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().ClearQuestUI();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildAcceptedQuestsList();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_AcceptedQuests.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_FinishedQuests.interactable = true;
     }
     public void ShowCompletedQuests()
     {
-        UIReuseScript.ClearQuestUI();
-        UIReuseScript.RebuildCompletedQuestsList();
-        UIReuseScript.btn_AcceptedQuests.interactable = true;
-        UIReuseScript.btn_FinishedQuests.interactable = false;
+        par_Managers.GetComponent<Manager_UIReuse>().ClearQuestUI();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildCompletedQuestsList();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_AcceptedQuests.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_FinishedQuests.interactable = false;
     }
 
     public void CloseQuests()
     {
-        UIReuseScript.par_RealQuestUI.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_RealQuestUI.SetActive(false);
     }
 }

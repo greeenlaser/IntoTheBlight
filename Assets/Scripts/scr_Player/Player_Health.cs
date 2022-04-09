@@ -12,8 +12,7 @@ public class Player_Health : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private TMP_Text txt_PlayerDied;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private GameObject par_Managers;
 
     //hidden but public variables
     [HideInInspector] public bool isPlayerAlive;
@@ -40,16 +39,16 @@ public class Player_Health : MonoBehaviour
 
     private void Start()
     {
-        UIReuseScript.health = health;
-        UIReuseScript.maxHealth = maxHealth;
-        UIReuseScript.UpdatePlayerHealth();
+        par_Managers.GetComponent<Manager_UIReuse>().health = health;
+        par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxHealth;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
-        UIReuseScript.mentalState = mentalState;
-        UIReuseScript.maxMentalState = maxMentalState;
-        UIReuseScript.UpdatePlayerMentalState();
+        par_Managers.GetComponent<Manager_UIReuse>().mentalState = mentalState;
+        par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = maxMentalState;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
 
-        UIReuseScript.maxRadiation = maxRadiation;
-        UIReuseScript.UpdatePlayerRadiation();
+        par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = maxRadiation;
+        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
     }
 
     private void Update()
@@ -65,37 +64,37 @@ public class Player_Health : MonoBehaviour
                 && radiation < maxRadiation
                 && mentalState > 0)
             {
-                if (UIReuseScript.health != health)
+                if (par_Managers.GetComponent<Manager_UIReuse>().health != health)
                 {
-                    UIReuseScript.health = health;
-                    UIReuseScript.UpdatePlayerHealth();
+                    par_Managers.GetComponent<Manager_UIReuse>().health = health;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
                 }
-                if (UIReuseScript.maxHealth != maxHealth)
+                if (par_Managers.GetComponent<Manager_UIReuse>().maxHealth != maxHealth)
                 {
-                    UIReuseScript.maxHealth = maxHealth;
-                    UIReuseScript.UpdatePlayerHealth();
-                }
-
-                if (UIReuseScript.mentalState != mentalState)
-                {
-                    UIReuseScript.mentalState = mentalState;
-                    UIReuseScript.UpdatePlayerMentalState();
-                }
-                if (UIReuseScript.maxMentalState != maxMentalState)
-                {
-                    UIReuseScript.maxMentalState = maxMentalState;
-                    UIReuseScript.UpdatePlayerMentalState();
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxHealth;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
                 }
 
-                if (UIReuseScript.radiation != radiation)
+                if (par_Managers.GetComponent<Manager_UIReuse>().mentalState != mentalState)
                 {
-                    UIReuseScript.radiation = radiation;
-                    UIReuseScript.UpdatePlayerRadiation();
+                    par_Managers.GetComponent<Manager_UIReuse>().mentalState = mentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
                 }
-                if (UIReuseScript.maxRadiation != maxRadiation)
+                if (par_Managers.GetComponent<Manager_UIReuse>().maxMentalState != maxMentalState)
                 {
-                    UIReuseScript.maxRadiation = maxRadiation;
-                    UIReuseScript.UpdatePlayerRadiation();
+                    par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = maxMentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
+                }
+
+                if (par_Managers.GetComponent<Manager_UIReuse>().radiation != radiation)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().radiation = radiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
+                }
+                if (par_Managers.GetComponent<Manager_UIReuse>().maxRadiation != maxRadiation)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = maxRadiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
                 }
 
                 if (mentalState < maxMentalState)
@@ -111,9 +110,9 @@ public class Player_Health : MonoBehaviour
                 if (health <= 0)
                 {
                     health = 0;
-                    UIReuseScript.health = health;
-                    UIReuseScript.maxHealth = maxHealth;
-                    UIReuseScript.UpdatePlayerHealth();
+                    par_Managers.GetComponent<Manager_UIReuse>().health = health;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = maxHealth;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
                     str_deathMessage = "You won't get far in the wasteland if you can't take care of your health...";
                     Death(str_deathMessage);
@@ -121,9 +120,9 @@ public class Player_Health : MonoBehaviour
                 else if (mentalState <= 0)
                 {
                     mentalState = 0;
-                    UIReuseScript.mentalState = mentalState;
-                    UIReuseScript.maxMentalState = maxMentalState;
-                    UIReuseScript.UpdatePlayerMentalState();
+                    par_Managers.GetComponent<Manager_UIReuse>().mentalState = mentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = maxMentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
 
                     str_deathMessage = "You managed to fry your brains in a pit of radiation like a zombie. Should've brought protection.";
                     Death(str_deathMessage);
@@ -131,9 +130,9 @@ public class Player_Health : MonoBehaviour
                 else if (radiation >= maxRadiation)
                 {
                     radiation = maxRadiation;
-                    UIReuseScript.radiation = radiation;
-                    UIReuseScript.maxRadiation = maxRadiation;
-                    UIReuseScript.UpdatePlayerRadiation();
+                    par_Managers.GetComponent<Manager_UIReuse>().radiation = radiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = maxRadiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
 
                     str_deathMessage = "You went insane trying to uncover the secrets of the reactor and the wasteland...";
                     Death(str_deathMessage);
@@ -155,10 +154,10 @@ public class Player_Health : MonoBehaviour
             txt_PlayerDied.text = deathMessage;
 
             isPlayerAlive = false;
-            ConsoleScript.toggleAIDetection = false;
+            par_Managers.GetComponent<Manager_Console>().toggleAIDetection = false;
 
             health = 0;
-            UIReuseScript.UpdatePlayerHealth();
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
 
             calledOnce = true;
         }

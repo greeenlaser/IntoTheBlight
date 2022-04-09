@@ -18,7 +18,7 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
     [SerializeField] private UI_AbilitySlot1 Slot1Script;
     [SerializeField] private UI_AbilitySlot2 Slot2Script;
     [SerializeField] private UI_AbilitySlot3 Slot3Script;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private GameObject par_Managers;
 
     public void AssignToSlot1()
     {
@@ -30,8 +30,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot1.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 1!");
         }
@@ -43,8 +43,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot1.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 1!");
         }
@@ -56,8 +56,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot1.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 1!");
         }
@@ -69,8 +69,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot1.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 1!");
         }
@@ -82,8 +82,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot1.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot1.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 1!");
         }
@@ -99,8 +99,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot2.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 2!");
         }
@@ -112,8 +112,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot2.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 2!");
         }
@@ -125,8 +125,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot2.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 2");
         }
@@ -138,8 +138,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot2.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 2!");
         }
@@ -151,8 +151,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot2.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot2.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 2!");
         }
@@ -168,8 +168,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot3.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 3!");
         }
@@ -181,8 +181,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot3.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 3!");
         }
@@ -194,8 +194,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot3.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 3!");
         }
@@ -207,8 +207,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot3.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 3!");
         }
@@ -220,8 +220,8 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
 
             AssignKeysToAssignedAbilities();
 
-            UIReuseScript.btn_AbilitySlot3.onClick.RemoveAllListeners();
-            UIReuseScript.btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_AbilitySlot3.onClick.AddListener(Slot1Script.UseAbility);
 
             //Debug.Log("Assigned " + assignedAbility.ToString() + " to slot 3!");
         }
@@ -230,76 +230,76 @@ public class UI_AssignThisAbilityToSlot : MonoBehaviour
     private void AssignKeysToAssignedAbilities()
     {
         //clear all keys
-        UIReuseScript.txt_abilityJumpBoostAssignedKey.text = "";
-        UIReuseScript.txt_abilitySprintBoostAssignedKey.text = "";
-        UIReuseScript.txt_abilityHealthRegenAssignedKey.text = "";
-        UIReuseScript.txt_abilityStaminaRegenAssignedKey.text = "";
-        UIReuseScript.txt_abilityEnvProtectionAssignedKey.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_abilityJumpBoostAssignedKey.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_abilitySprintBoostAssignedKey.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_abilityHealthRegenAssignedKey.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_abilityStaminaRegenAssignedKey.text = "";
+        par_Managers.GetComponent<Manager_UIReuse>().txt_abilityEnvProtectionAssignedKey.text = "";
 
         //slot 1 key
         if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.txt_abilityJumpBoostAssignedKey.text = "1";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityJumpBoostAssignedKey.text = "1";
         }
         else if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.txt_abilitySprintBoostAssignedKey.text = "1";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilitySprintBoostAssignedKey.text = "1";
         }
         else if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.healthRegen)
         {
-            UIReuseScript.txt_abilityHealthRegenAssignedKey.text = "1";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityHealthRegenAssignedKey.text = "1";
         }
         else if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.txt_abilityStaminaRegenAssignedKey.text = "1";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityStaminaRegenAssignedKey.text = "1";
         }
         else if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
         {
-            UIReuseScript.txt_abilityEnvProtectionAssignedKey.text = "1";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityEnvProtectionAssignedKey.text = "1";
         }
 
         //slot 2 key
         if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.txt_abilityJumpBoostAssignedKey.text = "2";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityJumpBoostAssignedKey.text = "2";
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.txt_abilitySprintBoostAssignedKey.text = "2";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilitySprintBoostAssignedKey.text = "2";
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.healthRegen)
         {
-            UIReuseScript.txt_abilityHealthRegenAssignedKey.text = "2";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityHealthRegenAssignedKey.text = "2";
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.txt_abilityStaminaRegenAssignedKey.text = "2";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityStaminaRegenAssignedKey.text = "2";
         }
         else if (Slot2Script.assignedAbility == UI_AbilitySlot2.AssignedAbility.envProtection)
         {
-            UIReuseScript.txt_abilityEnvProtectionAssignedKey.text = "2";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityEnvProtectionAssignedKey.text = "2";
         }
 
         //slot 3 key
         if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.jumpBoost)
         {
-            UIReuseScript.txt_abilityJumpBoostAssignedKey.text = "3";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityJumpBoostAssignedKey.text = "3";
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.sprintBoost)
         {
-            UIReuseScript.txt_abilitySprintBoostAssignedKey.text = "3";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilitySprintBoostAssignedKey.text = "3";
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.healthRegen)
         {
-            UIReuseScript.txt_abilityHealthRegenAssignedKey.text = "3";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityHealthRegenAssignedKey.text = "3";
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.staminaRegen)
         {
-            UIReuseScript.txt_abilityStaminaRegenAssignedKey.text = "3";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityStaminaRegenAssignedKey.text = "3";
         }
         else if (Slot3Script.assignedAbility == UI_AbilitySlot3.AssignedAbility.envProtection)
         {
-            UIReuseScript.txt_abilityEnvProtectionAssignedKey.text = "3";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_abilityEnvProtectionAssignedKey.text = "3";
         }
     }
 }

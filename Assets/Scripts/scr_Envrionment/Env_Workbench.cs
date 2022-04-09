@@ -8,9 +8,7 @@ public class Env_Workbench : MonoBehaviour
     public string str_workbenchName;
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isActive;
@@ -21,9 +19,9 @@ public class Env_Workbench : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Tab)
             && isWorkbenchRepairUIOpen
-            && !PauseMenuScript.isUIOpen)
+            && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen)
         {
-            PauseMenuScript.isInventoryOpen = false;
+            par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = false;
             CloseRepairUI();
         }
     }
@@ -32,20 +30,20 @@ public class Env_Workbench : MonoBehaviour
     {
         PlayerInventoryScript.Workbench = gameObject;
 
-        UIReuseScript.btn_CloseUI.gameObject.SetActive(true);
-        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
-        UIReuseScript.btn_CloseUI.onClick.AddListener(CloseRepairUI);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(CloseRepairUI);
 
         PlayerInventoryScript.CloseInventory();
         PlayerInventoryScript.isPlayerAndRepairOpen = true;
-        UIReuseScript.par_Inventory.SetActive(true);
-        UIReuseScript.par_Stats.SetActive(true);
-        UIReuseScript.txt_InventoryName.text = str_workbenchName.ToString();
+        par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = str_workbenchName.ToString();
         PlayerInventoryScript.UpdatePlayerInventoryStats();
 
-        UIReuseScript.RebuildRepairMenu();
-        PauseMenuScript.isInventoryOpen = true;
-        PauseMenuScript.PauseGameAndCloseUIAndResetBools();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
+        par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = true;
+        par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
 
         isWorkbenchRepairUIOpen = true;
     }
@@ -58,12 +56,12 @@ public class Env_Workbench : MonoBehaviour
         PlayerInventoryScript.CloseInventory();
         PlayerInventoryScript.Workbench = null;
 
-        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
-        UIReuseScript.btn_CloseUI.gameObject.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
 
         isWorkbenchRepairUIOpen = false;
 
-        PlayerMenuScript.ClosePlayerMenuUI();
+        par_Managers.GetComponent<UI_PlayerMenu>().ClosePlayerMenuUI();
         StartCoroutine(Wait());
     }
 

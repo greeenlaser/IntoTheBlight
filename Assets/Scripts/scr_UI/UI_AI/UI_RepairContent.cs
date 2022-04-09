@@ -7,8 +7,7 @@ public class UI_RepairContent : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private UI_AIContent AIScript;
-    [SerializeField] private Manager_UIReuse UIReuseScript;
-    [SerializeField] private UI_PauseMenu PauseMenuScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isNPCRepairUIOpen;
@@ -27,31 +26,31 @@ public class UI_RepairContent : MonoBehaviour
     {
         PlayerInventoryScript.Trader = gameObject;
 
-        UIReuseScript.CloseDialogueUI();
+        par_Managers.GetComponent<Manager_UIReuse>().CloseDialogueUI();
 
-        UIReuseScript.btn_CloseUI.gameObject.SetActive(true);
-        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
-        UIReuseScript.btn_CloseUI.onClick.AddListener(CloseRepairAndPlayerInventory);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(CloseRepairAndPlayerInventory);
 
         PlayerInventoryScript.CloseInventory();
         PlayerInventoryScript.isPlayerAndRepairOpen = true;
-        UIReuseScript.par_Inventory.SetActive(true);
-        UIReuseScript.par_Stats.SetActive(true);
-        UIReuseScript.txt_InventoryName.text = gameObject.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
+        par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = gameObject.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
         PlayerInventoryScript.UpdatePlayerInventoryStats();
 
-        UIReuseScript.RebuildRepairMenu();
+        par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
 
         isNPCRepairUIOpen = true;
     }
     public void CloseRepairUI()
     {
-        UIReuseScript.par_Inventory.SetActive(false);
-        UIReuseScript.par_Stats.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(false);
 
-        UIReuseScript.ClearAllInventories();
-        UIReuseScript.ClearInventoryUI();
-        UIReuseScript.ClearStatsUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
 
         PlayerInventoryScript.hasOpenedInventoryOnce = false;
     }
@@ -65,8 +64,8 @@ public class UI_RepairContent : MonoBehaviour
         PlayerInventoryScript.CloseInventory();
         PlayerInventoryScript.Trader = null;
 
-        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
-        UIReuseScript.btn_CloseUI.gameObject.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
         AIScript.CheckIfAnyQuestIsCompleted();
 
         isNPCRepairUIOpen = false;
