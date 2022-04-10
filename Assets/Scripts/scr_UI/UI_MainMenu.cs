@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using TMPro;
 
 public class UI_MainMenu : MonoBehaviour
 {
@@ -11,16 +9,37 @@ public class UI_MainMenu : MonoBehaviour
     [SerializeField] private GameObject par_MainMenuContent;
     [SerializeField] private GameObject par_KeyCommands;
     [SerializeField] private GameObject par_TeamMembers;
-    [SerializeField] private GameObject par_Managers;
+    [SerializeField] private GameObject img_loadingLogo;
+    [SerializeField] private GameObject par_LoadingScreen;
+
+    //private variables
+    private bool startedSceneSwitch;
+    private float time;
 
     private void Awake()
     {
+        Time.timeScale = 1;
         ReturnToMainMenu();
+    }
+
+    private void Update()
+    {
+        if (startedSceneSwitch)
+        {
+            img_loadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
+
+            time += Time.deltaTime;
+            if (time > 0.2f)
+            {
+                SceneManager.LoadScene(1);
+            }
+        }
     }
 
     public void StartGame()
     {
-        SceneManager.LoadScene(1);
+        par_LoadingScreen.SetActive(true);
+        startedSceneSwitch = true;
     }
 
     public void ShowKeyCommands()

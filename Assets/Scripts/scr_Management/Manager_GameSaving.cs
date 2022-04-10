@@ -21,8 +21,8 @@ public class Manager_GameSaving : MonoBehaviour
     [Header("Loading menu content")]
     [SerializeField] private GameObject par_LoadingMenu;
     [SerializeField] private RawImage img_loadingLogo;
+    [SerializeField] private RawImage img_smallLoadingLogo;
     [SerializeField] private TMP_Text txt_LoadingText;
-    [SerializeField] private TMP_Text txt_TipNumber;
     [SerializeField] private TMP_Text txt_TipText;
     [SerializeField] private Button btn_Continue;
 
@@ -149,12 +149,20 @@ public class Manager_GameSaving : MonoBehaviour
             }
             if (time > 10)
             {
-                int randomTip = UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count);
-                txt_TipNumber.text = "Tip # " + (randomTip + 1).ToString();
+                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count - 1));
                 txt_TipText.text = par_Managers.GetComponent<GameManager>().tips[randomTip];
 
                 time = 0;
             }
+        }
+        if (isSaving)
+        {
+            img_smallLoadingLogo.gameObject.SetActive(true);
+            img_smallLoadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
+        }
+        else if (!isSaving)
+        {
+            img_smallLoadingLogo.gameObject.SetActive(false);
         }
     }
 
@@ -166,8 +174,7 @@ public class Manager_GameSaving : MonoBehaviour
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
-        int randomTip = UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count -1);
-        txt_TipNumber.text = "Tip # " + (randomTip).ToString();
+        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count - 1));
         txt_TipText.text = par_Managers.GetComponent<GameManager>().tips[randomTip];
 
         btn_Continue.gameObject.SetActive(false);
@@ -334,7 +341,7 @@ public class Manager_GameSaving : MonoBehaviour
             else if (line.Contains("pi_"))
             {
                 //loading exoskeleton
-                if (line.Contains("b_hasExoskeleton = True"))
+                if (line.Contains("hasExoskeleton = True"))
                 {
                     GameObject exoskeleton = Instantiate(Exoskeleton,
                                                          PlayerInventoryScript.par_PlayerItems.transform.position,
@@ -452,7 +459,7 @@ public class Manager_GameSaving : MonoBehaviour
                     }
                 }
                 //loading player equipped weapon
-                else if (line.Contains("_ew_"))
+                else if (line.Contains("_ew"))
                 {
                     foreach (GameObject item in PlayerInventoryScript.inventory)
                     {
@@ -1173,9 +1180,6 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("pv_playerYVelocity = " + Mathf.Round(PlayerMovementScript.velocity.y * 10) / 10);
 
         saveFile.WriteLine("");
-        saveFile.WriteLine("X, Y, Z values");
-
-        saveFile.WriteLine("");
         //player position
         saveFile.WriteLine("pv_playerPosition = " + pos_Player);
         //player rotation
@@ -1498,7 +1502,7 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("--- DISCOVERED CELLS ---");
 
         saveFile.WriteLine("");
-        saveFile.WriteLine("(1)how many NPCs will respawn in this cell (if this cell supports ?PC respawning)");
+        saveFile.WriteLine("(1)how many NPCs will respawn in this cell (if this cell supports NPC respawning)");
 
         saveFile.WriteLine("");
         //save all cells that have been discovered

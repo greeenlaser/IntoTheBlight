@@ -6,12 +6,7 @@ using UnityEngine.UI;
 
 public class UI_PauseMenu : MonoBehaviour
 {
-    [Tooltip("How long to wait until pause menu can be opened again?")]
-    [SerializeField] private float waitTime;
-
     [Header("Assignables")]
-    public int scn_mainMenu;
-    public int scn_game;
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private GameObject par_PlayerSFX;
 
@@ -311,6 +306,6 @@ public class UI_PauseMenu : MonoBehaviour
     public void BackToMainMenu()
     {
         //Debug.Log("Went to main menu!");
-        SceneManager.LoadScene(scn_mainMenu);
+        SceneManager.LoadScene(0);
     }
 }

@@ -44,7 +44,8 @@ public class AI_Combat : MonoBehaviour
 
     private void Update()
     {
-        if (gameObject.GetComponent<AI_Health>() != null 
+        if (gameObject.GetComponent<AI_Movement>().canMove
+            && gameObject.GetComponent<AI_Health>() != null 
             && gameObject.GetComponent<AI_Health>().isAlive
             && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {

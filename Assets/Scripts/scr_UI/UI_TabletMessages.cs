@@ -16,7 +16,7 @@ public class UI_TabletMessages : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public List<GameObject> messages = new List<GameObject>();
 
-    public void SendMessage(GameObject logo, string senderName, string messageTitle, string messageContent)
+    public void SendMessage(GameObject logo, string messageTime, string senderName, string messageContent)
     {
         //delete first added message if messages count is over limit
         if (messages.Count +1 > maxMessageCount)
@@ -28,7 +28,7 @@ public class UI_TabletMessages : MonoBehaviour
         //move previous sent messages up
         foreach (GameObject message in messages)
         {
-            message.transform.position += new Vector3(0, 100, 0);
+            message.transform.position += new Vector3(0, 150, 0);
         }
 
         //spawn the message gameobject
@@ -42,8 +42,8 @@ public class UI_TabletMessages : MonoBehaviour
 
         //get child content from new message
         RawImage logo_message = null;
+        TMP_Text time_message = null;
         TMP_Text name_messageSender = null;
-        TMP_Text title_message = null;
         TMP_Text content_message = null;
 
         foreach (Transform messageChild in newMessage.transform)
@@ -58,13 +58,13 @@ public class UI_TabletMessages : MonoBehaviour
                     }
                 }
             }
+            else if (messageChild.name == "txt_messageTime")
+            {
+                time_message = messageChild.GetComponent<TMP_Text>();
+            }
             else if (messageChild.name == "txt_messageSender")
             {
                 name_messageSender = messageChild.GetComponent<TMP_Text>();
-            }
-            else if (messageChild.name == "txt_messageTitle")
-            {
-                title_message = messageChild.GetComponent<TMP_Text>();
             }
             else if (messageChild.name == "txt_messageContent")
             {
@@ -81,8 +81,8 @@ public class UI_TabletMessages : MonoBehaviour
                 break;
             }
         }
+        time_message.text = messageTime;
         name_messageSender.text = senderName;
-        title_message.text = messageTitle;
         content_message.text = messageContent;
     }
 }

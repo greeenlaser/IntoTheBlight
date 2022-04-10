@@ -49,14 +49,15 @@ public class GameManager : MonoBehaviour
         {
             Screenshot();
         }
+
         if (Input.GetKeyDown(KeyCode.P)
             && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
             && !par_Managers.GetComponent<Manager_Console>().consoleOpen)
         {
+            string messageTime = par_Managers.GetComponent<Manager_WorldClock>().time;
             string senderName = "System";
-            string messageTitle = Random.Range(1, 100).ToString();
-            string messageContent = "This is a very long message sent by the game manager script.";
-            par_Managers.GetComponent<UI_TabletMessages>().SendMessage(logo, senderName, messageTitle, messageContent);
+            string messageContent = "this shit is crazy, how are they even surviving after that crazy rad-storm, a regular human wouldve died in 5 seconds but it looks like this rad storm only made them stronger! ive never seen anythng like that...";
+            par_Managers.GetComponent<UI_TabletMessages>().SendMessage(logo, messageTime, senderName, messageContent);
         }
 
         if (respawnNPCs)

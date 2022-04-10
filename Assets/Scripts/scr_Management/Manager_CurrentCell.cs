@@ -13,10 +13,6 @@ public class Manager_CurrentCell : MonoBehaviour
     public bool canBeTeleportedTo;
     [SerializeField] private GameObject par_CellOnMap;
 
-    [Header("Toggle entire cell")]
-    [SerializeField] private bool toggleEntireCell;
-    [SerializeField] private GameObject par_entireCell;
-
     [Header("Toggle global volume")]
     [SerializeField] private bool isInteriorCell;
     [SerializeField] private GameObject GlobalVolume;
@@ -128,10 +124,6 @@ public class Manager_CurrentCell : MonoBehaviour
         par_Managers.GetComponent<Manager_Console>().currentCell = gameObject;
         par_Managers.GetComponent<Manager_Console>().lastCell = gameObject;
 
-        if (toggleEntireCell)
-        {
-            par_entireCell.SetActive(true);
-        }
         if (isInteriorCell)
         {
             GlobalVolume.SetActive(false);
@@ -184,6 +176,13 @@ public class Manager_CurrentCell : MonoBehaviour
             foreach (GameObject door in doors)
             {
                 door.GetComponent<Env_Door>().isActive = true;
+            }
+        }
+        if (AI.Count > 0)
+        {
+            foreach (GameObject npc in AI)
+            {
+                npc.GetComponent<AI_Movement>().canMove = true;
             }
         }
     }
@@ -246,10 +245,12 @@ public class Manager_CurrentCell : MonoBehaviour
                 door.GetComponent<Env_Door>().isActive = false;
             }
         }
-
-        if (toggleEntireCell)
+        if (AI.Count > 0)
         {
-            par_entireCell.SetActive(false);
+            foreach (GameObject npc in AI)
+            {
+                npc.GetComponent<AI_Movement>().canMove = false;
+            }
         }
     }
 
