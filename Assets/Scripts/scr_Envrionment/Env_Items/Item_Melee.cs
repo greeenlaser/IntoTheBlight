@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Item_Melee : MonoBehaviour
 {
-    public float int_maxDamage;
+    public float maxDamage;
     [SerializeField] private float swingTimerLimit;
     public float maxDurability;
     [SerializeField] private float durabilityReducedPerHit;
@@ -18,7 +19,7 @@ public class Item_Melee : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool hasEquippedMeleeWeapon;
     [HideInInspector] public float durability;
-    [HideInInspector] public float int_damage;
+    [HideInInspector] public float damage;
 
     //private variables
     private bool isSwinging;
@@ -26,9 +27,6 @@ public class Item_Melee : MonoBehaviour
 
     private void Awake()
     {
-        //durability is random value between third of max durability and 8/10ths of max durability
-        //durability = Mathf.FloorToInt(Random.Range(maxDurability / 3, maxDurability / 10 * 8));
-
         durability = maxDurability;
 
         LoadValues();
@@ -45,7 +43,14 @@ public class Item_Melee : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Mouse0)
                 && !isSwinging)
             {
-                Swing();
+                if (durability > 0)
+                {
+                    Swing();
+                }
+                else
+                {
+                    Debug.LogWarning("Error: " + name + " cannot be used because it is broken!");
+                }
             }
 
             if (isSwinging)
@@ -72,14 +77,14 @@ public class Item_Melee : MonoBehaviour
                 && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isAlive
                 && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isKillable)
             {
-                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(int_damage);
+                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().DealDamage("health", Mathf.Round(damage * 10) / 10);
                 //Debug.Log("Dealt " + meleeDamage + " damage to " + MeleeTargetsScript.targets[i].GetComponent<UI_AIContent>().str_NPCName + "! Targets remaining health is " + MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth + ".");
             }
             //deals damage to all non-broken destroyable crates in melee range
             if (MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>() != null
                 && MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>().crateHealth > 0)
             {
-                MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(int_damage);
+                MeleeTargetsScript.targets[i].GetComponentInParent<Env_DestroyableCrate>().DealDamage(Mathf.Round(damage * 10) / 10);
             }
 
             //protected melee weapons dont take durability damage
@@ -118,79 +123,121 @@ public class Item_Melee : MonoBehaviour
             gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
 
             //calculate new weapon damage according to weapon durability percentage
-            int itemDamage = Mathf.FloorToInt(int_maxDamage / 100 * durabilityPercentage);
+            float itemDamage = Mathf.Floor(maxDamage / 100 * durabilityPercentage * 10) / 10;
             //assign new damage to weapon
-            int_damage = Mathf.FloorToInt(itemDamage);
+            damage = itemDamage;
+
+            //melee weapon damage can never go below 10% max damage
+            if (damage < Mathf.FloorToInt(maxDamage / 10))
+            {
+                damage = Mathf.FloorToInt(maxDamage / 10);
+            }
         }
         else
         {
-            int_damage = int_maxDamage;
+            damage = maxDamage;
         }
     }
 
     public void EquipMeleeWeapon()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
-
-        //unequips previously equipped melee weapon if there is any
-        foreach (GameObject meleeWeapon in PlayerInventoryScript.inventory)
+        try
         {
-            if (meleeWeapon.GetComponent<Item_Melee>() != null
-                && meleeWeapon.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+            foreach (GameObject item in PlayerInventoryScript.inventory)
             {
-                meleeWeapon.GetComponent<Item_Melee>().UnequipMeleeWeapon();
+                if (item.GetComponent<Item_Gun>() != null
+                    && item.GetComponent<Item_Gun>().hasEquippedGun)
+                {
+                    item.GetComponent<Item_Gun>().UnequipGun();
+                }
+                else if (item.GetComponent<Item_Melee>() != null
+                         && item.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+                {
+                    item.GetComponent<Item_Melee>().UnequipMeleeWeapon();
+                }
+                else if (item.GetComponent<Item_Grenade>() != null
+                         && item.GetComponent<Item_Grenade>().hasEquippedGrenade)
+                {
+                    item.GetComponent<Item_Grenade>().UnequipGrenade();
+                }
             }
+
+            foreach (Collider collider in GetComponents<Collider>())
+            {
+                if (collider.GetComponent<BoxCollider>() != null
+                    && collider.GetComponent<BoxCollider>().enabled)
+                {
+                    collider.GetComponent<BoxCollider>().enabled = false;
+                }
+                else if (collider.GetComponent<SphereCollider>() != null
+                         && collider.GetComponent<SphereCollider>().enabled)
+                {
+                    collider.GetComponent<SphereCollider>().enabled = false;
+                }
+                else if (collider.GetComponent<MeshCollider>() != null
+                         && collider.GetComponent<MeshCollider>().enabled)
+                {
+                    collider.GetComponent<MeshCollider>().enabled = false;
+                }
+            }
+
+            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
+
+            //enables interpolation on the equipped melee weapon
+            rb.interpolation = RigidbodyInterpolation.None;
+
+            hasEquippedMeleeWeapon = true;
+
+            gameObject.GetComponent<Env_Item>().RemoveListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+            PlayerInventoryScript.UpdatePlayerInventoryStats();
+            PlayerInventoryScript.equippedGun = gameObject;
+
+            gameObject.SetActive(true);
+            gameObject.GetComponent<MeshRenderer>().enabled = true;
+            gameObject.GetComponent<Rigidbody>().isKinematic = true;
+            gameObject.transform.parent = PlayerInventoryScript.pos_EquippedItem.transform;
+            gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
+            gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
+
+            par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
+            par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+
+            //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
         }
-        //unequips previously equipped gun if there is any
-        foreach (GameObject gun in PlayerInventoryScript.inventory)
+        catch (Exception e)
         {
-            if (gun.GetComponent<Item_Gun>() != null
-                && gun.GetComponent<Item_Gun>().hasEquippedGun)
-            {
-                gun.GetComponent<Item_Gun>().UnequipGun();
-            }
+            Debug.LogError("Error: Something prevented equipping this melee weapon!" + e + ".");
         }
-        //unequips previously equipped grenade if there is any
-        foreach (GameObject grenade in PlayerInventoryScript.inventory)
-        {
-            if (grenade.GetComponent<Item_Grenade>() != null
-                && grenade.GetComponent<Item_Grenade>().hasEquippedGrenade)
-            {
-                grenade.GetComponent<Item_Grenade>().UnequipGrenade();
-            }
-        }
-
-        //enables interpolation on the equipped melee weapon
-        rb.interpolation = RigidbodyInterpolation.None;
-
-        hasEquippedMeleeWeapon = true;
-
-        gameObject.GetComponent<Env_Item>().RemoveListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-        par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
-        PlayerInventoryScript.UpdatePlayerInventoryStats();
-        PlayerInventoryScript.equippedGun = gameObject;
-
-        gameObject.SetActive(true);
-        gameObject.GetComponent<MeshRenderer>().enabled = true;
-        gameObject.GetComponent<Rigidbody>().isKinematic = true;
-        gameObject.transform.parent = PlayerInventoryScript.pos_EquippedItem.transform;
-        gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
-        gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
-
-        par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
-        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
-        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
-
-        //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
     }
     public void UnequipMeleeWeapon()
     {
         if (!isSwinging)
         {
+            foreach (Collider collider in GetComponents<Collider>())
+            {
+                if (collider.GetComponent<BoxCollider>() != null
+                    && !collider.GetComponent<BoxCollider>().enabled)
+                {
+                    collider.GetComponent<BoxCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<SphereCollider>() != null
+                         && !collider.GetComponent<SphereCollider>().enabled)
+                {
+                    collider.GetComponent<SphereCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<MeshCollider>() != null
+                         && !collider.GetComponent<MeshCollider>().enabled)
+                {
+                    collider.GetComponent<MeshCollider>().enabled = true;
+                }
+            }
+
             hasEquippedMeleeWeapon = false;
 
             //enables interpolation on the unequipped gun

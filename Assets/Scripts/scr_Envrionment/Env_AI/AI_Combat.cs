@@ -25,20 +25,16 @@ public class AI_Combat : MonoBehaviour
     [HideInInspector] public bool lostTarget;
     [HideInInspector] public GameObject confirmedTarget;
     [HideInInspector] public List<GameObject> hostileTargets = new List<GameObject>();
-    [HideInInspector] public List<GameObject> collidingObjects = new List<GameObject>();
+    public List<GameObject> collidingObjects = new List<GameObject>();
 
     //private variables
     private bool calledResetOnce;
     private float timer;
-    private float lastListCount;
 
     private void OnDrawGizmos()
     {
-        //yellow sphere for detect range
-        //Gizmos.color = Color.yellow;
-        //Gizmos.DrawWireSphere(transform.position, detectRange);
         //red sphere for attack range
-        Gizmos.color = Color.red;
+        Gizmos.color = new Color32(255, 0, 0, 255);
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
@@ -49,34 +45,12 @@ public class AI_Combat : MonoBehaviour
             && gameObject.GetComponent<AI_Health>().isAlive
             && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
-            if (lastListCount != collidingObjects.Count)
-            {
-                /*
-                //if the AI detects something new
-                if (lastListCount < collidingObjects.Count)
-                {
-                    possibleTarget = collidingObjects[collidingObjects.Count - 1];
-
-                    float distance = Vector3.Distance(gameObject.transform.position, possibleTarget.transform.position);
-
-                    if (possibleTarget.GetComponent<UI_AIContent>() != null && possibleTarget != gameObject)
-                    {
-                        string targetName = possibleTarget.GetComponent<UI_AIContent>().str_NPCName;
-                        Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " spotted " + targetName + " from " + Mathf.Round(distance * 10f) / 10f + "m away!");
-                    }
-                    else if (possibleTarget.CompareTag("Player") || possibleTarget.CompareTag("Item"))
-                    {
-                        Debug.Log(gameObject.GetComponent<UI_AIContent>().str_NPCName + " spotted " + possibleTarget.name + " from " + Mathf.Round(distance * 10f) / 10f + "m away!");
-                    }
-                }
-                */
-
-                lastListCount = collidingObjects.Count;
-            }
-
-            if (!lostTarget && par_Managers.GetComponent<Manager_Console>().toggleAIDetection && gameObject.GetComponent<AI_Health>().canBeHostile)
+            if (!lostTarget 
+                && par_Managers.GetComponent<Manager_Console>().toggleAIDetection 
+                && gameObject.GetComponent<AI_Health>().canBeHostile)
             {
                 if (collidingObjects.Count > 0
+                    && hostileTargets.Count == 0
                     && !searchingForHostiles
                     && !finishedHostileSearch)
                 {
@@ -94,13 +68,10 @@ public class AI_Combat : MonoBehaviour
                 {
                     confirmedTarget = hostileTargets[0];
                     gameObject.GetComponent<AI_Movement>().goingTowardsTarget = true;
+
                     if (confirmedTarget.CompareTag("Player"))
                     {
-                        //Debug.Log("Target was confirmed by " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ". Target is the player.");
-                    }
-                    else if (confirmedTarget.CompareTag("NPC"))
-                    {
-                        Debug.Log("Target was confirmed by " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ". Target is " + confirmedTarget.GetComponent<UI_AIContent>().str_NPCName + ".");
+                        Debug.Log("Target was confirmed by " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ". Target is the player.");
                     }
                 }
 
@@ -112,7 +83,7 @@ public class AI_Combat : MonoBehaviour
                     {
                         //keeps attacking player while players health is above 0
                         //and while this AI isnt stunned
-                        if (confirmedTarget.GetComponent<Player_Health>().health > 0
+                        if (confirmedTarget.GetComponent<Player_Health>().isPlayerAlive
                             && !gameObject.GetComponent<AI_Movement>().isStunned)
                         {
                             if (!dealtFirstDamage)
@@ -146,12 +117,12 @@ public class AI_Combat : MonoBehaviour
                     }
                 }
             }
-            else if (lostTarget || !par_Managers.GetComponent<Manager_Console>().toggleAIDetection || !gameObject.GetComponent<AI_Health>().canBeHostile)
+            else if ((lostTarget 
+                     || !par_Managers.GetComponent<Manager_Console>().toggleAIDetection 
+                     || !gameObject.GetComponent<AI_Health>().canBeHostile)
+                     && !calledResetOnce)
             {
-                if (!calledResetOnce)
-                {
-                    Reset();
-                }
+                Reset();
             }
         }
     }
@@ -174,7 +145,10 @@ public class AI_Combat : MonoBehaviour
             else
             {
                 Vector3 targetDir = (collidingObjects[i].transform.position - gameObject.transform.position);
-                if (Physics.Raycast(transform.position, targetDir, out RaycastHit hit, 50))
+                if (Physics.Raycast(transform.position, 
+                                    targetDir, 
+                                    out RaycastHit hit, 
+                                    50))
                 {
                     if (collidingObjects[i].CompareTag("Player")
                         && hit.transform.gameObject == collidingObjects[i])
@@ -202,7 +176,7 @@ public class AI_Combat : MonoBehaviour
     {
         if (confirmedTarget.GetComponent<Player_Health>() != null)
         {
-            confirmedTarget.GetComponent<Player_Health>().health -= meleeDamage;
+            confirmedTarget.GetComponent<Player_Health>().DealDamage(name, "melee", meleeDamage);
         }
     }
 
@@ -215,7 +189,6 @@ public class AI_Combat : MonoBehaviour
             calledResetOnce = false;
         }
 
-        searchingForHostiles = false;
         foundPossibleHostiles = false;
         finishedHostileSearch = false;
         attackConfirmedTarget = false;

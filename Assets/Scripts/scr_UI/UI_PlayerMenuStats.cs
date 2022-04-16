@@ -86,7 +86,8 @@ public class UI_PlayerMenuStats : MonoBehaviour
         }
 
         //shows player equipped gun stats if the player has equipped a gun
-        if (PlayerInventoryScript.equippedGun != null)
+        if (PlayerInventoryScript.equippedGun != null
+            && PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>() != null)
         {
             //gun name
             par_Managers.GetComponent<Manager_UIReuse>().txt_gunName.text = PlayerInventoryScript.equippedGun.GetComponent<Env_Item>().str_ItemName;

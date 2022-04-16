@@ -38,14 +38,14 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
+    [HideInInspector] public bool firstload;
     [HideInInspector] public bool isSaving;
     [HideInInspector] public bool isLoading;
+    [HideInInspector] public string path;
+    [HideInInspector] public string savedFilePath;
 
     //private variables
-    private bool firstload;
     private float time;
-    private string path;
-    private string savedFilePath;
     private GameObject equippedWeapon;
     private List<string> abilityNames = new List<string>();
 
@@ -59,8 +59,6 @@ public class Manager_GameSaving : MonoBehaviour
         //get path to game saves folder
         path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
 
-        //create a game saves folder
-        //where we can create game save files into
         try
         {
             //create LightsOff save folder if it doesnt already exist
@@ -135,7 +133,8 @@ public class Manager_GameSaving : MonoBehaviour
 
         if (isLoading)
         {
-            time += Time.deltaTime;
+            //time for loading screen timer continues regardless of game being paused
+            time += Time.unscaledDeltaTime;
 
             img_loadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
 
@@ -166,11 +165,8 @@ public class Manager_GameSaving : MonoBehaviour
         }
     }
 
-    private void OpenLoadingMenuUI()
+    public void OpenLoadingMenuUI()
     {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
@@ -181,15 +177,14 @@ public class Manager_GameSaving : MonoBehaviour
     }
     public void CloseLoadingMenuUI()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
 
         par_LoadingMenu.SetActive(false);
         isLoading = false;
     }
 
     //assign saved data to gameobjects
-    private void LoadGameData()
+    public void LoadGameData()
     {
         //looks through all the lines
         foreach (string line in File.ReadLines(path + @"\Save0001.txt"))
@@ -550,7 +545,7 @@ public class Manager_GameSaving : MonoBehaviour
                     {
                         //frag grenade
                         if (spawnable.GetComponent<Item_Grenade>().grenadeType 
-                            == Item_Grenade.GrenadeType.frag
+                            == Item_Grenade.GrenadeType.fragmentation
                             && line.Contains(spawnable.name))
                         {
                             item = spawnable;
@@ -1641,7 +1636,7 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("(1)cell index,");
         saveFile.WriteLine("(2)NPC index in cell,");
         saveFile.WriteLine("(3, 4, 5)X, Y, Z positions (after =),");
-        saveFile.WriteLine("(6, 7, ,8)X, Y, Z rotations,");
+        saveFile.WriteLine("(6, 7, 8)X, Y, Z rotations,");
         saveFile.WriteLine("(9)health (killable NPCs),");
         saveFile.WriteLine("(10)max health (killable NPCs)");
 

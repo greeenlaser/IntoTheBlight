@@ -36,64 +36,95 @@ public class Env_ObjectPickup : MonoBehaviour
             gameObject.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity.normalized * speedLimit;
         }
 
-        if (gameObject.GetComponent<Env_Item>().itemActivated)
+        if (isHolding)
         {
-            if (isHolding)
+            foreach (Collider collider in GetComponents<Collider>())
             {
-                PlayerInventoryScript.heldObject = gameObject;
-
-                if (gameObject.GetComponent<Rigidbody>().useGravity)
+                if (collider.GetComponent<BoxCollider>() != null
+                    && collider.GetComponent<BoxCollider>().enabled)
                 {
-                    gameObject.GetComponent<Rigidbody>().useGravity = false;
+                    collider.GetComponent<BoxCollider>().enabled = false;
                 }
-                if (gameObject.GetComponent<Env_Item>().droppedObject)
+                else if (collider.GetComponent<SphereCollider>() != null
+                         && collider.GetComponent<SphereCollider>().enabled)
                 {
-                    gameObject.GetComponent<Env_Item>().droppedObject = false;
-                    gameObject.GetComponent<Env_Item>().time = 0;
+                    collider.GetComponent<SphereCollider>().enabled = false;
                 }
-
-                Vector3 targetPoint = pos_HoldItem.transform.position;
-                targetPoint += pos_HoldItem.transform.forward;
-                Vector3 force = targetPoint - gameObject.GetComponent<Rigidbody>().transform.position;
-                gameObject.GetComponent<Rigidbody>().velocity = force.normalized * gameObject.GetComponent<Rigidbody>().velocity.magnitude;
-
-                if (isColliding && theCollider != null)
+                else if (collider.GetComponent<MeshCollider>() != null
+                         && collider.GetComponent<MeshCollider>().enabled)
                 {
-                    gameObject.GetComponent<Rigidbody>().freezeRotation = false;
-                    //Debug.Log(name + " is colliding with " + theCollider.name + "!");
-                }
-                else if (!isColliding)
-                {
-                    gameObject.GetComponent<Rigidbody>().freezeRotation = true;
-                }
-
-                gameObject.GetComponent<Rigidbody>().AddForce(force * 5000);
-
-                gameObject.GetComponent<Rigidbody>().velocity *= Mathf.Min(1.0f, force.magnitude / 2);
-
-                //drops held object if player is too far from it
-                if (Vector3.Distance(gameObject.transform.position, pos_HoldItem.transform.position) > 3)
-                {
-                    DropObject();
-                    //Debug.Log("Dropped " + gameObject.GetComponent<Env_Item>().str_fakeName + " because player went too far from it!");
-                }
-                //throws held object if player presses right mouse button
-                if (canThrow && Input.GetKeyDown(KeyCode.Mouse1))
-                {
-                    DropObject();
-                    RigidBody.AddForce(200 * throwForce * pos_HoldItem.forward);
+                    collider.GetComponent<MeshCollider>().enabled = false;
                 }
             }
-            else if (!isHolding)
+
+            PlayerInventoryScript.heldObject = gameObject;
+
+            if (gameObject.GetComponent<Rigidbody>().useGravity)
             {
-                RigidBody.useGravity = true;
-                RigidBody.freezeRotation = false;
-                PlayerInventoryScript.heldObject = null;
+                gameObject.GetComponent<Rigidbody>().useGravity = false;
+            }
+            if (gameObject.GetComponent<Env_Item>().droppedObject)
+            {
+                gameObject.GetComponent<Env_Item>().droppedObject = false;
+                gameObject.GetComponent<Env_Item>().time = 0;
+            }
+
+            Vector3 targetPoint = pos_HoldItem.transform.position;
+            targetPoint += pos_HoldItem.transform.forward;
+            Vector3 force = targetPoint - gameObject.GetComponent<Rigidbody>().transform.position;
+            gameObject.GetComponent<Rigidbody>().velocity = force.normalized * gameObject.GetComponent<Rigidbody>().velocity.magnitude;
+
+            if (isColliding && theCollider != null)
+            {
+                gameObject.GetComponent<Rigidbody>().freezeRotation = false;
+                //Debug.Log(name + " is colliding with " + theCollider.name + "!");
+            }
+            else if (!isColliding)
+            {
+                gameObject.GetComponent<Rigidbody>().freezeRotation = true;
+            }
+
+            gameObject.GetComponent<Rigidbody>().AddForce(force * 5000);
+
+            gameObject.GetComponent<Rigidbody>().velocity *= Mathf.Min(1.0f, force.magnitude / 2);
+
+            //drops held object if player is too far from it
+            if (Vector3.Distance(gameObject.transform.position, pos_HoldItem.transform.position) > 3)
+            {
+                DropObject();
+                //Debug.Log("Dropped " + gameObject.GetComponent<Env_Item>().str_fakeName + " because player went too far from it!");
+            }
+            //throws held object if player presses right mouse button
+            if (canThrow && Input.GetKeyDown(KeyCode.Mouse1))
+            {
+                DropObject();
+                RigidBody.AddForce(200 * throwForce * pos_HoldItem.forward);
             }
         }
-        else if (!gameObject.GetComponent<Env_Item>().itemActivated && isHolding)
+        else if (!isHolding)
         {
-            DropObject();
+            foreach (Collider collider in GetComponents<Collider>())
+            {
+                if (collider.GetComponent<BoxCollider>() != null
+                    && !collider.GetComponent<BoxCollider>().enabled)
+                {
+                    collider.GetComponent<BoxCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<SphereCollider>() != null
+                         && !collider.GetComponent<SphereCollider>().enabled)
+                {
+                    collider.GetComponent<SphereCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<MeshCollider>() != null
+                         && !collider.GetComponent<MeshCollider>().enabled)
+                {
+                    collider.GetComponent<MeshCollider>().enabled = true;
+                }
+            }
+
+            RigidBody.useGravity = true;
+            RigidBody.freezeRotation = false;
+            PlayerInventoryScript.heldObject = null;
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,9 @@ using UnityEngine;
 public class Item_Grenade : MonoBehaviour
 {
     [Header("Assignables")]
-    public float damage;
+    [Range(0, 100)]
+    public float maxDamage;
+    [Range(0, 500)]
     [SerializeField] private float explosionStrength;
     [Range(0f, 50f)]
     [SerializeField] private float explosionRange;
@@ -13,7 +16,7 @@ public class Item_Grenade : MonoBehaviour
     public GrenadeType grenadeType;
     public enum GrenadeType
     {
-        frag,
+        fragmentation,
         plasma,
         stun
     }
@@ -274,32 +277,41 @@ public class Item_Grenade : MonoBehaviour
                 && startedExplodedGrenadeDestroyTimer
                 && !endedExplosionEffects)
             {
-                //frag grenade effects
-                if (fragExplode)
+                //get all colliders in sphere radius and add effects
+                Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRange);
+                if (colliders.Length > 0)
                 {
-                    //get all colliders in sphere radius and add effects
-                    Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRange);
                     foreach (Collider target in colliders)
                     {
-                        //get distance between target and grenade
-                        float distance = Vector3.Distance(target.transform.position, transform.position);
-
-                        //full grenade damage
-                        if (distance <= 2f)
+                        //frag and plasma grenade effects
+                        if (fragExplode
+                            || plasmaExplode)
                         {
+                            //get distance between target and grenade
+                            float distance = Vector3.Distance(target.transform.position, transform.position);
+                            //get true grenade damage by distance
+                            float damageByDistance = Mathf.Floor(maxDamage / (distance / 2) * 10) / 10;
+
+                            //grenade damage can never be go below 10% max damage
+                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                            {
+                                damageByDistance = Mathf.Floor(maxDamage / 10);
+                            }
+
                             //if player was in explosion range
                             if (target.GetComponent<Player_Health>() != null
-                                && target.GetComponent<Player_Health>().health > 0
-                                && PlayerHealthScript.canTakeDamage)
+                                && PlayerHealthScript.canTakeDamage
+                                && PlayerHealthScript.isPlayerAlive)
                             {
-                                target.GetComponent<Player_Health>().health -= damage;
+                                target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), damageByDistance);
                                 //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                             //if AI was in explosion range
                             else if (target.GetComponent<AI_Health>() != null
-                                     && target.GetComponent<AI_Health>().currentHealth > 0)
+                                     && target.GetComponent<AI_Health>().isKillable
+                                     && target.GetComponent<AI_Health>().isAlive)
                             {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage);
+                                target.GetComponent<AI_Health>().DealDamage("health", damageByDistance);
                                 //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                             //if destroyable crate was in explosion range
@@ -307,97 +319,33 @@ public class Item_Grenade : MonoBehaviour
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
                             {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= damage;
+                                target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(damageByDistance);
                                 //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                         }
-                        //60% grenade damage
-                        else if (distance > 2f && distance <= 3.5f)
+                        //stun grenade effects
+                        else if (stunExplode)
                         {
-                            //if player was in explosion range
-                            if (target.GetComponent<Player_Health>() != null
-                                && target.GetComponent<Player_Health>().health > 0
-                                && PlayerHealthScript.canTakeDamage)
+                            //player in stungrenade explosion range
+                            //and if player doesnt have godmode enabled
+                            if (target.GetComponent<Player_Movement>() != null
+                                && PlayerHealthScript.canTakeDamage
+                                && PlayerRaycastScript.targets.Contains(gameObject))
                             {
-                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(damage / 3 * 2);
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
+                                //stuns the player
+                                target.GetComponent<Player_Movement>().Stun();
                             }
-                            //if AI was in explosion range
+                            //killable AI in stungrenade explosion range
+                            //and if this AI actually also saw this grenade
+                            //and if this AI isn't already stunned
                             else if (target.GetComponent<AI_Health>() != null
-                                     && target.GetComponent<AI_Health>().currentHealth > 0)
+                                     && target.GetComponent<AI_Health>().currentHealth > 0
+                                     && target.GetComponent<AI_Combat>().collidingObjects.Contains(gameObject)
+                                     && !target.GetComponent<AI_Movement>().isStunned)
                             {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage / 3 * 2);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
+                                //stuns the AI
+                                target.GetComponent<AI_Movement>().isStunned = true;
                             }
-                            //if destroyable crate was in explosion range
-                            else if (target.name == "completeCrate"
-                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
-                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
-                            {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(damage / 3 * 2);
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3 * 2) + " damage.");
-                            }
-                        }
-                        //30% grenade damage
-                        else if (distance > 3.5f && distance <= explosionRange)
-                        {
-                            //if player was in explosion range
-                            if (target.GetComponent<Player_Health>() != null
-                                && target.GetComponent<Player_Health>().health > 0
-                                && PlayerHealthScript.canTakeDamage)
-                            {
-                                target.GetComponent<Player_Health>().health -= Mathf.FloorToInt(damage / 3);
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
-                            }
-                            //if AI was in explosion range
-                            else if (target.GetComponent<AI_Health>() != null
-                                     && target.GetComponent<AI_Health>().currentHealth > 0)
-                            {
-                                target.GetComponent<AI_Health>().currentHealth -= Mathf.FloorToInt(damage / 3);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag renade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
-                            }
-                            //if destroyable crate was in explosion range
-                            else if (target.name == "completeCrate"
-                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
-                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
-                            {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth -= Mathf.FloorToInt(damage / 3);
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + Mathf.FloorToInt(damage / 3) + " damage.");
-                            }
-                        }
-                    }
-                }
-                //plasma grenade effects
-                else if (plasmaExplode)
-                {
-                    
-                }
-                //stun grenade effects
-                else if (stunExplode)
-                {
-                    //get all colliders in sphere radius and add effects
-                    Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRange);
-                    foreach (Collider target in colliders)
-                    {
-                        //player in stungrenade explosion range
-                        //and if player doesnt have godmode enabled
-                        if (target.GetComponent<Player_Movement>() != null
-                            && PlayerHealthScript.canTakeDamage
-                            && PlayerRaycastScript.targets.Contains(gameObject))
-                        {
-                            //stuns the player
-                            target.GetComponent<Player_Movement>().Stun();
-                        }
-                        //killable AI in stungrenade explosion range
-                        //and if this AI actually also saw this grenade
-                        //and if this AI isn't already stunned
-                        else if (target.GetComponent<AI_Health>() != null
-                                 && target.GetComponent<AI_Health>().currentHealth > 0
-                                 && target.GetComponent<AI_Combat>().collidingObjects.Contains(gameObject)
-                                 && !target.GetComponent<AI_Movement>().isStunned)
-                        {
-                            //stuns the AI
-                            target.GetComponent<AI_Movement>().isStunned = true;
                         }
                     }
                 }
@@ -456,90 +404,126 @@ public class Item_Grenade : MonoBehaviour
 
     public void EquipGrenade()
     {
-        bool isCookingGrenade = false;
-        foreach (GameObject grenade in PlayerInventoryScript.inventory)
+        try
         {
-            if (grenade.GetComponent<Item_Grenade>() != null
-                && grenade.GetComponent<Item_Grenade>().startedCookingGrenadeTimer)
-            {
-                isCookingGrenade = true;
-            }
-        }
-
-        if (isCookingGrenade)
-        {
-            Debug.LogWarning("Error: Cannot equip a different grenade because currently equipped grenade is still cooking!");
-        }
-        else if (!isCookingGrenade)
-        {
-            par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
-
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer1.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer2.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer3.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer4.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer5.gameObject.SetActive(true);
-
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
-
-            //unequips previously equipped melee weapon if there is any
-            foreach (GameObject meleeWeapon in PlayerInventoryScript.inventory)
-            {
-                if (meleeWeapon.GetComponent<Item_Melee>() != null
-                    && meleeWeapon.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
-                {
-                    meleeWeapon.GetComponent<Item_Melee>().UnequipMeleeWeapon();
-                }
-            }
-            //unequips previously equipped gun if there is any
-            foreach (GameObject gun in PlayerInventoryScript.inventory)
-            {
-                if (gun.GetComponent<Item_Gun>() != null
-                    && gun.GetComponent<Item_Gun>().hasEquippedGun)
-                {
-                    gun.GetComponent<Item_Gun>().UnequipGun();
-                }
-            }
-            //unequips previously equipped grenade if there is any
+            bool isCookingGrenade = false;
             foreach (GameObject grenade in PlayerInventoryScript.inventory)
             {
                 if (grenade.GetComponent<Item_Grenade>() != null
-                    && grenade.GetComponent<Item_Grenade>().hasEquippedGrenade)
+                    && grenade.GetComponent<Item_Grenade>().startedCookingGrenadeTimer)
                 {
-                    grenade.GetComponent<Item_Grenade>().UnequipGrenade();
+                    isCookingGrenade = true;
                 }
             }
 
-            //enables interpolation on the equipped grenade
-            rb.interpolation = RigidbodyInterpolation.None;
+            if (isCookingGrenade)
+            {
+                Debug.LogWarning("Error: Cannot equip a different grenade because currently equipped grenade is still cooking!");
+            }
+            else if (!isCookingGrenade)
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
+                par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
-            hasEquippedGrenade = true;
+                par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer1.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer2.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer3.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer4.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().bgr_grenadeTimer5.gameObject.SetActive(true);
 
-            endedGrenadeEquipWaitTimer = false;
-            grenadeEquipWaitTimer = 0;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
 
-            gameObject.GetComponent<Env_Item>().RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
-            PlayerInventoryScript.UpdatePlayerInventoryStats();
-            PlayerInventoryScript.equippedGun = gameObject;
+                foreach (GameObject item in PlayerInventoryScript.inventory)
+                {
+                    if (item.GetComponent<Item_Gun>() != null
+                        && item.GetComponent<Item_Gun>().hasEquippedGun)
+                    {
+                        item.GetComponent<Item_Gun>().UnequipGun();
+                    }
+                    else if (item.GetComponent<Item_Melee>() != null
+                             && item.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+                    {
+                        item.GetComponent<Item_Melee>().UnequipMeleeWeapon();
+                    }
+                    else if (item.GetComponent<Item_Grenade>() != null
+                             && item.GetComponent<Item_Grenade>().hasEquippedGrenade)
+                    {
+                        item.GetComponent<Item_Grenade>().UnequipGrenade();
+                    }
+                }
 
-            gameObject.SetActive(true);
-            gameObject.GetComponent<MeshRenderer>().enabled = true;
-            gameObject.GetComponent<Rigidbody>().isKinematic = true;
-            gameObject.transform.parent = PlayerInventoryScript.pos_EquippedItem.transform;
-            gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
+                foreach (Collider collider in GetComponents<Collider>())
+                {
+                    if (collider.GetComponent<BoxCollider>() != null
+                        && collider.GetComponent<BoxCollider>().enabled)
+                    {
+                        collider.GetComponent<BoxCollider>().enabled = false;
+                    }
+                    else if (collider.GetComponent<SphereCollider>() != null
+                             && collider.GetComponent<SphereCollider>().enabled)
+                    {
+                        collider.GetComponent<SphereCollider>().enabled = false;
+                    }
+                    else if (collider.GetComponent<MeshCollider>() != null
+                             && collider.GetComponent<MeshCollider>().enabled)
+                    {
+                        collider.GetComponent<MeshCollider>().enabled = false;
+                    }
+                }
 
-            //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
+                //enables interpolation on the equipped grenade
+                rb.interpolation = RigidbodyInterpolation.None;
+
+                hasEquippedGrenade = true;
+
+                endedGrenadeEquipWaitTimer = false;
+                grenadeEquipWaitTimer = 0;
+
+                gameObject.GetComponent<Env_Item>().RemoveListeners();
+                par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                PlayerInventoryScript.UpdatePlayerInventoryStats();
+                PlayerInventoryScript.equippedGun = gameObject;
+
+                gameObject.SetActive(true);
+                gameObject.GetComponent<MeshRenderer>().enabled = true;
+                gameObject.GetComponent<Rigidbody>().isKinematic = true;
+                gameObject.transform.parent = PlayerInventoryScript.pos_EquippedItem.transform;
+                gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
+
+                //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error: Something prevented equipping this grenade!" + e + ".");
         }
     }
     public void UnequipGrenade()
     {
         if (!startedCookingGrenadeTimer)
         {
+            foreach (Collider collider in GetComponents<Collider>())
+            {
+                if (collider.GetComponent<BoxCollider>() != null
+                    && !collider.GetComponent<BoxCollider>().enabled)
+                {
+                    collider.GetComponent<BoxCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<SphereCollider>() != null
+                         && !collider.GetComponent<SphereCollider>().enabled)
+                {
+                    collider.GetComponent<SphereCollider>().enabled = true;
+                }
+                else if (collider.GetComponent<MeshCollider>() != null
+                         && !collider.GetComponent<MeshCollider>().enabled)
+                {
+                    collider.GetComponent<MeshCollider>().enabled = true;
+                }
+            }
+
             hasEquippedGrenade = false;
 
             endedGrenadeEquipWaitTimer = false;
@@ -711,7 +695,8 @@ public class Item_Grenade : MonoBehaviour
         foreach (Collider target in colliders)
         {
             //add explosion effect for each rigidbody in grenades explosion range
-            if (target.GetComponent<Rigidbody>() != null)
+            if (target.GetComponent<Rigidbody>() != null
+                && !target.GetComponent<Rigidbody>().isKinematic)
             {
                 Rigidbody targetRB = target.GetComponent<Rigidbody>();
 
@@ -727,7 +712,7 @@ public class Item_Grenade : MonoBehaviour
         }
 
         //start frag grenade effects
-        if (grenadeType == GrenadeType.frag)
+        if (grenadeType == GrenadeType.fragmentation)
         {
             fragExplode = true;
 

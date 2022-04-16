@@ -26,8 +26,6 @@ public class UI_RepairContent : MonoBehaviour
     {
         PlayerInventoryScript.Trader = gameObject;
 
-        par_Managers.GetComponent<Manager_UIReuse>().CloseDialogueUI();
-
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(CloseRepairAndPlayerInventory);
@@ -66,7 +64,7 @@ public class UI_RepairContent : MonoBehaviour
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
-        AIScript.CheckIfAnyQuestIsCompleted();
+        AIScript.OpenNPCDialogue();
 
         isNPCRepairUIOpen = false;
     }

@@ -11,7 +11,6 @@ public class Env_Workbench : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public bool isActive;
     [HideInInspector] public bool isWorkbenchRepairUIOpen;
     [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
 

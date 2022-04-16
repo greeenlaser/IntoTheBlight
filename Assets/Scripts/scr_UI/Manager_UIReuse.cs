@@ -396,10 +396,9 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_Dialogue;
     public TMP_Text txt_NPCName;
     public TMP_Text txt_NPCDialogue;
-    public Button btn_DiaButton1;
-    public Button btn_DiaButton2;
-    public Button btn_DiaButton3;
-    public Button btn_DialogueReturn;
+    public Button btn_dialogueTemplate;
+    public GameObject par_DialoguePanel;
+    [HideInInspector] public List<Button> buttons = new List<Button>();
 
     [Header("Time")]
     public GameObject par_TimeSlider;
@@ -457,7 +456,7 @@ public class Manager_UIReuse : MonoBehaviour
         txt_timerSlot2.text = "0";
         txt_timerSlot3.text = "0";
 
-        CloseDialogueUI();
+        CloseAllDialogueUI();
 
         ClearWeaponUI();
 
@@ -530,6 +529,8 @@ public class Manager_UIReuse : MonoBehaviour
         bgr_QuestHoverBackground.gameObject.SetActive(false);
         ClearQuestUI();
         par_RealQuestUI.SetActive(false);
+
+        CloseAllDialogueUI();
 
         par_TeleportCheck.SetActive(false);
 
@@ -1313,33 +1314,21 @@ public class Manager_UIReuse : MonoBehaviour
         bgr_QuestHoverBackground.gameObject.SetActive(false);
     }
 
-    public void ClearDialogueUI()
+    public void CloseAllDialogueUI()
     {
-        txt_NPCDialogue.text = "";
+        CloseDialogueUI();
 
-        btn_DiaButton1.onClick.RemoveAllListeners();
-        btn_DiaButton2.onClick.RemoveAllListeners();
-        btn_DiaButton3.onClick.RemoveAllListeners();
-        btn_DialogueReturn.onClick.RemoveAllListeners();
-    }
-
-    public void CloseDialogueUI()
-    {
-        par_Dialogue.SetActive(false);
         txt_NPCName.text = "";
         txt_NPCDialogue.text = "";
-
-        btn_DiaButton1.onClick.RemoveAllListeners();
-        btn_DiaButton1.GetComponentInChildren<TMP_Text>().text = "";
-        btn_DiaButton1.gameObject.SetActive(false);
-        btn_DiaButton2.onClick.RemoveAllListeners();
-        btn_DiaButton2.GetComponentInChildren<TMP_Text>().text = "";
-        btn_DiaButton2.gameObject.SetActive(false);
-        btn_DiaButton3.onClick.RemoveAllListeners();
-        btn_DiaButton3.GetComponentInChildren<TMP_Text>().text = "";
-        btn_DiaButton3.gameObject.SetActive(false);
-        btn_DialogueReturn.onClick.RemoveAllListeners();
-        btn_DialogueReturn.gameObject.SetActive(false);
+        par_Dialogue.SetActive(false);
+    }
+    public void CloseDialogueUI()
+    {
+        foreach (Transform child in par_DialoguePanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        buttons.Clear();
     }
 
     public void UpdatePlayerFactionUI()

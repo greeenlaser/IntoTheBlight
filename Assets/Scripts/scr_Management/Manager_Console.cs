@@ -43,8 +43,6 @@ public class Manager_Console : MonoBehaviour
     [HideInInspector] private readonly List<string> itemnames = new List<string>();
     [HideInInspector] public List<string> playeritemnames = new List<string>();
     [HideInInspector] public GameObject lockpickUI;
-    [HideInInspector] public GameObject currentCell;
-    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool foundDuplicate;
@@ -212,7 +210,9 @@ public class Manager_Console : MonoBehaviour
                 Ray ray = cam_Player.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
                 //checks if the raycast hit anything
-                if (Physics.Raycast(ray, out RaycastHit hit, 100))
+                if (Physics.Raycast(ray, 
+                                    out RaycastHit hit, 
+                                    100))
                 {
                     //if selected gameobject isnt empty
                     if (hit.transform.gameObject != null)
@@ -364,6 +364,11 @@ public class Manager_Console : MonoBehaviour
                 {
                     Command_ToggleUnityLogs();
                 }
+                else if (separatedWords[0] == "save" && separatedWords.Count == 1
+                         && PlayerHealthScript.isPlayerAlive)
+                {
+                    Command_Save();
+                }
                 //delete all saves
                 else if (separatedWords[0] == "das" && separatedWords.Count == 1)
                 {
@@ -457,7 +462,8 @@ public class Manager_Console : MonoBehaviour
                 //some commands are disabled if the player is dead
                 else if (!PlayerHealthScript.isPlayerAlive)
                 {
-                    if (separatedWords[0] == "tgm" && separatedWords.Count == 1
+                    if (separatedWords[0] == "save" && separatedWords.Count == 1
+                        || separatedWords[0] == "tgm" && separatedWords.Count == 1
                         || separatedWords[0] == "tnc" && separatedWords.Count == 1
                         || separatedWords[0] == "taid" && separatedWords.Count == 1
                         || separatedWords[0] == "gcr" && separatedWords.Count == 1
@@ -673,6 +679,8 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             consoleText = "tul - Toggles the Unity logs on and off.";
             CreateNewConsoleLine();
+            consoleText = "save - Saves current game progress.";
+            CreateNewConsoleLine();
             consoleText = "das - deletes all the game saves - WARNING: All deleted saves are lost forever!";
             CreateNewConsoleLine();
             consoleText = "tgm - toggles godmode for player.";
@@ -831,38 +839,15 @@ public class Manager_Console : MonoBehaviour
         }
         separatedWords.Clear();
     }
-    //toggles the unity logs on and off
-    private void Command_ToggleUnityLogs()
+    //saves the current game progress
+    private void Command_Save()
     {
-        insertedCommands.Add("tul");
+        insertedCommands.Add("save");
         currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
+        consoleText = "--save--";
         CreateNewConsoleLine();
 
-        if (!displayUnityLogs)
-        {
-            consoleText = "Showing Unity logs.";
-            CreateNewConsoleLine();
-            displayUnityLogs = true;
-        }
-
-        else if (displayUnityLogs)
-        {
-            consoleText = "No longer showing Unity logs.";
-            CreateNewConsoleLine();
-            displayUnityLogs = false;
-        }
-        separatedWords.Clear();
-    }
-    //adds time in hours
-    private void Command_GlobalCellReset()
-    {
-        insertedCommands.Add("gcr");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--gcr--";
-        CreateNewConsoleLine();
-
-        par_Managers.GetComponent<GameManager>().GlobalCellReset();
+        par_Managers.GetComponent<UI_PauseMenu>().Save();
 
         separatedWords.Clear();
     }
@@ -901,6 +886,41 @@ public class Manager_Console : MonoBehaviour
                 CreateNewConsoleLine();
             }
         }
+
+        separatedWords.Clear();
+    }
+    //toggles the unity logs on and off
+    private void Command_ToggleUnityLogs()
+    {
+        insertedCommands.Add("tul");
+        currentSelectedInsertedCommand = insertedCommands.Count;
+        consoleText = "--" + input + "--";
+        CreateNewConsoleLine();
+
+        if (!displayUnityLogs)
+        {
+            consoleText = "Showing Unity logs.";
+            CreateNewConsoleLine();
+            displayUnityLogs = true;
+        }
+
+        else if (displayUnityLogs)
+        {
+            consoleText = "No longer showing Unity logs.";
+            CreateNewConsoleLine();
+            displayUnityLogs = false;
+        }
+        separatedWords.Clear();
+    }
+    //adds time in hours
+    private void Command_GlobalCellReset()
+    {
+        insertedCommands.Add("gcr");
+        currentSelectedInsertedCommand = insertedCommands.Count;
+        consoleText = "--gcr--";
+        CreateNewConsoleLine();
+
+        par_Managers.GetComponent<GameManager>().GlobalCellReset();
 
         separatedWords.Clear();
     }
@@ -2279,10 +2299,6 @@ public class Manager_Console : MonoBehaviour
                     Transform teleportLoc = cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint;
                     //move player to cell
                     thePlayer.transform.position = teleportLoc.position;
-                    //assign teleported cell to AllGameCells script
-                    currentCell = cell;
-                    //unload other cells if any are active and load teleported cell
-                    cell.GetComponent<Manager_CurrentCell>().QuitelyUnloadCell();
                     //load teleported cell items
                     cell.GetComponent<Manager_CurrentCell>().LoadCell();
                     ToggleConsole();
@@ -2462,9 +2478,9 @@ public class Manager_Console : MonoBehaviour
         consoleText = "--" + input + "--";
         CreateNewConsoleLine();
 
-        if (thePlayer.GetComponent<Player_Health>().health == 100
-            && thePlayer.GetComponent<Player_Health>().maxHealth == 100
-            && thePlayer.GetComponent<Player_Movement>().currentStamina == 100
+        if (thePlayer.GetComponent<Player_Health>().health == originalMaxHealth
+            && thePlayer.GetComponent<Player_Health>().maxHealth == originalMaxHealth
+            && thePlayer.GetComponent<Player_Movement>().currentStamina == originalMaxStamina
             && thePlayer.GetComponent<Player_Movement>().maxStamina == originalMaxStamina
             && thePlayer.GetComponent<Player_Movement>().staminaRecharge == originalStaminaRecharge
             && thePlayer.GetComponent<Player_Health>().maxMentalState == originalMaxMentalState
@@ -2494,6 +2510,22 @@ public class Manager_Console : MonoBehaviour
             thePlayer.GetComponent<Player_Movement>().jumpHeight = originalJumpHeight + 0.75f; //increasing the jump height to the real original jump height
             thePlayer.GetComponent<Inv_Player>().maxInvSpace = originalMaxInvspace;
             par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
+
+            par_Managers.GetComponent<Manager_UIReuse>().health = originalMaxHealth;
+            par_Managers.GetComponent<Manager_UIReuse>().maxHealth = originalMaxHealth;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
+
+            par_Managers.GetComponent<Manager_UIReuse>().stamina = originalMaxStamina;
+            par_Managers.GetComponent<Manager_UIReuse>().maxStamina = originalMaxStamina;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+
+            par_Managers.GetComponent<Manager_UIReuse>().radiation = 0;
+            par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = originalMaxRadiation;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
+
+            par_Managers.GetComponent<Manager_UIReuse>().mentalState = originalMaxMentalState;
+            par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = originalMaxMentalState;
+            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
         }
 
         separatedWords.Clear();
@@ -2532,6 +2564,11 @@ public class Manager_Console : MonoBehaviour
                     string health = thePlayer.GetComponent<Player_Health>().health.ToString();
                     consoleText = "Changed player current health to " + health + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().health = thePlayer.GetComponent<Player_Health>().health;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = thePlayer.GetComponent<Player_Health>().maxHealth;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Health>().maxHealth)
@@ -2555,6 +2592,11 @@ public class Manager_Console : MonoBehaviour
                     string maxhealth = thePlayer.GetComponent<Player_Health>().maxHealth.ToString();
                     consoleText = "Changed player max health to " + maxhealth + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().health = thePlayer.GetComponent<Player_Health>().health;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxHealth = thePlayer.GetComponent<Player_Health>().maxHealth;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerHealth();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Health>().health)
@@ -2578,6 +2620,11 @@ public class Manager_Console : MonoBehaviour
                     string stamina = thePlayer.GetComponent<Player_Movement>().currentStamina.ToString();
                     consoleText = "Changed player current stamina to " + stamina + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().stamina = thePlayer.GetComponent<Player_Movement>().currentStamina;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxStamina = thePlayer.GetComponent<Player_Movement>().maxStamina;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
@@ -2601,6 +2648,11 @@ public class Manager_Console : MonoBehaviour
                     string maxstamina = thePlayer.GetComponent<Player_Movement>().maxStamina.ToString();
                     consoleText = "Changed player max stamina to " + maxstamina + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().stamina = thePlayer.GetComponent<Player_Movement>().currentStamina;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxStamina = thePlayer.GetComponent<Player_Movement>().maxStamina;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
@@ -2624,6 +2676,11 @@ public class Manager_Console : MonoBehaviour
                     string mentalstate = thePlayer.GetComponent<Player_Health>().mentalState.ToString();
                     consoleText = "Changed player current mental state to " + mentalstate + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().mentalState = thePlayer.GetComponent<Player_Health>().mentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = thePlayer.GetComponent<Player_Health>().maxMentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
@@ -2647,6 +2704,11 @@ public class Manager_Console : MonoBehaviour
                     string maxmentalstate = thePlayer.GetComponent<Player_Health>().maxMentalState.ToString();
                     consoleText = "Changed player max mental state to " + maxmentalstate + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().mentalState = thePlayer.GetComponent<Player_Health>().mentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = thePlayer.GetComponent<Player_Health>().maxMentalState;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
@@ -2670,6 +2732,11 @@ public class Manager_Console : MonoBehaviour
                     string radiation = thePlayer.GetComponent<Player_Health>().radiation.ToString();
                     consoleText = "Changed player current radiation to " + radiation + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().radiation = thePlayer.GetComponent<Player_Health>().radiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue < 0)
@@ -2693,6 +2760,11 @@ public class Manager_Console : MonoBehaviour
                     string maxradiation = thePlayer.GetComponent<Player_Health>().maxRadiation.ToString();
                     consoleText = "Changed player max radiation to " + maxradiation + ".";
                     CreateNewConsoleLine();
+
+                    par_Managers.GetComponent<Manager_UIReuse>().radiation = thePlayer.GetComponent<Player_Health>().radiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerRadiation();
+
                     par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
                 }
                 else if (insertedValue >= 1000001)
@@ -3538,7 +3610,7 @@ public class Manager_Console : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
             par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
         }
-        else if (PlayerInventoryScript.Workbench != null && PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().isActive)
+        else if (PlayerInventoryScript.Workbench != null)
         {
             par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
             par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();

@@ -10,29 +10,38 @@ public class Env_DestroyableCrate : MonoBehaviour
     [SerializeField] private GameObject completeCrate;
     [SerializeField] private GameObject brokenCrate;
     [SerializeField] private Transform par_Cratespawns;
-    [SerializeField] private Manager_CurrentCell CurrentCellScript;
     [SerializeField] private GameObject par_Managers;
 
-    //public but hidden variables
-    [HideInInspector] public bool isActive;
-
     //private variables
-    private bool calledCrateDestroyOnce;
+    private Manager_CurrentCell CurrentCellScript;
 
-    private void Update()
+    private void Start()
     {
-        if (isActive 
-            && !calledCrateDestroyOnce
-            && crateHealth <= 0)
+        foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
         {
+            if (cell.GetComponent<Manager_CurrentCell>().destroyableCrates.Contains(gameObject))
+            {
+                CurrentCellScript = cell.GetComponent<Manager_CurrentCell>();
+                break;
+            }
+        }
+    }
+
+    public void DealDamage(float damageAmount)
+    {
+        if (crateHealth - damageAmount > 0)
+        {
+            crateHealth -= damageAmount;
+        }
+        else
+        {
+            crateHealth = 0;
             Destroyed();
         }
     }
 
-    public void Destroyed()
+    private void Destroyed()
     {
-        calledCrateDestroyOnce = true;
-
         if (CurrentCellScript != null)
         {
             CurrentCellScript.destroyableCrates.Remove(gameObject);
@@ -97,7 +106,6 @@ public class Env_DestroyableCrate : MonoBehaviour
                                                                   par_Cratespawns);
 
                         spawnedRepairKit.name = spawnedRepairKit.GetComponent<Env_Item>().str_ItemName;
-                        spawnedRepairKit.GetComponent<Env_Item>().itemActivated = true;
                         spawnedRepairKit.GetComponent<Env_Item>().droppedObject = true;
                         spawnedRepairKit.SetActive(true);
 
@@ -136,7 +144,6 @@ public class Env_DestroyableCrate : MonoBehaviour
                                                       par_Cratespawns);
 
                         spawnedHealthKit.name = spawnedHealthKit.GetComponent<Env_Item>().str_ItemName;
-                        spawnedHealthKit.GetComponent<Env_Item>().itemActivated = true;
                         spawnedHealthKit.GetComponent<Env_Item>().droppedObject = true;
                         spawnedHealthKit.SetActive(true);
 
@@ -193,7 +200,6 @@ public class Env_DestroyableCrate : MonoBehaviour
                               par_Cratespawns);
 
                     spawnedBullet.name = spawnedBullet.GetComponent<Env_Item>().str_ItemName;
-                    spawnedBullet.GetComponent<Env_Item>().itemActivated = true;
                     spawnedBullet.GetComponent<Env_Item>().droppedObject = true;
                     spawnedBullet.GetComponent<Env_Item>().int_itemCount = Random.Range(1, 30);
                     spawnedBullet.SetActive(true);

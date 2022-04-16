@@ -4,314 +4,175 @@ using UnityEngine;
 
 public class Env_DamageType : MonoBehaviour
 {
-    [SerializeField] private DamageType damageType;
-    [SerializeField] private enum DamageType
-    {
-        radiation,
-        fire,
-        electricity,
-        gas,
-        psy
-    }
-    [SerializeField] private DamageSeverity damageSeverity;
-    [SerializeField] private enum DamageSeverity
-    {
-        minor,
-        moderate,
-        severe
-    }
-    [SerializeField] private int damage;
-    [SerializeField] private int radiationDamage;
-    [SerializeField] private int mentalDamage;
+    [SerializeField] private string damageTypeName;
+    [SerializeField] private float maxDamage;
     [Tooltip("How many times a second does this damageType deal damage?")]
     [Range(1, 10)]
     [SerializeField] private int damageTimer = 1;
+    [Range(0f, 2f)]
+    [SerializeField] private float innerRange;
+    [Range(0.1f, 4f)]
+    [SerializeField] private float middleRange;
+    [Range(0.5f, 10f)]
+    [SerializeField] private float outerRange;
+    public DamageType damageType;
+    public enum DamageType
+    {
+        fire,
+        electricity,
+        gas,
+        radiation,
+        psy
+    }
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public float damageProtection;
-    [HideInInspector] public float mentalProtection;
-    [HideInInspector] public float radiationProtection;
+    [HideInInspector] public string damageDealerSeverity;
 
     //private variables
-    private bool isDealingDamage;
-    private bool dealtFirstDamage;
-    private float timer;
-    private GameObject thePlayer;
+    private bool dealDamage;
+    private float timeUntilDamageDealt;
+    private string theDamageType;
 
-    private void OnTriggerEnter(Collider other)
+    private void Start()
     {
-        //if player stepped into of damage collider
-        if (other.CompareTag("Player") 
-            && other.GetComponent<Player_Health>().health > 0
-            && other.GetComponent<Player_Health>().canTakeDamage)
+        if (damageType == DamageType.fire)
         {
-            EnableDamageTypeLogo();
-
-            isDealingDamage = true;
-
-            other.GetComponent<Player_Health>().isTakingDamage = true;
-            other.GetComponent<Player_Health>().damageDealers.Add(gameObject);
-
-            if (thePlayer == null)
-            {
-                thePlayer = other.gameObject;
-            }
+            theDamageType = "fire";
+        }
+        else if (damageType == DamageType.electricity)
+        {
+            theDamageType = "electricity";
+        }
+        else if (damageType == DamageType.gas)
+        {
+            theDamageType = "gas";
+        }
+        else if (damageType == DamageType.radiation)
+        {
+            theDamageType = "radiation";
+        }
+        else if (damageType == DamageType.psy)
+        {
+            theDamageType = "psy";
         }
     }
-    private void OnTriggerExit(Collider other)
+
+    private void OnDrawGizmosSelected()
     {
-        //if player stepped out of damage collider
-        if (other.CompareTag("Player"))
-        {
-            DisableDamageTypeLogo();
+        //red sphere for inner damage range
+        Gizmos.color = new Color32(255, 0, 0, 255);
+        Gizmos.DrawWireSphere(transform.position, innerRange);
 
-            other.GetComponent<Player_Health>().damageDealers.Remove(gameObject);
+        //orange sphere for middle damage range
+        Gizmos.color = new Color32(255, 145, 100, 255);
+        Gizmos.DrawWireSphere(transform.position, middleRange);
 
-            isDealingDamage = false;
-            dealtFirstDamage = false;
-        }
+        //yellow sphere for outer damage range
+        Gizmos.color = new Color32(255, 255, 0, 255);
+        Gizmos.DrawWireSphere(transform.position, outerRange);
     }
 
     private void Update()
     {
-        if (isDealingDamage)
-        {
-            if (!dealtFirstDamage)
-            {
-                timer = 0;
-                dealtFirstDamage = true;
-            }
+        Collider[] colliders = Physics.OverlapSphere(transform.position, outerRange);
 
-            timer -= damageTimer * Time.deltaTime;
-            if (timer <= 0)
+        if (colliders.Length > 0)
+        {
+            foreach (var target in colliders)
             {
-                if (damageType == DamageType.fire
-                    || damageType == DamageType.electricity
-                    || damageType == DamageType.gas)
+                if ((target.transform.GetComponent<Player_Health>() != null
+                    && target.GetComponent<Player_Health>().isPlayerAlive
+                    && target.GetComponent<Player_Health>().canTakeDamage)
+                    || (target.GetComponent<AI_Health>() != null
+                    && target.GetComponent<AI_Health>().isAlive
+                    && target.GetComponent<AI_Health>().isKillable)
+                    || (target.GetComponent<Env_DestroyableCrate>() != null
+                    && target.GetComponent<Env_DestroyableCrate>().crateHealth > 0))
                 {
-                    Damage();
+                    timeUntilDamageDealt += Time.deltaTime;
+                    if (timeUntilDamageDealt > damageTimer)
+                    {
+                        dealDamage = true;
+                        timeUntilDamageDealt = 0;
+                    }
+
+                    if (dealDamage)
+                    {
+                        float distance = Vector3.Distance(target.transform.position, transform.position);
+                        float finalDamage = 0;
+
+                        //damaging killable player
+                        if (target.transform.GetComponent<Player_Health>() != null)
+                        {
+                            if (distance <= outerRange
+                                && distance > middleRange)
+                            {
+                                //33% damage to target
+                                finalDamage = Mathf.Floor(maxDamage / 3 * 10) / 10;
+                                damageDealerSeverity = "minor";
+                            }
+                            else if (distance <= middleRange
+                                     && distance > innerRange)
+                            {
+                                //66% damage to target
+                                finalDamage = Mathf.Floor(maxDamage / 3 * 2 * 10) / 10;
+                                damageDealerSeverity = "moderate";
+                            }
+                            else if (distance <= innerRange)
+                            {
+                                //100% damage to target
+                                finalDamage = maxDamage;
+                                damageDealerSeverity = "severe";
+                            }
+                            
+                            target.transform.GetComponent<Player_Health>().DealDamage(damageTypeName, theDamageType, finalDamage);
+
+                            //Debug.Log("Dealt " + damageDealt + " " + damageType + " damage to " + target.name + "!");
+                        }
+                        //damaging killable AI
+                        else if (target.transform.GetComponent<AI_Health>() != null)
+                        {
+                            target.transform.GetComponent<AI_Health>().DealDamage(theDamageType, finalDamage);
+                            //Debug.Log("Dealt " + damageDealt + " " + damageType + " damage to " + target.name + "!");
+                        }
+                        //damaging destroyable crate
+                        else if (target.transform.GetComponent<Env_DestroyableCrate>() != null)
+                        {
+                            target.transform.GetComponent<Env_DestroyableCrate>().DealDamage(finalDamage);
+                            //Debug.Log("Dealt " + damageDealt + " " + damageType + " damage to " + target.name + "!");
+                        }
+
+                        dealDamage = false;
+                    }
                 }
-                else if (damageType == DamageType.radiation)
-                {
-                    RadiationDamage();
-                }
-                else if (damageType == DamageType.psy)
-                {
-                    MentalDamage();
-                }
-                timer = 1;
             }
-
-            //if players health - damage dealt is less or equal to 0
-            if (thePlayer.GetComponent<Player_Health>().health - damage <= 0)
+        }
+        else
+        {
+            if (timeUntilDamageDealt > 0)
             {
-                thePlayer.GetComponent<Player_Health>().health = 0;
-                isDealingDamage = false;
-            }
-            //if players mentalstate - mentaldamage dealt is less or equal to 0
-            if (thePlayer.GetComponent<Player_Health>().mentalState - mentalDamage <= 0)
-            {
-                thePlayer.GetComponent<Player_Health>().mentalState = 0;
-                isDealingDamage = false;
-            }
-            //if players radiation + radiationdamange dealt is over or equal to maxradiation
-            if (thePlayer.GetComponent<Player_Health>().radiation + radiationDamage 
-                >= thePlayer.GetComponent<Player_Health>().maxRadiation)
-            {
-                thePlayer.GetComponent<Player_Health>().radiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
-                isDealingDamage = false;
+                timeUntilDamageDealt = 0;
             }
         }
     }
 
-    private void Damage()
+    private void OnTriggerEnter(Collider other)
     {
-        float finalDamage = damage - damageProtection;
-        if (finalDamage < 0)
+        if (other.gameObject.GetComponent<Player_Health>() != null
+            && !other.gameObject.GetComponent<Player_Health>().elementalDamageDealers.Contains(gameObject)
+            && other.gameObject.GetComponent<Player_Health>().canTakeDamage
+            && other.gameObject.GetComponent<Player_Health>().isPlayerAlive)
         {
-            finalDamage = 0;
-        }
-
-        thePlayer.GetComponent<Player_Health>().health -= finalDamage;
-    }
-    private void RadiationDamage()
-    {
-        float finalDamage = radiationDamage - radiationProtection;
-        if (finalDamage < 0)
-        {
-            finalDamage = 0;
-        }
-
-        thePlayer.GetComponent<Player_Health>().radiation += finalDamage;
-
-        //Debug.Log("Dealt " + finalDamage + " radiation damage. Players recieved radiation: " + thePlayer.GetComponent<Player_Health>().radiation + ".");
-    }
-    private void MentalDamage()
-    {
-        float finalDamage = mentalDamage - mentalProtection;
-        if (finalDamage < 0)
-        {
-            finalDamage = 0;
-        }
-
-        thePlayer.GetComponent<Player_Health>().mentalState -= finalDamage;
-    }
-
-    private void EnableDamageTypeLogo()
-    {
-        if (damageType == DamageType.radiation)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorRadiationDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateRadiationDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeRadiationDamage.gameObject.SetActive(true);
-            }
-        }
-        else if (damageType == DamageType.fire)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorFireDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateFireDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeFireDamage.gameObject.SetActive(true);
-            }
-        }
-        else if (damageType == DamageType.electricity)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorElectricityDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateElectricityDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeElectricityDamage.gameObject.SetActive(true);
-            }
-        }
-        else if (damageType == DamageType.gas)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorGasDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateGasDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeGasDamage.gameObject.SetActive(true);
-            }
-        }
-        else if (damageType == DamageType.psy)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorPsyDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderatePsyDamage.gameObject.SetActive(true);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severePsyDamage.gameObject.SetActive(true);
-            }
+            other.gameObject.GetComponent<Player_Health>().elementalDamageDealers.Add(gameObject);
         }
     }
-    private void DisableDamageTypeLogo()
+    private void OnTriggerExit(Collider other)
     {
-        if (damageType == DamageType.radiation)
+        if (other.GetComponent<Player_Health>() != null
+            && other.GetComponent<Player_Health>().elementalDamageDealers.Contains(gameObject))
         {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorRadiationDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateRadiationDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeRadiationDamage.gameObject.SetActive(false);
-            }
-        }
-        else if (damageType == DamageType.fire)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorFireDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateFireDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeFireDamage.gameObject.SetActive(false);
-            }
-        }
-        else if (damageType == DamageType.electricity)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorElectricityDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateElectricityDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeElectricityDamage.gameObject.SetActive(false);
-            }
-        }
-        else if (damageType == DamageType.gas)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorGasDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderateGasDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severeGasDamage.gameObject.SetActive(false);
-            }
-        }
-        else if (damageType == DamageType.psy)
-        {
-            if (damageSeverity == DamageSeverity.minor)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().minorPsyDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.moderate)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().moderatePsyDamage.gameObject.SetActive(false);
-            }
-            else if (damageSeverity == DamageSeverity.severe)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().severePsyDamage.gameObject.SetActive(false);
-            }
+            other.GetComponent<Player_Health>().elementalDamageDealers.Remove(gameObject);
         }
     }
 }

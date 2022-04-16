@@ -36,11 +36,6 @@ public class UI_QuestContent : MonoBehaviour
     [HideInInspector] public bool failedQuest;
     [HideInInspector] public int questCurrentStage;
 
-    //private void Start()
-    //{
-    //Debug.Log("Total quest stages count for " + str_questTitle + " is " + questStages.Count + ".");
-    //}
-
     public void ShowStats()
     {
         par_Managers.GetComponent<Manager_UIReuse>().txt_QuestName.text = str_questTitle;

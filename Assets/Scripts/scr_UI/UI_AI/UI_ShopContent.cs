@@ -57,8 +57,6 @@ public class UI_ShopContent : MonoBehaviour
     {
         PlayerInventoryScript.Trader = gameObject;
 
-        par_Managers.GetComponent<Manager_UIReuse>().CloseDialogueUI();
-
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(CloseShopAndPlayerInventory);
@@ -189,7 +187,7 @@ public class UI_ShopContent : MonoBehaviour
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
-        AIScript.CheckIfAnyQuestIsCompleted();
+        AIScript.OpenNPCDialogue();
 
         isShopOpen = false;
     }

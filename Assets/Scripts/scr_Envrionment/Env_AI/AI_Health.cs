@@ -8,18 +8,16 @@ public class AI_Health : MonoBehaviour
     [Header("Assignables")]
     public bool isKillable;
     public bool isRespawnable;
-    public int maxHealth;
-    [SerializeField] private GameObject thePlayer;
+    public bool canBeHostile;
+    public float maxHealth;
     [SerializeField] private GameObject par_deadAILoot;
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isAlive;
-    [HideInInspector] public bool canBeHostile;
-    [HideInInspector] public int currentHealth;
+    [HideInInspector] public float currentHealth;
 
     //private variables
-    private float lastHealth;
     private float timer;
 
     private void Start()
@@ -30,31 +28,12 @@ public class AI_Health : MonoBehaviour
         canBeHostile = true;
 
         par_deadAILoot.SetActive(false);
+
+        gameObject.GetComponent<Renderer>().material.color = Color.green;
     }
 
     private void Update()
     {
-        if (isAlive && lastHealth != currentHealth)
-        {
-            //if ai health is over 25% then it is colored green
-            if (currentHealth > maxHealth / 4)
-            {
-                NormalHealth();
-            }
-            //if ai health is 25% or less then it is colored yellow
-            else if (currentHealth <= maxHealth / 4)
-            {
-                LowHealth();
-            }
-            //if ai health is 0
-            else if (currentHealth <= 0)
-            {
-                Death();
-            }
-
-            lastHealth = currentHealth;
-        }
-
         //starts countdown and checks player distance from dead AI
         //if time runs out or player is further than 25 meters from the looted dead AI
         //then the dead AI is deleted
@@ -72,37 +51,51 @@ public class AI_Health : MonoBehaviour
         }
     }
 
-    //currentHealth > 25%
-    private void NormalHealth()
+    //deal damage to this AI
+    //NOTE: damageType is currently only a placeholder value,
+    //      it will deal different element damage types like player health
+    //      in the future
+    public void DealDamage(string damageType, float damageAmount)
     {
-        gameObject.GetComponent<Renderer>().material.color = Color.green;
+        if (currentHealth - damageAmount > 0)
+        {
+            currentHealth -= damageAmount;
+
+            //if ai health is over 25% then it is colored green
+            if (currentHealth > maxHealth / 4)
+            {
+                gameObject.GetComponent<Renderer>().material.color = Color.green;
+            }
+            //if ai health is 25% or less then it is colored yellow
+            else if (currentHealth <= maxHealth / 4)
+            {
+                gameObject.GetComponent<Renderer>().material.color = Color.yellow;
+            }
+        }
+        else
+        {
+            Death();
+        }
     }
-    //currentHealth <= 25%
-    private void LowHealth()
-    {
-        gameObject.GetComponent<Renderer>().material.color = Color.yellow;
-    }
+
     //currentHealth <= 0
     public void Death()
     {
-        gameObject.GetComponent<AI_Movement>().canMove = false;
         isAlive = false;
+        currentHealth = 0;
 
         gameObject.GetComponent<Renderer>().material.color = Color.red;
+
         gameObject.GetComponent<AI_Movement>().canMove = false;
         gameObject.GetComponent<NavMeshAgent>().isStopped = true;
 
-        currentHealth = 0;
-
         RandomLoot();
     }
+
     //gives the dead AI random loot based off of many stats
-    //player level?
-    //AI rank in faction?
     private void RandomLoot()
     {
         par_deadAILoot.SetActive(true);
-        par_deadAILoot.GetComponent<Inv_Container>().containerActivated = true;
 
         foreach (GameObject item in par_deadAILoot.GetComponent<Inv_Container>().inventory)
         {
@@ -116,7 +109,7 @@ public class AI_Health : MonoBehaviour
             //random ammo count
             if (item.GetComponent<Item_Ammo>() != null)
             {
-                item.GetComponent<Env_Item>().int_itemCount = Random.Range(15, 45);
+                item.GetComponent<Env_Item>().int_itemCount = Random.Range(3, 25);
             }
             //random health kit count
             if (item.GetComponent<Item_Consumable>() != null

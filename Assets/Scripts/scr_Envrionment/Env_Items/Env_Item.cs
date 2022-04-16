@@ -10,8 +10,6 @@ public class Env_Item : MonoBehaviour
     public bool isProtected;
     [Tooltip("Items without this tag only stack once.")]
     public bool isStackable;
-    [Tooltip("Items with this tag will be randomized. Note: Items dropped by dead bodies are always randomized.")]
-    [SerializeField] private bool randomizeCount;
     public string str_ItemName;
     public string str_ItemDescription;
     [Tooltip("How much is this item worth at its full durability/remainder?")]
@@ -68,7 +66,6 @@ public class Env_Item : MonoBehaviour
     [SerializeField] private Player_Movement PlayerMovementScript;
 
     //public but hidden variables
-    [HideInInspector] public bool itemActivated;
     [HideInInspector] public bool isInPlayerInventory;
     [HideInInspector] public bool isInContainer;
     [HideInInspector] public bool isInTraderShop;
@@ -81,12 +78,12 @@ public class Env_Item : MonoBehaviour
     [HideInInspector] public int int_ItemValue;
     [HideInInspector] public float time;
     [HideInInspector] public GameObject theItem;
-    [HideInInspector] public GameObject currentCell;
-    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool foundDuplicate;
     private bool canContinue;
+    private float closestDistance;
+    private string cellName;
 
     //multiple checkers
     private bool isPickingUpMultipleItems;
@@ -101,11 +98,9 @@ public class Env_Item : MonoBehaviour
     private GameObject selectedGun;
     private GameObject correctAmmo;
     private GameObject duplicate;
-    private GameObject cell;
     //buy, sell, space
     private int int_finalSpace;
     private int int_totalSpace;
-    private int int_quarterPrice;
     private int int_singlePrice;
     private int int_finalPrice;
     private string str_itemName;
@@ -118,38 +113,14 @@ public class Env_Item : MonoBehaviour
         {
             gameObject.name = str_ItemName;
         }
-
-        if (randomizeCount)
-        {
-            //GameObject spawnableParent = GameObject.Find("par_consoleSpawnables");
-            if (gameObject.transform.parent.name != "par_consoleSpawnables"
-                && gameObject.transform.parent.name != "DeadAILoot")
-            {
-                //randomize ammo count
-                if (gameObject.GetComponent<Item_Ammo>() != null)
-                {
-                    int_itemCount = Random.Range(15, 45);
-                }
-                //randomize health kit amount
-                if (gameObject.GetComponent<Item_Consumable>() != null
-                    && gameObject.GetComponent<Item_Consumable>().consumableType
-                    == Item_Consumable.ConsumableType.Healthkit)
-                {
-                    int_itemCount = Random.Range(1, 3);
-                }
-                //randomize money amount
-                if (name == "money")
-                {
-                    int_itemCount = Random.Range(15, 200);
-                }
-            }
-        }
     }
 
     private void Update()
     {
         //resets the stackable item bools
-        if (!isInPlayerInventory && !isInContainer && !isInTraderShop && itemActivated)
+        if (!isInPlayerInventory 
+            && !isInContainer 
+            && !isInTraderShop)
         {
             if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.Escape))
             {
@@ -254,21 +225,21 @@ public class Env_Item : MonoBehaviour
         //weapon damage
         if (gameObject.GetComponent<Item_Melee>() != null)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Melee>().int_damage.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Melee>().damage.ToString();
         }
         //gun ammo count
         if (gameObject.GetComponent<Item_Gun>() != null)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Gun>().int_damage.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + (Mathf.Floor(gameObject.GetComponent<Item_Gun>().damage * 10) / 10).ToString();
             par_Managers.GetComponent<Manager_UIReuse>().txt_AmmoCount.text = "Ammo: " + gameObject.GetComponent<Item_Gun>().currentClipSize.ToString();
         }
         if (gameObject.GetComponent<Item_Grenade>() != null
             && (gameObject.GetComponent<Item_Grenade>().grenadeType
-            == Item_Grenade.GrenadeType.frag
+            == Item_Grenade.GrenadeType.fragmentation
             || gameObject.GetComponent<Item_Grenade>().grenadeType
             == Item_Grenade.GrenadeType.plasma))
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Grenade>().damage.ToString();
+            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Grenade>().maxDamage.ToString();
         }
 
         if (!isInRepairMenu)
@@ -285,11 +256,7 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
 
-            if (gameObject.GetComponent<Item_Ammo>() != null)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Ammo: " + int_itemCount;
-            }
-            else if (gameObject.GetComponent<Item_Consumable>() != null)
+            if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit)
                 {
@@ -418,11 +385,7 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().btn_Take.gameObject.SetActive(true);
             par_Managers.GetComponent<Manager_UIReuse>().btn_Take.onClick.AddListener(Take);
 
-            if (gameObject.GetComponent<Item_Ammo>() != null)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Ammo: " + int_itemCount;
-            }
-            else if (gameObject.GetComponent<Item_Consumable>() != null)
+            if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType 
                     == Item_Consumable.ConsumableType.Repairkit
@@ -473,6 +436,17 @@ public class Env_Item : MonoBehaviour
                 par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(false);
             }
 
+            if (!isProtected)
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
+            }
+            else if (isProtected)
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+            }
+
             if (!isStackable)
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
@@ -490,11 +464,7 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(
                 PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-            if (gameObject.GetComponent<Item_Ammo>() != null)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Ammo: " + int_itemCount;
-            }
-            else if (gameObject.GetComponent<Item_Consumable>() != null)
+            if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType 
                     == Item_Consumable.ConsumableType.Repairkit
@@ -562,11 +532,7 @@ public class Env_Item : MonoBehaviour
 
             par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-            if (gameObject.GetComponent<Item_Ammo>() != null)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Ammo: " + int_itemCount;
-            }
-            else if (gameObject.GetComponent<Item_Consumable>() != null)
+            if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Repairkit
                     || gameObject.GetComponent<Item_Consumable>().consumableType == Item_Consumable.ConsumableType.Healthkit)
@@ -631,18 +597,13 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
 
-            int_quarterPrice = Mathf.FloorToInt(int_ItemValue / 4);
-            int_finalPrice = int_quarterPrice * 3;
+            int_finalPrice = int_finalPrice / 2;
             par_Managers.GetComponent<Manager_UIReuse>().txt_ItemValue.text = int_finalPrice.ToString();
 
             par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(
                 PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-            if (gameObject.GetComponent<Item_Ammo>() != null)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Ammo: " + int_itemCount;
-            }
-            else if (gameObject.GetComponent<Item_Consumable>() != null)
+            if (gameObject.GetComponent<Item_Consumable>() != null)
             {
                 if (gameObject.GetComponent<Item_Consumable>().consumableType 
                     == Item_Consumable.ConsumableType.Repairkit
@@ -923,15 +884,13 @@ public class Env_Item : MonoBehaviour
 
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
-                    if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                        && par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                    foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                     {
-                        par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-                    }
-                    else if (par_Managers.GetComponent<Manager_Console>().currentCell == null
-                             && !par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                    {
-                        par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                        if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                        {
+                            cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                            break;
+                        }
                     }
 
                     gameObject.GetComponent<Env_ObjectPickup>().isHolding = false;
@@ -1009,15 +968,13 @@ public class Env_Item : MonoBehaviour
 
                 par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
-                if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                    && par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                 {
-                    par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-                }
-                else if (par_Managers.GetComponent<Manager_Console>().currentCell == null
-                         && !par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                {
-                    par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                    if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                    {
+                        cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                        break;
+                    }
                 }
 
                 gameObject.GetComponent<Env_ObjectPickup>().isHolding = false;
@@ -1294,8 +1251,7 @@ public class Env_Item : MonoBehaviour
 
         if (canContinue)
         {
-            int_quarterPrice = Mathf.FloorToInt(int_ItemValue / 4);
-            int_singlePrice = int_quarterPrice * 3;
+            int_singlePrice = int_finalPrice * 2;
             str_traderName = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName;
             int_totalSpace = int_ItemWeight * int_confirmedCount;
 
@@ -1892,11 +1848,15 @@ public class Env_Item : MonoBehaviour
                 droppedObject = true;
                 time = 0;
 
-                if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                    && !par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                 {
-                    par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                    if (!cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                    {
+                        cell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                        break;
+                    }
                 }
+
                 gameObject.transform.parent = par_DroppedItems.transform;
 
                 isInPlayerInventory = false;
@@ -2094,8 +2054,7 @@ public class Env_Item : MonoBehaviour
         if (isSellingMultipleItems)
         {
             int_totalSpace = int_ItemWeight * int_selectedCount;
-            int_quarterPrice = Mathf.FloorToInt(int_ItemValue / 4);
-            int_singlePrice = int_quarterPrice * 3;
+            int_singlePrice = int_finalPrice * 2;
             int_finalPrice = int_singlePrice * int_selectedCount;
             par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text + " Total money added: " + int_finalPrice;
         }
@@ -2368,8 +2327,7 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
             par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
 
-            int_quarterPrice = Mathf.FloorToInt(int_ItemValue / 4);
-            int_singlePrice = int_quarterPrice * 3;
+            int_singlePrice = int_finalPrice * 2;
             int_finalPrice = int_singlePrice * int_confirmedCount;
             str_traderName = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName;
             int_totalSpace = int_ItemWeight * int_confirmedCount;
@@ -2435,15 +2393,13 @@ public class Env_Item : MonoBehaviour
                             UpdateGunsAndAmmo();
                         }
 
-                        if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                            && par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                        foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                         {
-                            par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-                        }
-                        else if (par_Managers.GetComponent<Manager_Console>().currentCell == null
-                                && par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                        {
-                            par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                            if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                            {
+                                cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                                break;
+                            }
                         }
 
                         par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
@@ -2463,15 +2419,13 @@ public class Env_Item : MonoBehaviour
                         gameObject.transform.position = PlayerInventoryScript.par_PlayerItems.transform.position;
                         gameObject.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
-                        if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                            && par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                        foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                         {
-                            par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-                        }
-                        else if (par_Managers.GetComponent<Manager_Console>().currentCell == null
-                                && par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                        {
-                            par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                            if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                            {
+                                cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                                break;
+                            }
                         }
 
                         if (gameObject.GetComponent<Item_Ammo>() != null)
@@ -2507,15 +2461,13 @@ public class Env_Item : MonoBehaviour
                         newDuplicate.GetComponent<Env_Item>().int_itemCount = int_confirmedCount;
                         newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = true;
 
-                        if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                            && par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(theItem))
+                        foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                         {
-                            par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Remove(theItem);
-                        }
-                        else if (par_Managers.GetComponent<Manager_Console>().currentCell == null
-                                 && par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Contains(theItem))
-                        {
-                            par_Managers.GetComponent<Manager_Console>().lastCell.GetComponent<Manager_CurrentCell>().items.Remove(theItem);
+                            if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                            {
+                                cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                                break;
+                            }
                         }
 
                         if (gameObject.GetComponent<Item_Ammo>() != null)
@@ -2829,11 +2781,15 @@ public class Env_Item : MonoBehaviour
                 droppedObject = true;
                 time = 0;
 
-                if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                    && !par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                 {
-                    par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                    if (!cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                    {
+                        cell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                        break;
+                    }
                 }
+
                 gameObject.transform.parent = par_DroppedItems.transform;
 
                 isInPlayerInventory = false;
@@ -2863,10 +2819,13 @@ public class Env_Item : MonoBehaviour
                 droppedObject = true;
                 time = 0;
 
-                if (par_Managers.GetComponent<Manager_Console>().currentCell != null
-                    && !par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Contains(theItem))
+                foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
                 {
-                    par_Managers.GetComponent<Manager_Console>().currentCell.GetComponent<Manager_CurrentCell>().items.Add(theItem);
+                    if (!cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+                    {
+                        cell.GetComponent<Manager_CurrentCell>().items.Add(gameObject);
+                        break;
+                    }
                 }
 
                 theItem.name = theItem.GetComponent<Env_Item>().str_ItemName;
@@ -3084,7 +3043,7 @@ public class Env_Item : MonoBehaviour
                     par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
                     par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
                 }
-                else if (PlayerInventoryScript.Workbench != null && PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().isActive)
+                else if (PlayerInventoryScript.Workbench != null)
                 {
                     par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
@@ -3098,7 +3057,6 @@ public class Env_Item : MonoBehaviour
 
     public void ActivateItem()
     {
-        itemActivated = true;
         if (gameObject.GetComponent<MeshRenderer>() != null)
         {
             gameObject.GetComponent<MeshRenderer>().enabled = true;
@@ -3111,7 +3069,6 @@ public class Env_Item : MonoBehaviour
     }
     public void DeactivateItem()
     {
-        itemActivated = false;
         if (gameObject.GetComponent<Rigidbody>() != null)
         {
             gameObject.GetComponent<Rigidbody>().isKinematic = true;
@@ -3121,32 +3078,14 @@ public class Env_Item : MonoBehaviour
 
     public void DestroyObject()
     {
-        //if player is currently in a cell
-        if (par_Managers.GetComponent<Manager_Console>().currentCell != null)
-        {
-            cell = par_Managers.GetComponent<Manager_Console>().currentCell;
-        }
-        //if player is not currently in a cell then it looks for last cell
-        else if (par_Managers.GetComponent<Manager_Console>().currentCell == null)
-        {
-            cell = par_Managers.GetComponent<Manager_Console>().lastCell;
-        }
-        //if the found cell contains the destroyable item then its destroyed
-        if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-        {
-            cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-        }
         //if the found cell doesnt contain the item then it looks through all the other cells items
         //and tries to destroy it if it finds the same gameobject
-        else if (!cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
+        foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
         {
-            foreach (GameObject gameCell in par_Managers.GetComponent<Manager_Console>().allCells)
+            if (cell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
             {
-                if (gameCell.GetComponent<Manager_CurrentCell>().items.Contains(gameObject))
-                {
-                    gameCell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
-                    break;
-                }
+                cell.GetComponent<Manager_CurrentCell>().items.Remove(gameObject);
+                break;
             }
         }
         par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
@@ -3198,17 +3137,42 @@ public class Env_Item : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.onClick.RemoveAllListeners();
     }
 
+    //if this item collided with world border
+    //then look for closest discovered cell spawn point
+    //and teleport this item there
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag("WorldBlocker"))
         {
-            if (currentCell != null)
+            foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
             {
-                transform.position = currentCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+                if (cell.GetComponent<Manager_CurrentCell>().discoveredCell)
+                {
+                    float distance = Vector3.Distance(gameObject.transform.position, cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position);
+
+                    if (cell == par_Managers.GetComponent<Manager_Console>().allCells[0])
+                    {
+                        closestDistance = distance;
+                    }
+                    else
+                    {
+                        if (distance < closestDistance)
+                        {
+                            cellName = cell.GetComponent<Manager_CurrentCell>().str_CellName;
+                        }
+                    }
+                }
             }
-            else if (currentCell == null && lastCell != null)
+
+            foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
             {
-                transform.position = lastCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+                if (cell.GetComponent<Manager_CurrentCell>().discoveredCell
+                    && cell.GetComponent<Manager_CurrentCell>().str_CellName
+                    == cellName)
+                {
+                    gameObject.transform.position = cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position + new Vector3(0, 0.2f, 0);
+                    break;
+                }
             }
         }
     }

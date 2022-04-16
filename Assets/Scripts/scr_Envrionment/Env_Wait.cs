@@ -7,9 +7,6 @@ public class Env_Wait : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] GameObject par_Managers;
 
-    //public but hidden variables
-    [HideInInspector] public bool isActivated;
-
     //private variables
     private int int_selectedCount;
 

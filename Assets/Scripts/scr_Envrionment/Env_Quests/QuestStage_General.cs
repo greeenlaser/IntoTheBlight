@@ -83,7 +83,6 @@ public class QuestStage_General : MonoBehaviour
             {
                 startedStage = true;
                 pickupItem.gameObject.SetActive(true);
-                pickupItem.GetComponent<Env_Item>().itemActivated = true;
                 //Debug.Log(pickupItem.str_ItemName + " was enabled. Started pickup stage!");
             }
             else if (stageType == StageType.give)

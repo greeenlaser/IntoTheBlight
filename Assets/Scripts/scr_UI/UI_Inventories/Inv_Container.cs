@@ -27,7 +27,6 @@ public class Inv_Container : MonoBehaviour
     [SerializeField] private Manager_CurrentCell currentCellScript;
 
     //public but hidden variables
-    [HideInInspector] public bool containerActivated;
     [HideInInspector] public bool isContainerInventoryOpen;
     [HideInInspector] public bool calledContainerOpenOnce;
     [HideInInspector] public bool hasLootedDeadAIInventoryOnce;

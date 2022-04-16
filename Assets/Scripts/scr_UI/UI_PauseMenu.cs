@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,10 @@ public class UI_PauseMenu : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;
     [SerializeField] private GameObject par_PlayerSFX;
+    [SerializeField] private Button btn_Save;
+    [SerializeField] private Button btn_Load;
 
+    [Header("Scripts")]
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Player_Camera PlayerCameraScript;
     [SerializeField] private GameObject par_Managers;
@@ -30,8 +34,8 @@ public class UI_PauseMenu : MonoBehaviour
 
     private void Awake()
     {
-        canPauseGame = true;
-        UnpauseGame();
+        //game is paused by default when main game scene is loaded
+        PauseGame();
     }
 
     private void Update()
@@ -142,6 +146,28 @@ public class UI_PauseMenu : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
             par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
 
+            var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+
+            //restarts current scene
+            //if no save file directory or save file was found
+            if (!Directory.Exists(savingScript.path)
+                || (Directory.Exists(savingScript.path)
+                && !File.Exists(savingScript.path + @"\Save0001.txt")))
+            {
+                btn_Load.onClick.RemoveAllListeners();
+                btn_Load.interactable = false;
+            }
+            //loads game data if a save file was found
+            else if (File.Exists(savingScript.path + @"\Save0001.txt"))
+            {
+                btn_Load.onClick.RemoveAllListeners();
+                btn_Load.onClick.AddListener(Load);
+                btn_Load.interactable = true;
+            }
+
+            btn_Save.onClick.RemoveAllListeners();
+            btn_Save.onClick.AddListener(Save);
+
             par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
             PauseSFX();
@@ -157,25 +183,6 @@ public class UI_PauseMenu : MonoBehaviour
             //Debug.Log("Paused game and opened pause menu UI!");
             callPMOpenOnce = true;
         }
-    }
-
-    public void OpenKeyCommands()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-    }
-    public void OpenConsoleCommands()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-    }
-    public void CloseKeyAndConsoleCommands()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
-
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
     }
 
     //keeps the game paused, closes UI and fixes bools to be able to re-open pause menu again
@@ -284,6 +291,29 @@ public class UI_PauseMenu : MonoBehaviour
 
         calledOnce = false;
         isUIOpen = true;
+
+        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+
+        //restarts current scene
+        //if no save file directory or save file was found
+        if (!Directory.Exists(savingScript.path)
+            || (Directory.Exists(savingScript.path)
+            && !File.Exists(savingScript.path + @"\Save0001.txt")))
+        {
+            btn_Load.onClick.RemoveAllListeners();
+            btn_Load.interactable = false;
+        }
+        //loads game data if a save file was found
+        else if (File.Exists(savingScript.path + @"\Save0001.txt"))
+        {
+            btn_Load.onClick.RemoveAllListeners();
+            btn_Load.onClick.AddListener(Load);
+            btn_Load.interactable = true;
+        }
+
+        btn_Save.onClick.RemoveAllListeners();
+        btn_Save.onClick.AddListener(Save);
+
         //Debug.Log("Opened pause menu UI!");
     }
 
@@ -296,6 +326,55 @@ public class UI_PauseMenu : MonoBehaviour
         calledOnce = false;
         isUIOpen = false;
         //Debug.Log("Closed pause menu UI!");
+    }
+
+    public void Save()
+    {
+        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+
+        //game can only be saved if game isnt currently being saved
+        //and if player is alive
+        if (!savingScript.isSaving
+            && thePlayer.GetComponent<Player_Health>().isPlayerAlive)
+        {
+            savingScript.CreateSaveFile();
+        }
+    }
+    public void Load()
+    {
+        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+
+        //loads game data if a save file was found
+        if (File.Exists(savingScript.path + @"\Save0001.txt"))
+        {
+            if (!savingScript.isLoading)
+            {
+                savingScript.isLoading = true;
+                savingScript.OpenLoadingMenuUI();
+            }
+
+            //Debug.Log("Found save file! Loading data...");
+            savingScript.LoadGameData();
+        }
+    }
+
+    public void OpenKeyCommands()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
+    }
+    public void OpenConsoleCommands()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
+    }
+    public void CloseKeyAndConsoleCommands()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
     }
 
     public void BackToPauseMenu()

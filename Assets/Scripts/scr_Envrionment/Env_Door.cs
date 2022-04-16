@@ -36,7 +36,6 @@ public class Env_Door : MonoBehaviour
     [SerializeField] private Transform pos_DoorClosed2;
 
     //public but hidden variables
-    [HideInInspector] public bool isActive;
     [HideInInspector] public bool openDoor;
     [HideInInspector] public bool closeDoor;
     [HideInInspector] public bool forceCloseDoor;
@@ -123,8 +122,7 @@ public class Env_Door : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isActive
-            && !isLocked 
+        if (!isLocked 
             && (other.CompareTag("Player") 
             || other.CompareTag("NPC"))
             && !controlledByLift)
@@ -142,8 +140,7 @@ public class Env_Door : MonoBehaviour
     }
     private void OnTriggerExit(Collider other)
     {
-        if (isActive
-            && !isLocked
+        if (!isLocked
             && (other.CompareTag("Player") 
             || other.CompareTag("NPC"))
             && !controlledByLift)

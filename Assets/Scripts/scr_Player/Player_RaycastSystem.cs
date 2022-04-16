@@ -54,7 +54,12 @@ public class Player_RaycastSystem : MonoBehaviour
                 //all other layers except this one
                 IgnoredLayermask = ~IgnoredLayermask;
 
-                if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hitTarget, 3, IgnoredLayermask, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(transform.position, 
+                                    transform.TransformDirection(Vector3.forward), 
+                                    out RaycastHit hitTarget, 
+                                    3, 
+                                    IgnoredLayermask, 
+                                    QueryTriggerInteraction.Ignore))
                 {
                     //Debug.Log("Hit target is " + hitTarget.transform.name);
 
@@ -258,47 +263,40 @@ public class Player_RaycastSystem : MonoBehaviour
                 {
                     //hit alive npc
                     if (target.GetComponent<UI_AIContent>() != null
-                        && target.GetComponent<UI_AIContent>().AIActivated
                         && target.GetComponent<UI_AIContent>().hasDialogue)
                     {
-                        target.GetComponent<UI_AIContent>().CheckIfAnyQuestIsCompleted();
+                        target.GetComponent<UI_AIContent>().OpenNPCDialogue();
                     }
                     //hit dead npc
                     else if (deadAIContainer != null
                              && deadAIContainer.GetComponent<Inv_Container>() != null
-                             && deadAIContainer.GetComponent<Env_Follow>() != null
-                             && deadAIContainer.GetComponent<Inv_Container>().containerActivated)
+                             && deadAIContainer.GetComponent<Env_Follow>() != null)
                     {
                         deadAIContainer.GetComponent<Inv_Container>().CheckIfLocked();
                     }
                     //hit item
-                    else if (target.GetComponent<Env_Item>() != null
-                             && target.GetComponent<Env_Item>().itemActivated)
+                    else if (target.GetComponent<Env_Item>() != null)
                     {
                         target.GetComponent<Env_Item>().PickUp();
                     }
                     //hit container
                     else if (target.GetComponent<Inv_Container>() != null
-                             && target.GetComponent<Env_Follow>() == null
-                             && target.GetComponent<Inv_Container>().containerActivated)
+                             && target.GetComponent<Env_Follow>() == null)
                     {
                         target.GetComponent<Inv_Container>().CheckIfLocked();
                     }
                     //hit workbench
-                    else if (target.GetComponent<Env_Workbench>() != null
-                             && target.GetComponent<Env_Workbench>().isActive)
+                    else if (target.GetComponent<Env_Workbench>() != null)
                     {
                         target.GetComponent<Env_Workbench>().OpenRepairUI();
                     }
                     //hit waitable
-                    else if (target.GetComponent<Env_Wait>() != null
-                             && target.GetComponent<Env_Wait>().isActivated)
+                    else if (target.GetComponent<Env_Wait>() != null)
                     {
                         target.GetComponent<Env_Wait>().OpenTimeSlider();
                     }
                     //hit door
                     else if (target.GetComponent<Env_Door>() != null
-                             && target.GetComponent<Env_Door>().isActive
                              && target.GetComponent<Env_Door>().isLocked)
                     {
                         target.GetComponent<Env_Door>().CheckIfKeyIsNeeded();
@@ -313,7 +311,6 @@ public class Player_RaycastSystem : MonoBehaviour
                 //holding an item
                 if (Input.GetKeyDown(KeyCode.Mouse0)
                     && target.GetComponent<Env_Item>() != null
-                    && target.GetComponent<Env_Item>().itemActivated
                     && PlayerInventoryScript.equippedGun == null
                     && heldObject == null)
                 {

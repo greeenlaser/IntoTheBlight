@@ -21,26 +21,39 @@ public class AI_Movement : MonoBehaviour
     [HideInInspector] public bool goingTowardsTarget;
     [HideInInspector] public bool calledTargetLostOnce;
     [HideInInspector] public GameObject target;
-    [HideInInspector] public GameObject currentCell;
-    [HideInInspector] public GameObject lastCell;
 
     //private variables
     private bool calledWaitOnce;
     private bool targetInSight;
     private int destinationPoint;
-    private float realWaitTime;
     private float stunRemaining;
-    //these are only used for AI with combat mechanics
 
+    //world border variables
+    private float closestDistance;
+    private string cellName;
+
+    //these are only used for AI with combat mechanics
     private Vector3 lastKnownTargetPosition;
 
     private void Start()
     {
         canMove = true;
-        realWaitTime = 0;
-        waypointWaitTime = 0;
         agent.autoBraking = false;
-        GoToNextPoint();
+
+        if (wayPoints.Count == 0)
+        {
+            Debug.LogWarning("Error: No waypoints have been set up for " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
+        }
+        else
+        {
+            //update to random point in array
+            destinationPoint = Random.Range(0, wayPoints.Count);
+            //set next destination for AI as targetPos
+            Transform targetPos = wayPoints[destinationPoint];
+            agent.destination = targetPos.position;
+
+            calledWaitOnce = false;
+        }
     }
 
     private void Update()
@@ -62,7 +75,6 @@ public class AI_Movement : MonoBehaviour
                     //and if AI detection is enabled
                     //and if player is close enough
                     if (Vector3.Distance(transform.position, thePlayer.transform.position) < 3f
-                        && AIContentScript.AIActivated
                         && !AIContentScript.isAIUIOpen
                         && AIContentScript.hasDialogue
                         && par_Managers.GetComponent<Manager_Console>().toggleAIDetection)
@@ -90,7 +102,10 @@ public class AI_Movement : MonoBehaviour
                     }
 
                     Vector3 targetDir = (target.transform.position - gameObject.transform.position);
-                    if (Physics.Raycast(transform.position, targetDir, out RaycastHit hit, 50))
+                    if (Physics.Raycast(transform.position, 
+                                        targetDir, 
+                                        out RaycastHit hit, 
+                                        50))
                     {
                         if (hit.transform.gameObject == target)
                         {
@@ -179,11 +194,12 @@ public class AI_Movement : MonoBehaviour
     {
         if (wayPoints.Count == 0)
         {
-            Debug.Log("No waypoints were set up for " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
-            return;
+            Debug.LogWarning("Error: No waypoints have been set up for " + gameObject.GetComponent<UI_AIContent>().str_NPCName + ".");
         }
-
-        if (agent.remainingDistance < 1f && !agent.pathPending && !calledWaitOnce)
+        else if (wayPoints.Count > 0
+                 && agent.remainingDistance < 1f 
+                 && !agent.pathPending 
+                 && !calledWaitOnce)
         {
             StartCoroutine(Wait());
         }
@@ -196,17 +212,20 @@ public class AI_Movement : MonoBehaviour
             || gameObject.GetComponent<AI_Combat>() == null)
         {
             calledWaitOnce = true;
+
             agent.isStopped = true;
+
             yield return new WaitForSeconds(waypointWaitTime);
-            waypointWaitTime = realWaitTime;
+
             agent.isStopped = false;
+
             //update to random point in array
             destinationPoint = Random.Range(0, wayPoints.Count);
             //set next destination for AI as targetPos
             Transform targetPos = wayPoints[destinationPoint];
             agent.destination = targetPos.position;
+
             calledWaitOnce = false;
-            GoToNextPoint();
         }
         else
         {
@@ -248,17 +267,39 @@ public class AI_Movement : MonoBehaviour
         StartCoroutine(Wait());
     }
 
+    //if AI collided with world border
+    //then look for closest cell spawn point
+    //and teleport AI there
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag("WorldBlocker"))
         {
-            if (currentCell != null)
+            foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
             {
-                transform.position = currentCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+                float distance = Vector3.Distance(gameObject.transform.position, cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position);
+
+                if (cell == par_Managers.GetComponent<Manager_Console>().allCells[0])
+                {
+                    closestDistance = distance;
+                }
+                else
+                {
+                    if (distance < closestDistance)
+                    {
+                        cellName = cell.GetComponent<Manager_CurrentCell>().str_CellName;
+                    }
+                }
             }
-            else if (currentCell == null && lastCell != null)
+
+            foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
             {
-                transform.position = lastCell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position;
+                if (cell.GetComponent<Manager_CurrentCell>().discoveredCell
+                    && cell.GetComponent<Manager_CurrentCell>().str_CellName
+                    == cellName)
+                {
+                    gameObject.transform.position = cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint.position + new Vector3(0, 0.2f, 0);
+                    break;
+                }
             }
         }
     }

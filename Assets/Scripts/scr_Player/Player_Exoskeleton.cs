@@ -122,7 +122,6 @@ public class Player_Exoskeleton : MonoBehaviour
 
     //private variables
     private GameObject upgradeCell;
-    private List<GameObject> damageDealers = new List<GameObject>();
 
     private void Update()
     {
@@ -228,10 +227,8 @@ public class Player_Exoskeleton : MonoBehaviour
                 }
 
                 //healing ability only works if players health is below max health
-                //and player isnt currently taking damage
                 if (PlayerHealthScript.health + abilityBuff_healthRegen 
-                    <= PlayerHealthScript.maxHealth + abilityBuff_healthRegen
-                    && !PlayerHealthScript.isTakingDamage)
+                    <= PlayerHealthScript.maxHealth + abilityBuff_healthRegen)
                 {
                     PlayerHealthScript.health += abilityBuff_healthRegen * Time.deltaTime;
                 }
@@ -308,21 +305,6 @@ public class Player_Exoskeleton : MonoBehaviour
 
             if (usingAbility_envProtection)
             {
-                foreach (GameObject damageDealer in PlayerHealthScript.damageDealers)
-                {
-                    if (!damageDealers.Contains(gameObject))
-                    {
-                        damageDealers.Add(damageDealer);
-                    }
-                }
-
-                foreach (GameObject damageDealer in damageDealers)
-                {
-                    damageDealer.GetComponent<Env_DamageType>().damageProtection = abilityBuff_generalResistance;
-                    damageDealer.GetComponent<Env_DamageType>().mentalProtection = abilityBuff_mentalResistance;
-                    damageDealer.GetComponent<Env_DamageType>().radiationProtection = abilityBuff_radResistance;
-                }
-
                 remainingCooldown_envProtection -= Time.deltaTime;
 
                 if (Slot1Script.assignedAbility == UI_AbilitySlot1.AssignedAbility.envProtection)
@@ -358,14 +340,6 @@ public class Player_Exoskeleton : MonoBehaviour
                     {
                         par_Managers.GetComponent<Manager_UIReuse>().txt_timerSlot3.text = "0";
                     }
-
-                    foreach (GameObject damageDealer in damageDealers)
-                    {
-                        damageDealer.GetComponent<Env_DamageType>().damageProtection = 0;
-                        damageDealer.GetComponent<Env_DamageType>().mentalProtection = 0;
-                        damageDealer.GetComponent<Env_DamageType>().radiationProtection = 0;
-                    }
-                    damageDealers.Clear();
 
                     par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsHealthProtection.text = "+0";
                     par_Managers.GetComponent<Manager_UIReuse>().txt_playerStatsMentalProtection.text = "-0";
