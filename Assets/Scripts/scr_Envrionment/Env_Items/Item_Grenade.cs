@@ -451,26 +451,7 @@ public class Item_Grenade : MonoBehaviour
                         item.GetComponent<Item_Grenade>().UnequipGrenade();
                     }
                 }
-
-                foreach (Collider collider in GetComponents<Collider>())
-                {
-                    if (collider.GetComponent<BoxCollider>() != null
-                        && collider.GetComponent<BoxCollider>().enabled)
-                    {
-                        collider.GetComponent<BoxCollider>().enabled = false;
-                    }
-                    else if (collider.GetComponent<SphereCollider>() != null
-                             && collider.GetComponent<SphereCollider>().enabled)
-                    {
-                        collider.GetComponent<SphereCollider>().enabled = false;
-                    }
-                    else if (collider.GetComponent<MeshCollider>() != null
-                             && collider.GetComponent<MeshCollider>().enabled)
-                    {
-                        collider.GetComponent<MeshCollider>().enabled = false;
-                    }
-                }
-
+                
                 //enables interpolation on the equipped grenade
                 rb.interpolation = RigidbodyInterpolation.None;
 
@@ -505,25 +486,6 @@ public class Item_Grenade : MonoBehaviour
     {
         if (!startedCookingGrenadeTimer)
         {
-            foreach (Collider collider in GetComponents<Collider>())
-            {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && !collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && !collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && !collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = true;
-                }
-            }
-
             hasEquippedGrenade = false;
 
             endedGrenadeEquipWaitTimer = false;

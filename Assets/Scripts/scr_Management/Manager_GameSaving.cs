@@ -1244,14 +1244,14 @@ public class Manager_GameSaving : MonoBehaviour
                         itemDurability = item.GetComponent<Item_Gun>().durability;
                         maxDurability = item.GetComponent<Item_Gun>().maxDurability;
 
-                        finalOutput += ", " + itemDurability + ", " + maxDurability;
+                        finalOutput += ", " + Mathf.Floor(itemDurability * 10) / 10 + ", " + maxDurability;
                     }
                     else if (item.GetComponent<Item_Melee>() != null)
                     {
                         itemDurability = item.GetComponent<Item_Melee>().durability;
                         maxDurability = item.GetComponent<Item_Melee>().maxDurability;
 
-                        finalOutput += ", " + itemDurability + ", " + maxDurability;
+                        finalOutput += ", " + Mathf.Floor(itemDurability * 10) / 10 + ", " + maxDurability;
                     }
 
                     //save consumable current and max remainder
@@ -1262,7 +1262,7 @@ public class Manager_GameSaving : MonoBehaviour
                         itemRemainder = item.GetComponent<Item_Consumable>().currentConsumableAmount;
                         itemMaxRemainder = item.GetComponent<Item_Consumable>().maxConsumableAmount;
 
-                        finalOutput += ", " + itemRemainder + ", " + itemMaxRemainder;
+                        finalOutput += ", " + Mathf.Floor(itemRemainder * 10) / 10 + ", " + itemMaxRemainder;
                     }
 
                     //save gun loaded ammo count

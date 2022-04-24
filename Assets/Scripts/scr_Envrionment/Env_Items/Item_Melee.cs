@@ -162,25 +162,6 @@ public class Item_Melee : MonoBehaviour
                 }
             }
 
-            foreach (Collider collider in GetComponents<Collider>())
-            {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = false;
-                }
-            }
-
             par_Managers.GetComponent<Manager_UIReuse>().ClearGrenadeUI();
             par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
 
@@ -219,25 +200,6 @@ public class Item_Melee : MonoBehaviour
     {
         if (!isSwinging)
         {
-            foreach (Collider collider in GetComponents<Collider>())
-            {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && !collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && !collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && !collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = true;
-                }
-            }
-
             hasEquippedMeleeWeapon = false;
 
             //enables interpolation on the unequipped gun

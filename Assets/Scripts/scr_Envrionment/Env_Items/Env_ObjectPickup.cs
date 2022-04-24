@@ -27,34 +27,30 @@ public class Env_ObjectPickup : MonoBehaviour
     //private variables
     private bool isColliding;
     private readonly bool canThrow = true;
+    private bool isGrounded;
+    private float distanceToGround;
     private Collider theCollider;
+
+    private void Start()
+    {
+        distanceToGround = gameObject.GetComponent<Collider>().bounds.extents.y;
+    }
 
     private void FixedUpdate()
     {
         if (gameObject.GetComponent<Rigidbody>().velocity.magnitude > speedLimit)
         {
-            gameObject.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity.normalized * speedLimit;
+            gameObject.GetComponent<Rigidbody>().velocity 
+                = gameObject.GetComponent<Rigidbody>().velocity.normalized * speedLimit;
         }
 
         if (isHolding)
         {
-            foreach (Collider collider in GetComponents<Collider>())
+            if (gameObject.layer != LayerMask.NameToLayer("LimitedCollision"))
             {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = false;
-                }
+                isGrounded = false;
+
+                gameObject.layer = LayerMask.NameToLayer("LimitedCollision");
             }
 
             PlayerInventoryScript.heldObject = gameObject;
@@ -103,23 +99,22 @@ public class Env_ObjectPickup : MonoBehaviour
         }
         else if (!isHolding)
         {
-            foreach (Collider collider in GetComponents<Collider>())
+            if (!isGrounded
+                && Physics.Raycast(transform.position,
+                       -Vector3.up,
+                       distanceToGround + 0.1f))
             {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && !collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && !collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && !collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = true;
-                }
+                isGrounded = true;
+            }
+            else
+            {
+                isGrounded = false;
+            }
+
+            if (gameObject.layer != LayerMask.NameToLayer("Ground")
+                && isGrounded)
+            {
+                gameObject.layer = LayerMask.NameToLayer("Ground");
             }
 
             RigidBody.useGravity = true;

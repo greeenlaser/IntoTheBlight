@@ -572,25 +572,6 @@ public class Item_Gun : MonoBehaviour
                 }
             }
 
-            foreach (Collider collider in GetComponents<Collider>())
-            {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = false;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = false;
-                }
-            }
-
             //disables interpolation on the equipped gun
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             rb.interpolation = RigidbodyInterpolation.None;
@@ -638,25 +619,6 @@ public class Item_Gun : MonoBehaviour
     {
         if (!isReloading)
         {
-            foreach (Collider collider in GetComponents<Collider>())
-            {
-                if (collider.GetComponent<BoxCollider>() != null
-                    && !collider.GetComponent<BoxCollider>().enabled)
-                {
-                    collider.GetComponent<BoxCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<SphereCollider>() != null
-                         && !collider.GetComponent<SphereCollider>().enabled)
-                {
-                    collider.GetComponent<SphereCollider>().enabled = true;
-                }
-                else if (collider.GetComponent<MeshCollider>() != null
-                         && !collider.GetComponent<MeshCollider>().enabled)
-                {
-                    collider.GetComponent<MeshCollider>().enabled = true;
-                }
-            }
-
             //enables interpolation on the unequipped gun
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             rb.interpolation = RigidbodyInterpolation.Interpolate;

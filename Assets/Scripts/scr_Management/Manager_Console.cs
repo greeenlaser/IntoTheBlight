@@ -2994,7 +2994,7 @@ public class Manager_Console : MonoBehaviour
                 float currentRemainder = displayableItem.GetComponent<Item_Gun>().durability;
                 float maxRemainder = displayableItem.GetComponent<Item_Gun>().maxDurability;
 
-                consoleLine += " <" + currentRemainder + "/" + maxRemainder + ">";
+                consoleLine += " <" + Mathf.Floor(currentRemainder * 10) / 10 + "/" + maxRemainder + ">";
             }
 
             //shows reusable consumable current and max remainder
@@ -3003,7 +3003,7 @@ public class Manager_Console : MonoBehaviour
                 float currentRemainder = displayableItem.GetComponent<Item_Consumable>().currentConsumableAmount;
                 float maxRemainder = displayableItem.GetComponent<Item_Consumable>().maxConsumableAmount;
 
-                consoleLine += " <"+ currentRemainder + "/" + maxRemainder +">";
+                consoleLine += " <"+ Mathf.Floor(currentRemainder * 10) / 10 + "/" + maxRemainder +">";
             }
 
             //shows extra text that the item isnt stackable
