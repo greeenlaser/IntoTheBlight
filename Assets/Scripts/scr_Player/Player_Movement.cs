@@ -34,7 +34,6 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private float groundDistance;
 
     [Header("Assignables")]
-    [SerializeField] private GameObject light_Flashlight;
     public CharacterController controller;
     [SerializeField] private Camera PlayerCamera;
     [SerializeField] private GameObject checkSphere;
@@ -58,8 +57,6 @@ public class Player_Movement : MonoBehaviour
     [HideInInspector] public bool isJumping;
     [HideInInspector] public bool canCrouch;
     [HideInInspector] public bool isCrouching;
-    [HideInInspector] public bool hasFlashlight;
-    [HideInInspector] public bool isFlashlightEnabled;
     [HideInInspector] public float speedIncrease = 1;
     [HideInInspector] public float currentStamina;
     [HideInInspector] public float jumpBuff;
@@ -120,34 +117,6 @@ public class Player_Movement : MonoBehaviour
         {
             par_Managers.GetComponent<Manager_UIReuse>().maxStamina = maxStamina;
             par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
-        }
-
-        //toggles players flashlight if flashlight item was picked up
-        if (Input.GetKeyDown(KeyCode.F)
-            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
-            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
-            && PlayerHealthScript.isPlayerAlive
-            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
-        {
-            if (!hasFlashlight)
-            {
-                foreach (GameObject item in PlayerInventoryScript.inventory)
-                {
-                    if (item.name == "Flashlight")
-                    {
-                        isFlashlightEnabled = !isFlashlightEnabled;
-
-                        hasFlashlight = true;
-                        break;
-                    }
-                }
-            }
-            else if (hasFlashlight)
-            {
-                isFlashlightEnabled = !isFlashlightEnabled;
-
-                CheckForFlashlight();
-            }
         }
 
         if (canMove
@@ -515,36 +484,6 @@ public class Player_Movement : MonoBehaviour
         {
             string deathMessage = "You took " + damageDealt + " damage from that fall and fell to your death! Shouldve brought rocket boots...";
             PlayerHealthScript.Death(deathMessage);
-        }
-    }
-
-    public void CheckForFlashlight()
-    {
-        bool hasFlashlight = false;
-        foreach (GameObject item in PlayerInventoryScript.inventory)
-        {
-            if (item.name == "Flashlight")
-            {
-                hasFlashlight = true;
-                break;
-            }
-        }
-        if (!hasFlashlight
-            && light_Flashlight.activeInHierarchy)
-        {
-            isFlashlightEnabled = false;
-            light_Flashlight.SetActive(false);
-        }
-        else if (hasFlashlight)
-        {
-            if (isFlashlightEnabled && !light_Flashlight.activeInHierarchy)
-            {
-                light_Flashlight.SetActive(true);
-            }
-            else if (!isFlashlightEnabled && light_Flashlight.activeInHierarchy)
-            {
-                light_Flashlight.SetActive(false);
-            }
         }
     }
 

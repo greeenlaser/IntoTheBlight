@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Item_Gun : MonoBehaviour
 {
@@ -546,6 +547,8 @@ public class Item_Gun : MonoBehaviour
         else
         {
             damage = maxDamage;
+
+            gameObject.GetComponent<Env_Item>().int_ItemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
         }
     }
 

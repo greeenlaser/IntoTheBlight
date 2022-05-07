@@ -62,9 +62,6 @@ public class Env_Item : MonoBehaviour
     [SerializeField] private UI_PlayerMenu PlayerMenuScript;
     [SerializeField] private UI_AbilityAssignManager AbilityAssignManagerScript;
 
-    [Header("Flashlight assignables")]
-    [SerializeField] private Player_Movement PlayerMovementScript;
-
     //public but hidden variables
     [HideInInspector] public bool isInPlayerInventory;
     [HideInInspector] public bool isInContainer;
@@ -93,6 +90,8 @@ public class Env_Item : MonoBehaviour
     private bool isDestroyingMultipleItems;
     private bool isTakingMultipleItems;
     private bool isPlacingMultipleItems;
+    private bool hasBatteriesInInv;
+    private bool hasBatteriesInTarget;
     private int int_selectedCount;
     private int int_confirmedCount;
     private GameObject selectedGun;
@@ -209,6 +208,27 @@ public class Env_Item : MonoBehaviour
         }
         //item description
         par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDescription.text = str_ItemDescription;
+
+        if (gameObject.GetComponent<Item_Gun>() != null)
+        {
+            gameObject.GetComponent<Item_Gun>().LoadValues();
+        }
+        else if (gameObject.GetComponent<Item_Melee>() != null)
+        {
+            gameObject.GetComponent<Item_Melee>().LoadValues();
+        }
+        else if (gameObject.GetComponent<Item_Consumable>() != null)
+        {
+            gameObject.GetComponent<Item_Consumable>().LoadValues();
+        }
+        else if (gameObject.GetComponent<Item_Battery>() != null)
+        {
+            gameObject.GetComponent<Item_Battery>().LoadValues();
+        }
+        else
+        {
+            int_ItemValue = int_maxItemValue;
+        }
 
         //single or multiple item value and weight
         if (int_itemCount == 1)
@@ -350,6 +370,102 @@ public class Env_Item : MonoBehaviour
                     par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Grenade>().UnequipGrenade);
                 }
             }
+            else if (gameObject.GetComponent<Item_Flashlight>() != null)
+            {
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    GameObject theBattery = gameObject.GetComponent<Item_Flashlight>().battery;
+
+                    float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
+                            / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                            + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                }
+
+                if (!gameObject.GetComponent<Item_Flashlight>().isFlashlightEquipped)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().EquipFlashlight);
+                }
+                else if (gameObject.GetComponent<Item_Flashlight>().isFlashlightEquipped)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.gameObject.SetActive(true);
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().UnequipFlashlight);
+                }
+
+                foreach (GameObject fl in PlayerInventoryScript.inventory)
+                {
+                    if (fl.GetComponent<Item_Flashlight>() != null)
+                    {
+                        fl.GetComponent<Item_Flashlight>().isAssigningBattery = false;
+                        break;
+                    }
+                }
+                gameObject.GetComponent<Item_Flashlight>().isAssigningBattery = true;
+
+                hasBatteriesInInv = false;
+                foreach (GameObject battery in PlayerInventoryScript.inventory)
+                {
+                    if (battery.GetComponent<Item_Battery>() != null
+                        && !battery.GetComponent<Item_Battery>().isInUse)
+                    {
+                        battery.GetComponent<Item_Battery>().target = gameObject;
+                        hasBatteriesInInv = true;
+                    }
+                }
+
+                par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.gameObject.SetActive(true);
+                if (hasBatteriesInInv
+                    && gameObject.GetComponent<Item_Flashlight>().battery == null)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.interactable = true;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.onClick.AddListener(PlayerInventoryScript.ShowUnequippedBatteries);
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.interactable = false;
+                }
+
+                par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.gameObject.SetActive(true);
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.interactable = true;
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().RemoveBattery);
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.interactable = false;
+                }
+            }
+            else if (gameObject.GetComponent<Item_Battery>() != null)
+            {
+                float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
+                        / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+
+                if (PlayerInventoryScript.showingAllUnusedBatteries)
+                {
+                    foreach (GameObject battery in PlayerInventoryScript.inventory)
+                    {
+                        if (battery.GetComponent<Item_Battery>() != null)
+                        {
+                            battery.GetComponent<Item_Battery>().isBeingAssigned = false;
+                        }
+                    }
+
+                    gameObject.GetComponent<Item_Battery>().isBeingAssigned = true;
+
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
+                    GameObject target = gameObject.GetComponent<Item_Battery>().target;
+                    Item_Flashlight flashlight = target.GetComponent<Item_Flashlight>();
+                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(flashlight.AssignBattery);
+                }
+            }
 
             if (!isProtected)
             {
@@ -358,7 +474,9 @@ public class Env_Item : MonoBehaviour
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.onClick.AddListener(Drop);
             }
-            else if (isProtected)
+            else if (isProtected
+                     || (gameObject.GetComponent<Item_Battery>() != null
+                     && gameObject.GetComponent<Item_Battery>().isInUse))
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
             }
@@ -387,9 +505,9 @@ public class Env_Item : MonoBehaviour
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
             {
-                if (gameObject.GetComponent<Item_Consumable>().consumableType 
+                if (gameObject.GetComponent<Item_Consumable>().consumableType
                     == Item_Consumable.ConsumableType.Repairkit
-                    || gameObject.GetComponent<Item_Consumable>().consumableType 
+                    || gameObject.GetComponent<Item_Consumable>().consumableType
                     == Item_Consumable.ConsumableType.Healthkit)
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
@@ -412,7 +530,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
@@ -421,8 +539,32 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+
+            else if (gameObject.GetComponent<Item_Flashlight>() != null)
+            {
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    GameObject theBattery = gameObject.GetComponent<Item_Flashlight>().battery;
+
+                    float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
+                            / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                            + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                }
+            }
+            else if (gameObject.GetComponent<Item_Battery>() != null)
+            {
+                float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
+                        / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             if (int_ItemWeight > PlayerInventoryScript.invSpace)
@@ -442,7 +584,9 @@ public class Env_Item : MonoBehaviour
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
             }
-            else if (isProtected)
+            else if (isProtected
+                     || (gameObject.GetComponent<Item_Battery>() != null
+                     && gameObject.GetComponent<Item_Battery>().isInUse))
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
             }
@@ -505,13 +649,39 @@ public class Env_Item : MonoBehaviour
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
+            else if (gameObject.GetComponent<Item_Flashlight>() != null)
+            {
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    GameObject theBattery = gameObject.GetComponent<Item_Flashlight>().battery;
+
+                    float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
+                            / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                            + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                }
+            }
+            else if (gameObject.GetComponent<Item_Battery>() != null)
+            {
+                float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
+                        / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+
             if (!isProtected)
             {
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
             }
-            else if (isProtected)
+            else if (isProtected
+                     || (gameObject.GetComponent<Item_Battery>() != null
+                     && gameObject.GetComponent<Item_Battery>().isInUse))
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
             }
@@ -570,6 +740,30 @@ public class Env_Item : MonoBehaviour
                 float finalPercentage = durability / maxDurability * 100;
                 par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+
+            else if (gameObject.GetComponent<Item_Flashlight>() != null)
+            {
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    GameObject theBattery = gameObject.GetComponent<Item_Flashlight>().battery;
+
+                    float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
+                            / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                            + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                }
+            }
+            else if (gameObject.GetComponent<Item_Battery>() != null)
+            {
+                float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
+                        / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             if (PlayerInventoryScript.money >= int_ItemValue)
@@ -641,13 +835,39 @@ public class Env_Item : MonoBehaviour
                     + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
             }
 
+            else if (gameObject.GetComponent<Item_Flashlight>() != null)
+            {
+                if (gameObject.GetComponent<Item_Flashlight>().battery != null)
+                {
+                    GameObject theBattery = gameObject.GetComponent<Item_Flashlight>().battery;
+
+                    float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
+                            / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                            + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                }
+                else
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                }
+            }
+            else if (gameObject.GetComponent<Item_Battery>() != null)
+            {
+                float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
+                        / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
+                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                        + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+            }
+
             if (!isProtected)
             {
                 par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.onClick.AddListener(Sell);
             }
-            else if (isProtected)
+            else if (isProtected
+                     || (gameObject.GetComponent<Item_Battery>() != null
+                     && gameObject.GetComponent<Item_Battery>().isInUse))
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
             }
@@ -1833,11 +2053,6 @@ public class Env_Item : MonoBehaviour
 
                 par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
 
-                if (gameObject.name == "Flashlight")
-                {
-                    PlayerMovementScript.CheckForFlashlight();
-                }
-
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
@@ -1970,11 +2185,6 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.invSpace += int_ItemWeight;
 
                 par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
-
-                if (gameObject.name == "Flashlight")
-                {
-                    PlayerMovementScript.CheckForFlashlight();
-                }
 
                 isInPlayerInventory = false;
 
@@ -3135,6 +3345,8 @@ public class Env_Item : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.onClick.RemoveAllListeners();
     }
 
     //if this item collided with world border

@@ -188,8 +188,7 @@ public class Player_RaycastSystem : MonoBehaviour
                     //which the raycast is actually ignoring by default
                     //to allow interacting with other gameobjects
                     //if theyre inside a trigger we dont want to interact with
-                    else if (hitTarget.transform.name == "door_scifi02"
-                             || hitTarget.transform.name == "door_scifi03")
+                    else if (hitTarget.transform.name == "door_interactable")
                     {
                         Transform doorParent = hitTarget.transform.parent.parent;
                         foreach (Transform child in doorParent)
@@ -244,6 +243,8 @@ public class Player_RaycastSystem : MonoBehaviour
     {
         if (canInteract)
         {
+            //timer is used to "restart" loop
+            //which re-checks if we are still looking at the same target
             timer += Time.deltaTime;
             if (timer > 0.05f)
             {
@@ -325,11 +326,14 @@ public class Player_RaycastSystem : MonoBehaviour
                     || (heldObject != null
                     && !heldObject.GetComponent<Env_ObjectPickup>().isHolding))
                 {
-                    DropHeldObject();
+                    heldObject.GetComponent<Env_ObjectPickup>().DropObject();
+                    heldObject = null;
                 }
             }
         }
-        else if (!canInteract && (timer > 0 || par_Managers.GetComponent<Manager_UIReuse>().img_Interact.isActiveAndEnabled))
+        else if (!canInteract 
+                 && (timer > 0 
+                 || par_Managers.GetComponent<Manager_UIReuse>().img_Interact.isActiveAndEnabled))
         {
             par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
 
@@ -338,11 +342,5 @@ public class Player_RaycastSystem : MonoBehaviour
 
             timer = 0;
         }
-    }
-
-    public void DropHeldObject()
-    {
-        heldObject.GetComponent<Env_ObjectPickup>().DropObject();
-        heldObject = null;
     }
 }

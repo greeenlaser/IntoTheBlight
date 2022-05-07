@@ -70,6 +70,10 @@ public class Item_Consumable : MonoBehaviour
             //assign item value to consumable
             gameObject.GetComponent<Env_Item>().int_ItemValue = itemValue;
         }
+        else
+        {
+            gameObject.GetComponent<Env_Item>().int_ItemValue = gameObject.GetComponent<Env_Item>().int_maxItemValue;
+        }
     }
 
     public void Consume()

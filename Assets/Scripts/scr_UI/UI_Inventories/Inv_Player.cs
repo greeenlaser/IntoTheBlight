@@ -32,11 +32,13 @@ public class Inv_Player : MonoBehaviour
     [HideInInspector] public bool showingAllAmmo;
     [HideInInspector] public bool showingAllGear;
     [HideInInspector] public bool showingAllMisc;
+    [HideInInspector] public bool showingAllUnusedBatteries;
     [HideInInspector] public int invSpace;
     [HideInInspector] public GameObject Container;
     [HideInInspector] public GameObject Workbench;
     [HideInInspector] public GameObject Trader;
     [HideInInspector] public GameObject equippedGun;
+    [HideInInspector] public GameObject equippedFlashlight;
     [HideInInspector] public GameObject heldObject;
     [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
 
@@ -317,6 +319,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = false;
         showingAllGear = false;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -341,6 +344,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = false;
         showingAllGear = false;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = false;
@@ -422,6 +426,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = false;
         showingAllGear = false;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -501,6 +506,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = false;
         showingAllGear = false;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -579,6 +585,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = true;
         showingAllGear = false;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -657,6 +664,7 @@ public class Inv_Player : MonoBehaviour
         showingAllAmmo = false;
         showingAllGear = true;
         showingAllMisc = false;
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -735,7 +743,8 @@ public class Inv_Player : MonoBehaviour
         showingAllConsumables = false;
         showingAllAmmo = false;
         showingAllGear = false;
-        showingAllMisc = true;
+        showingAllMisc = true; 
+        showingAllUnusedBatteries = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
@@ -806,6 +815,78 @@ public class Inv_Player : MonoBehaviour
 
                     item.GetComponent<Env_Item>().isInPlayerInventory = true;
                 }
+            }
+        }
+        //Debug.Log("Showing player misc items.");
+    }
+    public void ShowUnequippedBatteries()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+        showingAllItems = false;
+        showingAllWeapons = false;
+        showingAllArmor = false;
+        showingAllConsumables = false;
+        showingAllAmmo = false;
+        showingAllGear = false;
+        showingAllMisc = false;
+        showingAllUnusedBatteries = true;
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
+
+        UpdatePlayerInventoryStats();
+        foreach (GameObject item in inventory)
+        {
+            if (item != null
+                && item.GetComponent<Item_Battery>() != null
+                && !item.GetComponent<Item_Battery>().isInUse)
+            {
+                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
+
+                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+                {
+                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
+                    {
+                        item.GetComponent<Env_Item>().hasUnderscore = true;
+                        break;
+                    }
+                }
+                if (item.GetComponent<Env_Item>().hasUnderscore)
+                {
+                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
+                    {
+                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
+                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
+                    }
+                    else
+                    {
+                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
+                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+                    }
+                }
+                else if (!item.GetComponent<Env_Item>().hasUnderscore)
+                {
+                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
+                    {
+                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
+                    }
+                    else
+                    {
+                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+                    }
+                }
+
+                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
+                buttons.Add(btn_New.gameObject);
+
+                item.GetComponent<Env_Item>().isInPlayerInventory = true;
             }
         }
         //Debug.Log("Showing player misc items.");

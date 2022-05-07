@@ -23,14 +23,11 @@ public class GameManager : MonoBehaviour
     public List<string> tips = new List<string>();
 
     //public but hidden variables
-    [HideInInspector] public bool respawnNPCs;
-    [HideInInspector] public int respawnCount;
     [HideInInspector] public List<GameObject> thrownGrenades = new List<GameObject>();
 
     //private variables
     private float fps;
     private int scrCount;
-    private GameObject currentCell;
 
     private void Awake()
     {
@@ -58,31 +55,6 @@ public class GameManager : MonoBehaviour
             string senderName = "System";
             string messageContent = "this shit is crazy, how are they even surviving after that crazy rad-storm, a regular human wouldve died in 5 seconds but it looks like this rad storm only made them stronger! ive never seen anythng like that...";
             par_Managers.GetComponent<UI_TabletMessages>().SendMessage(logo, messageTime, senderName, messageContent);
-        }
-
-        if (respawnNPCs)
-        {
-            for (int i = 0; i < respawnCount; i++)
-            {
-                //create a temporary template npc gameobject
-                GameObject templateNPC = currentCell.GetComponent<Manager_CurrentCell>().AITemplate;
-                //pick a random respawn positions list index
-                int randomSpawnPosIndex = Random.Range(0, currentCell.GetComponent<Manager_CurrentCell>().respawnPositions.Count);
-                //pick a spawn position according to the randomly picked spawn position list index
-                Transform pos_randomSpawn = currentCell.GetComponent<Manager_CurrentCell>().respawnPositions[randomSpawnPosIndex];
-                //spawn the npc at the position
-                GameObject respawnedNPC = Instantiate(templateNPC,
-                                                     templateNPC.transform.position,
-                                                     Quaternion.identity,
-                                                     currentCell.GetComponent<Manager_CurrentCell>().par_CellNPCs);
-                //assign the spawned npc to the npcs list in the current cell
-                currentCell.GetComponent<Manager_CurrentCell>().AI.Add(respawnedNPC);
-                //activate the NPC
-                respawnedNPC.gameObject.SetActive(true);
-            }
-
-            respawnCount = 0;
-            respawnNPCs = false;
         }
     }
 
@@ -112,21 +84,24 @@ public class GameManager : MonoBehaviour
             {
                 foreach (GameObject container in cell.GetComponent<Manager_CurrentCell>().containers)
                 {
-                    //remove previous container content if there was any
-                    if (container.GetComponent<Inv_Container>().inventory.Count > 0)
-                    {
-                        for (int i = 0; i < container.GetComponent<Inv_Container>().inventory.Count; i++)
-                        {
-                            GameObject item = container.GetComponent<Inv_Container>().inventory[i];
-                            Destroy(item);
-                            container.GetComponent<Inv_Container>().inventory.Remove(item);
-                        }
-                    }
-
-                    //randomize container content
                     if (container.GetComponent<Inv_Container>().randomizeAllContent)
                     {
-                        container.GetComponent<Inv_Container>().RandomizeAllContent();
+                        //remove previous container content if there was any
+                        if (container.GetComponent<Inv_Container>().inventory.Count > 0)
+                        {
+                            for (int i = 0; i < container.GetComponent<Inv_Container>().inventory.Count; i++)
+                            {
+                                GameObject item = container.GetComponent<Inv_Container>().inventory[i];
+                                Destroy(item);
+                                container.GetComponent<Inv_Container>().inventory.Remove(item);
+                            }
+                        }
+
+                        //randomize container content
+                        if (container.GetComponent<Inv_Container>().randomizeAllContent)
+                        {
+                            container.GetComponent<Inv_Container>().RandomizeAllContent();
+                        }
                     }
                 }
             }
@@ -147,10 +122,31 @@ public class GameManager : MonoBehaviour
             }
             if (cell.GetComponent<Manager_CurrentCell>().respawnableNPCCount > 0)
             {
-                currentCell = cell;
-                respawnNPCs = true;
-                respawnCount = cell.GetComponent<Manager_CurrentCell>().respawnableNPCCount;
+                int respawnCount = cell.GetComponent<Manager_CurrentCell>().respawnableNPCCount;
+                RespawnNPCs(cell, respawnCount);
             }
+        }
+    }
+
+    public void RespawnNPCs(GameObject theCell, int theRespawnCount)
+    {
+        for (int i = 0; i < theRespawnCount; i++)
+        {
+            //create a temporary template npc gameobject
+            GameObject templateNPC = theCell.GetComponent<Manager_CurrentCell>().AITemplate;
+            //pick a random respawn positions list index
+            int randomSpawnPosIndex = Random.Range(0, theCell.GetComponent<Manager_CurrentCell>().respawnPositions.Count);
+            //pick a spawn position according to the randomly picked spawn position list index
+            Transform pos_randomSpawn = theCell.GetComponent<Manager_CurrentCell>().respawnPositions[randomSpawnPosIndex];
+            //spawn the npc at the position
+            GameObject respawnedNPC = Instantiate(templateNPC,
+                                                 templateNPC.transform.position,
+                                                 Quaternion.identity,
+                                                 theCell.GetComponent<Manager_CurrentCell>().par_CellNPCs);
+            //assign the spawned npc to the npcs list in the current cell
+            theCell.GetComponent<Manager_CurrentCell>().AI.Add(respawnedNPC);
+            //activate the NPC
+            respawnedNPC.gameObject.SetActive(true);
         }
     }
 }

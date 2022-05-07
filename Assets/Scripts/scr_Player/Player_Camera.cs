@@ -27,20 +27,15 @@ public class Player_Camera : MonoBehaviour
     private float mouseX;
     private float mouseY;
     private float xRot;
-    private GameObject ThePlayer;
 
     private void Awake()
     {
         cam_Main.fieldOfView = fov;
         sensX = mouseSpeed;
         sensY = mouseSpeed;
-        StartCoroutine(Wait());
-    }
-
-    private void Start()
-    {
-        ThePlayer = GameObject.Find("Player");
         txt_mouseSpeed.text = mouseSpeed.ToString();
+
+        StartCoroutine(Wait());
     }
 
     private void Update()
@@ -66,8 +61,8 @@ public class Player_Camera : MonoBehaviour
             xRot = Mathf.Clamp(xRot, -90f, 90f);
             transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
 
-            ThePlayer.transform.Rotate(Vector3.up * mouseX);
-        }    
+            transform.parent.Rotate(Vector3.up * mouseX);
+        }
     }
 
     public void SetMouseSpeed()

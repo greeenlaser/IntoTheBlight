@@ -47,6 +47,7 @@ public class Manager_GameSaving : MonoBehaviour
     //private variables
     private float time;
     private GameObject equippedWeapon;
+    private GameObject equippedFlashlight;
     private List<string> abilityNames = new List<string>();
 
     //player values
@@ -370,6 +371,7 @@ public class Manager_GameSaving : MonoBehaviour
 
                 //loading player inventory items
                 else if (!line.Contains("_ew")
+                         && !line.Contains("_ef")
                          && numbers.Count >= 1)
                 {
                     foreach (GameObject item in par_Managers.GetComponent<Manager_Console>().spawnables)
@@ -428,6 +430,14 @@ public class Manager_GameSaving : MonoBehaviour
                                 //consumable max remainder
                                 newDuplicate.GetComponent<Item_Consumable>().maxConsumableAmount = float.Parse(numbers[2]);
                             }
+                            //if this item is a battery
+                            else if (newDuplicate.GetComponent<Item_Battery>() != null)
+                            {
+                                //battery remainder
+                                newDuplicate.GetComponent<Item_Battery>().currentBattery = float.Parse(numbers[1]);
+                                //battery max remainder
+                                newDuplicate.GetComponent<Item_Battery>().maxBattery = float.Parse(numbers[2]);
+                            }
 
                             newDuplicate.GetComponent<Env_Item>().isInPlayerInventory = true;
                             par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(newDuplicate.GetComponent<Env_Item>().str_ItemName);
@@ -475,15 +485,24 @@ public class Manager_GameSaving : MonoBehaviour
                         }
                     }
                 }
-                //loading player flashlight state
-                else if (line.Contains("flashlightEnabled = True"))
+                else if (line.Contains("_ef"))
                 {
-                    PlayerMovementScript.hasFlashlight = true;
-                    PlayerMovementScript.isFlashlightEnabled = true;
-                    light_Flashlight.SetActive(true);
+                    foreach (GameObject item in PlayerInventoryScript.inventory)
+                    {
+                        if (line.Contains(item.name)
+                            && item.GetComponent<Item_Flashlight>() != null)
+                        {
+                            equippedFlashlight = item;
+
+                            //Debug.Log(item.name + " " + line);
+
+                            StartCoroutine(LoadEquippedFlashlight(float.Parse(numbers[0]), float.Parse(numbers[1]), int.Parse(numbers[2])));
+
+                            break;
+                        }
+                    }
                 }
             }
-            
 
             //---
             //loading player abilities
@@ -608,13 +627,13 @@ public class Manager_GameSaving : MonoBehaviour
                         if (cell.GetComponent<Manager_CurrentCell>().respawnPositions.Count > 0
                             && int.Parse(numbers[0]) > 0)
                         {
-                            par_Managers.GetComponent<GameManager>().respawnCount = int.Parse(numbers[0]);
-                            par_Managers.GetComponent<GameManager>().respawnNPCs = true;
+                            par_Managers.GetComponent<GameManager>().RespawnNPCs(cell, int.Parse(numbers[0]));
                         }
                     }
                 }
             }
 
+            //loading all cell randomized container contents
             else if (line.Contains("rcc_"))
             {
                 //find the correct cell
@@ -690,6 +709,16 @@ public class Manager_GameSaving : MonoBehaviour
                                             newDuplicate.GetComponent<Item_Consumable>().maxConsumableAmount = float.Parse(numbers[4]);
                                             //update consumable value
                                             newDuplicate.GetComponent<Item_Consumable>().LoadValues();
+                                        }
+                                        //if this item is a battery
+                                        else if (newDuplicate.GetComponent<Item_Battery>() != null)
+                                        {
+                                            //battery remainder
+                                            newDuplicate.GetComponent<Item_Battery>().currentBattery = float.Parse(numbers[3]);
+                                            //battery max remainder
+                                            newDuplicate.GetComponent<Item_Battery>().maxBattery = float.Parse(numbers[4]);
+                                            //update battery value
+                                            newDuplicate.GetComponent<Item_Battery>().LoadValues();
                                         }
 
                                         newDuplicate.GetComponent<Env_Item>().isInContainer = true;
@@ -1216,8 +1245,8 @@ public class Manager_GameSaving : MonoBehaviour
             && PlayerInventoryScript.inventory[0].gameObject.name != "Exoskeleton"))
         {
             saveFile.WriteLine("(1)count (all items)");
-            saveFile.WriteLine("(2)current remainder (all consumables) / (2)current durability (all weapons with durability)");
-            saveFile.WriteLine("(3)max remainder (all consumables) / (3)max durability (all weapons with durability)");
+            saveFile.WriteLine("(2)current remainder (all consumables) / (2)current durability (all weapons with durability) (-1 means no battery equipped)");
+            saveFile.WriteLine("(3)max remainder (all consumables) / (3)max durability (all weapons with durability) (-1 means no battery equipped)");
             saveFile.WriteLine("(4)ammo count (guns)");
             saveFile.WriteLine("(5)gun jam state (0 - not jammed, 1 - jammed) (guns)");
 
@@ -1237,53 +1266,69 @@ public class Manager_GameSaving : MonoBehaviour
                     finalOutput = "pi_" + fileName + " = " + itemCount;
 
                     //save weapon current and max durability
-                    float itemDurability = 0;
-                    float maxDurability = 0;
                     if (item.GetComponent<Item_Gun>() != null)
                     {
-                        itemDurability = item.GetComponent<Item_Gun>().durability;
-                        maxDurability = item.GetComponent<Item_Gun>().maxDurability;
+                        float itemDurability = item.GetComponent<Item_Gun>().durability;
+                        float maxDurability = item.GetComponent<Item_Gun>().maxDurability;
 
                         finalOutput += ", " + Mathf.Floor(itemDurability * 10) / 10 + ", " + maxDurability;
-                    }
-                    else if (item.GetComponent<Item_Melee>() != null)
-                    {
-                        itemDurability = item.GetComponent<Item_Melee>().durability;
-                        maxDurability = item.GetComponent<Item_Melee>().maxDurability;
 
-                        finalOutput += ", " + Mathf.Floor(itemDurability * 10) / 10 + ", " + maxDurability;
-                    }
-
-                    //save consumable current and max remainder
-                    float itemRemainder = 0;
-                    float itemMaxRemainder = 0;
-                    if (item.GetComponent<Item_Consumable>() != null)
-                    {
-                        itemRemainder = item.GetComponent<Item_Consumable>().currentConsumableAmount;
-                        itemMaxRemainder = item.GetComponent<Item_Consumable>().maxConsumableAmount;
-
-                        finalOutput += ", " + Mathf.Floor(itemRemainder * 10) / 10 + ", " + itemMaxRemainder;
-                    }
-
-                    //save gun loaded ammo count
-                    int loadedAmmoCount = 0;
-                    if (item.GetComponent<Item_Gun>() != null)
-                    {
-                        loadedAmmoCount = item.GetComponent<Item_Gun>().currentClipSize;
+                        //save gun loaded ammo count
+                        int loadedAmmoCount = item.GetComponent<Item_Gun>().currentClipSize;
                         finalOutput += ", " + loadedAmmoCount;
-                    }
-                    //save gun jam state
-                    int gunJamState = 0;
-                    if (item.GetComponent<Item_Gun>() != null)
-                    {
+
+                        //save gun jam state
+                        int gunJamState = 0;
                         if (item.GetComponent<Item_Gun>().isGunJammed)
                         {
                             gunJamState = 1;
                         }
                         finalOutput += ", " + gunJamState;
                     }
+                    else if (item.GetComponent<Item_Melee>() != null)
+                    {
+                        float itemDurability = item.GetComponent<Item_Melee>().durability;
+                        float maxDurability = item.GetComponent<Item_Melee>().maxDurability;
+
+                        finalOutput += ", " + Mathf.Floor(itemDurability * 10) / 10 + ", " + maxDurability;
+                    }
+
+                    //save consumable current and max remainder
+                    else if (item.GetComponent<Item_Consumable>() != null)
+                    {
+                        float itemRemainder = item.GetComponent<Item_Consumable>().currentConsumableAmount;
+                        float itemMaxRemainder = item.GetComponent<Item_Consumable>().maxConsumableAmount;
+
+                        finalOutput += ", " + Mathf.Floor(itemRemainder * 10) / 10 + ", " + itemMaxRemainder;
+                    }
+
+                    //save flashlight battery current and max remainder
+                    else if (item.GetComponent<Item_Flashlight>() != null)
+                    {
+                        float flbatteryRemainder = -1;
+                        float flbatteryMaxRemainder = -1;
+
+                        if (item.GetComponent<Item_Flashlight>().battery != null)
+                        {
+                            GameObject theBattery = item.GetComponent<Item_Flashlight>().battery;
+
+                            flbatteryRemainder = theBattery.GetComponent<Item_Battery>().currentBattery;
+                            flbatteryMaxRemainder = theBattery.GetComponent<Item_Battery>().maxBattery;
+                        }
+
+                        finalOutput += ", " + flbatteryRemainder + ", " + flbatteryMaxRemainder;
+                    }
+                    //save battery current and max remainder
+                    else if (item.GetComponent<Item_Battery>() != null)
+                    {
+                        float batteryRemainder = item.GetComponent<Item_Battery>().currentBattery;
+                        float batteryMaxRemainder = item.GetComponent<Item_Battery>().maxBattery;
+
+                        finalOutput += ", " + Mathf.Floor(batteryRemainder * 10) / 10 + ", " + batteryMaxRemainder;
+                    }
 
                     saveFile.WriteLine(finalOutput);
+                    saveFile.WriteLine("");
                 }
             }
         }
@@ -1292,18 +1337,18 @@ public class Manager_GameSaving : MonoBehaviour
                 && PlayerInventoryScript.inventory[0].gameObject.name == "Exoskeleton"))
         {
             saveFile.WriteLine("<<<NO PLAYER INVENTORY ITEMS FOUND>>>");
+            saveFile.WriteLine("");
         }
 
+        saveFile.WriteLine("----");
+        saveFile.WriteLine("");
         //save equipped weapon
         if (PlayerInventoryScript.equippedGun != null)
         {
-            saveFile.WriteLine("----");
             saveFile.WriteLine("(1)equipped weapon name,");
             saveFile.WriteLine("(2)durability (weapons with durability)");
 
             saveFile.WriteLine("");
-
-            int itemIndex = 0;
 
             foreach (GameObject equippedWeapon in PlayerInventoryScript.inventory)
             {
@@ -1330,15 +1375,75 @@ public class Manager_GameSaving : MonoBehaviour
                     }
 
                     saveFile.WriteLine(finalOutput);
+                    saveFile.WriteLine("");
 
                     break;
                 }
-
-                itemIndex++;
             }
+        }
+        else
+        {
+            saveFile.WriteLine("<<<NO EQUIPPED WEAPON FOUND>>>");
+            saveFile.WriteLine("");
         }
 
         saveFile.WriteLine("----");
+        saveFile.WriteLine("");
+        //save equipped flashlight
+        if (PlayerInventoryScript.equippedFlashlight != null)
+        {
+            saveFile.WriteLine("(1)equipped flashlight name,");
+            saveFile.WriteLine("(2)current remainder (-1 means no battery equipped)");
+            saveFile.WriteLine("(3)max remainder (-1 means no battery equipped)");
+            saveFile.WriteLine("(4)is flashlight enabled (0 is false, 1 is true)");
+
+            saveFile.WriteLine("");
+
+            foreach (GameObject equippedFlashlight in PlayerInventoryScript.inventory)
+            {
+                if (equippedFlashlight == PlayerInventoryScript.equippedFlashlight)
+                {
+                    string finalOutput = "";
+
+                    //save equipped flashlight name
+                    string flashlightName = equippedFlashlight.GetComponent<Env_Item>().str_ItemName;
+                    finalOutput += "pi_ef = " + flashlightName;
+
+                    //save equipped flashlight current and max remainder
+                    string flashlightRemainder = "-1";
+                    string flashlightMaxRemainder = "-1";
+                    if (equippedFlashlight.GetComponent<Item_Flashlight>().battery != null)
+                    {
+                        var batteryScript = equippedFlashlight.GetComponent<Item_Flashlight>().battery.GetComponent<Item_Battery>();
+                        flashlightRemainder = batteryScript.currentBattery.ToString();
+                        flashlightMaxRemainder = batteryScript.maxBattery.ToString();
+                    }
+                    finalOutput += ", " + flashlightRemainder + ", " + flashlightMaxRemainder;
+
+                    if (equippedFlashlight.GetComponent<Item_Flashlight>().isFlashlightEnabled)
+                    {
+                        finalOutput += ", " + "1";
+                    }
+                    else
+                    {
+                        finalOutput += ", " + "0";
+                    }
+
+                    saveFile.WriteLine(finalOutput);
+                    saveFile.WriteLine("");
+
+                    break;
+                }
+            }
+        }
+        else
+        {
+            saveFile.WriteLine("<<<NO EQUIPPED FLASHLIGHT FOUND>>>");
+            saveFile.WriteLine("");
+        }
+
+        saveFile.WriteLine("----");
+        saveFile.WriteLine("");
         //save exoskeleton if player picked it up
         bool hasExoskeleton = false;
         foreach (GameObject playerItem in PlayerInventoryScript.inventory)
@@ -1351,30 +1456,6 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
         saveFile.WriteLine("pi_hasExoskeleton = " + hasExoskeleton);
-
-        //looking for flashlight in players inventory
-        bool foundFlashlight = false;
-        foreach (GameObject item in PlayerInventoryScript.inventory)
-        {
-            if (item.name == "Flashlight")
-            {
-                foundFlashlight = true;
-                break;
-            }
-        }
-        if (foundFlashlight)
-        {
-            saveFile.WriteLine("----");
-            //save flashlight toggle state
-            if (light_Flashlight.gameObject.activeInHierarchy)
-            {
-                saveFile.WriteLine("pi_flashlightEnabled = True");
-            }
-            else
-            {
-                saveFile.WriteLine("pi_flashlightEnabled = False");
-            }
-        }
 
         saveFile.WriteLine("");
         saveFile.WriteLine("--- PLAYER ABILITIES ---");
@@ -1524,8 +1605,8 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("(1)cell index");
         saveFile.WriteLine("(2)container index in its cell");
         saveFile.WriteLine("(3)count (after =) (all items)");
-        saveFile.WriteLine("(4)current remainder (all consumables) / (4)current durability (all weapons with durability)");
-        saveFile.WriteLine("(5)max remainder (all consumables) / (5)max durability (all weapons with durability)");
+        saveFile.WriteLine("(4)current remainder (all consumables) / (4)current durability (all weapons with durability) (-1 means no battery equipped)");
+        saveFile.WriteLine("(5)max remainder (all consumables) / (5)max durability (all weapons with durability) (-1 means no battery equipped)");
         saveFile.WriteLine("(6)ammo count (guns)");
         saveFile.WriteLine("(7)gun jam state (0 - not jammed, 1 - jammed) (guns)");
 
@@ -1589,6 +1670,34 @@ public class Manager_GameSaving : MonoBehaviour
                                     itemMaxRemainder = item.GetComponent<Item_Consumable>().maxConsumableAmount;
 
                                     finalOutput += ", " + itemRemainder + ", " + itemMaxRemainder;
+                                }
+
+                                //save flashlight battery current and max remainder
+                                if (item.GetComponent<Item_Flashlight>() != null)
+                                {
+                                    float flbatteryRemainder = -1;
+                                    float flbatteryMaxRemainder = -1;
+
+                                    if (item.GetComponent<Item_Flashlight>().battery != null)
+                                    {
+                                        GameObject theBattery = item.GetComponent<Item_Flashlight>().battery;
+
+                                        flbatteryRemainder = theBattery.GetComponent<Item_Battery>().currentBattery;
+                                        flbatteryMaxRemainder = theBattery.GetComponent<Item_Battery>().maxBattery;
+                                    }
+
+                                    finalOutput += ", " + flbatteryRemainder + ", " + flbatteryMaxRemainder;
+                                }
+
+                                //save battery current and max remainder
+                                float batteryRemainder = 0;
+                                float batteryMaxRemainder = 0;
+                                if (item.GetComponent<Item_Battery>() != null)
+                                {
+                                    batteryRemainder = item.GetComponent<Item_Battery>().currentBattery;
+                                    batteryMaxRemainder = item.GetComponent<Item_Battery>().maxBattery;
+
+                                    finalOutput += ", " + batteryRemainder + ", " + batteryMaxRemainder;
                                 }
 
                                 //save gun loaded ammo count
@@ -1924,6 +2033,34 @@ public class Manager_GameSaving : MonoBehaviour
         else if (equippedWeapon.GetComponent<Item_Melee>() != null)
         {
             equippedWeapon.GetComponent<Item_Melee>().EquipMeleeWeapon();
+        }
+    }
+
+    private IEnumerator LoadEquippedFlashlight(float currentRemainder, float maxRemainder, int isEnabled)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        //equips flashlight
+        equippedFlashlight.GetComponent<Item_Flashlight>().EquipFlashlight();
+
+        //equips battery for flashlight
+        foreach (GameObject item in PlayerInventoryScript.inventory)
+        {
+            if (item.GetComponent<Item_Battery>() != null
+                && item.GetComponent<Item_Battery>().currentBattery == currentRemainder
+                && item.GetComponent<Item_Battery>().maxBattery == maxRemainder)
+            {
+                item.GetComponent<Item_Battery>().isBeingAssigned = true;
+                break;
+            }
+        }
+        equippedFlashlight.GetComponent<Item_Flashlight>().AssignBattery();
+
+        //turns on flashlight
+        if (isEnabled == 1)
+        {
+            equippedFlashlight.GetComponent<Item_Flashlight>().isFlashlightEnabled = true;
+            equippedFlashlight.GetComponent<Item_Flashlight>().CheckForFlashlight();
         }
     }
 

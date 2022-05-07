@@ -63,6 +63,8 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_ShowGear;
     public Button btn_ShowMisc;
     public Button btn_DiscardDeadBody;
+    public Button btn_AddBattery;
+    public Button btn_RemoveBattery;
     public TMP_Text txt_InventoryName;
     public TMP_Text txt_PlayerInventorySpace;
     public TMP_Text txt_PlayerMoney;
@@ -343,6 +345,18 @@ public class Manager_UIReuse : MonoBehaviour
     [SerializeField] private RawImage bgr_radiation8;
     [SerializeField] private RawImage bgr_radiation9;
     [SerializeField] private RawImage bgr_radiation10;
+    [HideInInspector] public float flashlightBattery;
+    [HideInInspector] public float flashlightMaxBattery;
+    [SerializeField] private RawImage bgr_flashlight1;
+    [SerializeField] private RawImage bgr_flashlight2;
+    [SerializeField] private RawImage bgr_flashlight3;
+    [SerializeField] private RawImage bgr_flashlight4;
+    [SerializeField] private RawImage bgr_flashlight5;
+    [SerializeField] private RawImage bgr_flashlight6;
+    [SerializeField] private RawImage bgr_flashlight7;
+    [SerializeField] private RawImage bgr_flashlight8;
+    [SerializeField] private RawImage bgr_flashlight9;
+    [SerializeField] private RawImage bgr_flashlight10;
 
     // ### PLAYER MAIN UI BAR ASSIGNABLES END ###
     // --------
@@ -632,97 +646,101 @@ public class Manager_UIReuse : MonoBehaviour
     public void RebuildPlayerInventory()
     {
         //Debug.Log("Rebuilding player inventory...");
-        if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllItems)
+        if (PlayerInventoryScript.showingAllItems)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowAll();
+            PlayerInventoryScript.ShowAll();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllWeapons)
+        else if (PlayerInventoryScript.showingAllWeapons)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowWeapons();
+            PlayerInventoryScript.ShowWeapons();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllArmor)
+        else if (PlayerInventoryScript.showingAllArmor)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowArmor();
+            PlayerInventoryScript.ShowArmor();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllConsumables)
+        else if (PlayerInventoryScript.showingAllConsumables)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowConsumables();
+            PlayerInventoryScript.ShowConsumables();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllAmmo)
+        else if (PlayerInventoryScript.showingAllAmmo)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowAmmo();
+            PlayerInventoryScript.ShowAmmo();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllGear)
+        else if (PlayerInventoryScript.showingAllGear)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowGear();
+            PlayerInventoryScript.ShowGear();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().showingAllMisc)
+        else if (PlayerInventoryScript.showingAllMisc)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().ShowMisc();
+            PlayerInventoryScript.ShowMisc();
         }
     }
     public void RebuildContainerInventory()
     {
+        var containerScript = PlayerInventoryScript.Container.GetComponent<Inv_Container>();
+
         //Debug.Log("Rebuilding container inventory...");
-        if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllItems)
+        if (containerScript.showingAllItems)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowAll();
+            containerScript.ShowAll();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllWeapons)
+        else if (containerScript.showingAllWeapons)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowWeapons();
+            containerScript.ShowWeapons();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllArmor)
+        else if (containerScript.showingAllArmor)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowArmor();
+            containerScript.ShowArmor();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllConsumables)
+        else if (containerScript.showingAllConsumables)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowConsumables();
+            containerScript.ShowConsumables();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllAmmo)
+        else if (containerScript.showingAllAmmo)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowAmmo();
+            containerScript.ShowAmmo();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllGear)
+        else if (containerScript.showingAllGear)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowGear();
+            containerScript.ShowGear();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().showingAllMisc)
+        else if (containerScript.showingAllMisc)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Container.GetComponent<Inv_Container>().ShowMisc();
+            containerScript.ShowMisc();
         }
     }
     public void RebuildShopInventory()
     {
+        var shopScript = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>();
+
         //Debug.Log("Rebuilding trader inventory...");
-        if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllItems)
+        if (shopScript.showingAllItems)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowAll();
+            shopScript.ShowAll();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllWeapons)
+        else if (shopScript.showingAllWeapons)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowWeapons();
+            shopScript.ShowWeapons();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllArmor)
+        else if (shopScript.showingAllArmor)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowArmor();
+            shopScript.ShowArmor();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllConsumables)
+        else if (shopScript.showingAllConsumables)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowConsumables();
+            shopScript.ShowConsumables();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllAmmo)
+        else if (shopScript.showingAllAmmo)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowAmmo();
+            shopScript.ShowAmmo();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllGear)
+        else if (shopScript.showingAllGear)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowGear();
+            shopScript.ShowGear();
         }
-        else if (PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().showingAllMisc)
+        else if (shopScript.showingAllMisc)
         {
-            PlayerInventoryScript.GetComponent<Inv_Player>().Trader.GetComponent<UI_ShopContent>().ShowMisc();
+            shopScript.ShowMisc();
         }
     }
     public void RebuildRepairMenu()
@@ -807,6 +825,8 @@ public class Manager_UIReuse : MonoBehaviour
         btn_ShowGear.gameObject.SetActive(false);
         btn_ShowMisc.gameObject.SetActive(false);
         btn_DiscardDeadBody.gameObject.SetActive(false);
+        btn_AddBattery.gameObject.SetActive(false);
+        btn_RemoveBattery.gameObject.SetActive(false);
         txt_InventoryName.text = "";
         txt_PlayerInventorySpace.text = "";
         txt_PlayerMoney.text = "";
@@ -1077,6 +1097,52 @@ public class Manager_UIReuse : MonoBehaviour
             }
         }
     }
+    public void UpdatePlayerFlashlight()
+    {
+        float flashlightPercentage = flashlightBattery / flashlightMaxBattery * 100;
+
+        ClearFlashlightUI();
+        if (flashlightPercentage > 0)
+        {
+            bgr_flashlight1.enabled = true;
+            if (flashlightPercentage >= 10)
+            {
+                bgr_flashlight2.enabled = true;
+                if (flashlightPercentage >= 20)
+                {
+                    bgr_flashlight3.enabled = true;
+                    if (flashlightPercentage >= 30)
+                    {
+                        bgr_flashlight4.enabled = true;
+                        if (flashlightPercentage >= 40)
+                        {
+                            bgr_flashlight5.enabled = true;
+                            if (flashlightPercentage >= 50)
+                            {
+                                bgr_flashlight6.enabled = true;
+                                if (flashlightPercentage >= 60)
+                                {
+                                    bgr_flashlight7.enabled = true;
+                                    if (flashlightPercentage >= 70)
+                                    {
+                                        bgr_flashlight8.enabled = true;
+                                        if (flashlightPercentage >= 80)
+                                        {
+                                            bgr_flashlight9.enabled = true;
+                                            if (flashlightPercentage >= 90)
+                                            {
+                                                bgr_flashlight10.enabled = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     public void UpdateWeaponQuality()
     {
         float weaponQualityPercentage = durability / maxDurability * 100;
@@ -1174,6 +1240,19 @@ public class Manager_UIReuse : MonoBehaviour
         bgr_radiation8.enabled = false;
         bgr_radiation9.enabled = false;
         bgr_radiation10.enabled = false;
+    }
+    public void ClearFlashlightUI()
+    {
+        bgr_flashlight1.enabled = false;
+        bgr_flashlight2.enabled = false;
+        bgr_flashlight3.enabled = false;
+        bgr_flashlight4.enabled = false;
+        bgr_flashlight5.enabled = false;
+        bgr_flashlight6.enabled = false;
+        bgr_flashlight7.enabled = false;
+        bgr_flashlight8.enabled = false;
+        bgr_flashlight9.enabled = false;
+        bgr_flashlight10.enabled = false;
     }
     public void ClearWeaponUI()
     {

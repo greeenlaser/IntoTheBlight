@@ -209,10 +209,15 @@ public class Manager_Console : MonoBehaviour
                 //shoots out a ray from the camera towards  the position of the cursor
                 Ray ray = cam_Player.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 
+                LayerMask ignoredLayer = LayerMask.NameToLayer("Player");
+                ignoredLayer = ~ignoredLayer;
+
                 //checks if the raycast hit anything
                 if (Physics.Raycast(ray, 
                                     out RaycastHit hit, 
-                                    100))
+                                    100,
+                                    ignoredLayer,
+                                    QueryTriggerInteraction.Ignore))
                 {
                     //if selected gameobject isnt empty
                     if (hit.transform.gameObject != null)
@@ -368,6 +373,11 @@ public class Manager_Console : MonoBehaviour
                          && PlayerHealthScript.isPlayerAlive)
                 {
                     Command_Save();
+                }
+                else if (separatedWords[0] == "restart" && separatedWords.Count == 1
+                         && PlayerHealthScript.isPlayerAlive)
+                {
+                    Command_Restart();
                 }
                 //delete all saves
                 else if (separatedWords[0] == "das" && separatedWords.Count == 1)
@@ -681,6 +691,8 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine();
             consoleText = "save - Saves current game progress.";
             CreateNewConsoleLine();
+            consoleText = "restart - Loads the newest save if saves exist or restarts the game from the beginning.";
+            CreateNewConsoleLine();
             consoleText = "das - deletes all the game saves - WARNING: All deleted saves are lost forever!";
             CreateNewConsoleLine();
             consoleText = "tgm - toggles godmode for player.";
@@ -848,6 +860,35 @@ public class Manager_Console : MonoBehaviour
         CreateNewConsoleLine();
 
         par_Managers.GetComponent<UI_PauseMenu>().Save();
+
+        separatedWords.Clear();
+    }
+    //loads newest save if save was found, otherwise restarts scene
+    private void Command_Restart()
+    {
+        insertedCommands.Add("restart");
+        currentSelectedInsertedCommand = insertedCommands.Count;
+        consoleText = "--restart--";
+        CreateNewConsoleLine();
+
+        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+
+        //loads game data if a save file was found
+        if (File.Exists(savingScript.path + @"\Save0001.txt"))
+        {
+            if (!savingScript.isLoading)
+            {
+                savingScript.isLoading = true;
+                savingScript.OpenLoadingMenuUI();
+            }
+
+            //Debug.Log("Found save file! Loading data...");
+            savingScript.LoadGameData();
+        }
+        else
+        {
+            SceneManager.LoadScene(1);
+        }
 
         separatedWords.Clear();
     }
@@ -1029,6 +1070,8 @@ public class Manager_Console : MonoBehaviour
 
                         if (target.GetComponent<AI_Health>() != null)
                         {
+                            consoleText = "target kill - kills the target if it is not protected.";
+                            CreateNewConsoleLine();
                             consoleText = "target sethostilestate hostileStateValue - sets target hostile state to either 0 or 1. 0 means target is no longer hostile towards anyone who attacks it, 1 means targets original battle rules have been enabled";
                             CreateNewConsoleLine();
                             consoleText = "target setkillablestate killableStateValue - sets target killable state to either 0 or 1. 0 means target is no longer killable, 1 means target is killable again. protected npc/monsters are permanently unkillable and cannot be set to killable";
@@ -1097,7 +1140,7 @@ public class Manager_Console : MonoBehaviour
                         consoleText = "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed";
                         CreateNewConsoleLine();
 
-                        consoleText = "target setcount countValue - changes the item count to countValue";
+                        consoleText = "target setcount countValue - changes the item count to countValue if it is stackable";
                         CreateNewConsoleLine();
                         consoleText = "target setvalue valueValue - changes individual item value to valueValue";
                         CreateNewConsoleLine();
@@ -1113,56 +1156,77 @@ public class Manager_Console : MonoBehaviour
                         }
                     }
                     //door/container states and commands
-                    else if (target.GetComponent<Env_Lock>() != null)
+                    else if (target.name == "door_interactable"
+                             || target.GetComponent<Inv_Container>() != null)
                     {
                         consoleText = "--- target states:";
                         CreateNewConsoleLine();
 
-                        //is door locked and protected or not
-                        if (target.GetComponent<Env_Door>() != null)
+                        Transform par = target.transform.parent.parent;
+                        GameObject door = null;
+                        GameObject container = null;
+
+                        if (target.GetComponent<Inv_Container>() != null)
                         {
-                            if (target.GetComponent<Env_Door>().isProtected)
+                            container = target;
+                        }
+                        else
+                        {
+                            foreach (Transform child in par)
+                            {
+                                if (child.GetComponent<Env_Door>() != null)
+                                {
+                                    door = child.gameObject;
+                                    break;
+                                }
+                            }
+                        }
+
+                        //is door locked and protected or not
+                        if (door.GetComponent<Env_Door>() != null)
+                        {
+                            if (door.GetComponent<Env_Door>().isProtected)
                             {
                                 consoleText = "isprotected = true";
                                 CreateNewConsoleLine();
                             }
-                            else if (!target.GetComponent<Env_Door>().isProtected)
+                            else if (!door.GetComponent<Env_Door>().isProtected)
                             {
                                 consoleText = "isprotected = false";
                                 CreateNewConsoleLine();
                             }
 
-                            if (target.GetComponent<Env_Door>().isLocked)
+                            if (door.GetComponent<Env_Door>().isLocked)
                             {
                                 consoleText = "islocked = true";
                                 CreateNewConsoleLine();
                             }
-                            else if (!target.GetComponent<Env_Door>().isLocked)
+                            else if (!door.GetComponent<Env_Door>().isLocked)
                             {
                                 consoleText = "islocked = false";
                                 CreateNewConsoleLine();
                             }
                         }
                         //is container locked and protected or not
-                        else if (target.GetComponent<Inv_Container>() != null)
+                        else if (container.GetComponent<Inv_Container>() != null)
                         {
-                            if (target.GetComponent<Inv_Container>().isProtected)
+                            if (container.GetComponent<Inv_Container>().isProtected)
                             {
                                 consoleText = "isprotected = true";
                                 CreateNewConsoleLine();
                             }
-                            else if (!target.GetComponent<Inv_Container>().isProtected)
+                            else if (!container.GetComponent<Inv_Container>().isProtected)
                             {
                                 consoleText = "isprotected = false";
                                 CreateNewConsoleLine();
                             }
 
-                            if (target.GetComponent<Inv_Container>().isLocked)
+                            if (container.GetComponent<Inv_Container>().isLocked)
                             {
                                 consoleText = "islocked = true";
                                 CreateNewConsoleLine();
                             }
-                            else if (!target.GetComponent<Inv_Container>().isLocked)
+                            else if (!container.GetComponent<Inv_Container>().isLocked)
                             {
                                 consoleText = "islocked = false";
                                 CreateNewConsoleLine();
@@ -1173,6 +1237,11 @@ public class Manager_Console : MonoBehaviour
                         CreateNewConsoleLine();
 
                         consoleText = "target unlock - unlocks the door/container if it isn't protected";
+                        CreateNewConsoleLine();
+                    }
+                    else
+                    {
+                        consoleText = "No commands found for selected target.";
                         CreateNewConsoleLine();
                     }
                 }
@@ -1255,44 +1324,75 @@ public class Manager_Console : MonoBehaviour
                 else if (secondCommandName == "unlock"
                          && !secondCommand)
                 {
-                    if (target.GetComponent<Env_Door>() != null
-                        && target.GetComponent<Env_Door>().isLocked
-                        && !target.GetComponent<Env_Door>().isProtected)
+                    Transform par = target.transform.parent.parent;
+                    GameObject door = null;
+                    GameObject container = null;
+
+                    if (target.GetComponent<Inv_Container>() != null)
                     {
-                        target.GetComponent<Env_Lock>().Unlock();
-                        consoleText = "Unlocked this door.";
-                        CreateNewConsoleLine();
+                        container = target;
                     }
-                    else if (target.GetComponent<Inv_Container>() != null
-                             && target.GetComponent<Inv_Container>().isLocked
-                             && !target.GetComponent<Inv_Container>().isProtected)
+                    else
                     {
-                        target.GetComponent<Env_Lock>().Unlock();
-                        consoleText = "Unlocked this container.";
-                        CreateNewConsoleLine();
+                        foreach (Transform child in par)
+                        {
+                            if (child.GetComponent<Env_Door>() != null)
+                            {
+                                door = child.gameObject;
+                                break;
+                            }
+                        }
                     }
 
-                    //custom unlock errors
-                    else if (target.GetComponent<Env_Door>() == null
-                             && target.GetComponent<Inv_Container>() == null)
+                    if (door != null)
+                    {
+                        if (door.GetComponent<Env_Door>().isLocked
+                        && !door.GetComponent<Env_Door>().isProtected)
+                        {
+                            door.GetComponent<Env_Lock>().Unlock();
+                            consoleText = "Unlocked this door.";
+                            CreateNewConsoleLine();
+                        }
+
+                        //custom unlock errors
+                        else if (!door.GetComponent<Env_Door>().isLocked
+                                 || door.GetComponent<Env_Lock>() == null)
+                        {
+                            consoleText = "Error: Target is already unlocked!";
+                            CreateNewConsoleLine();
+                        }
+                        else if (door.GetComponent<Env_Door>().isProtected)
+                        {
+                            consoleText = "Error: Target cannot be unlocked through console because it is protected!";
+                            CreateNewConsoleLine();
+                        }
+                    }
+                    else if (container != null)
+                    {
+                        if (container.GetComponent<Inv_Container>().isLocked
+                            && !container.GetComponent<Inv_Container>().isProtected)
+                        {
+                            container.GetComponent<Inv_Container>().isLocked = false;
+                            consoleText = "Unlocked this container.";
+                            CreateNewConsoleLine();
+                        }
+
+                        //custom unlock errors
+                        else if (!container.GetComponent<Inv_Container>().isLocked
+                                 || container.GetComponent<Env_Lock>() == null)
+                        {
+                            consoleText = "Error: Target is already unlocked!";
+                            CreateNewConsoleLine();
+                        }
+                        else if (container.GetComponent<Inv_Container>().isProtected)
+                        {
+                            consoleText = "Error: Target cannot be unlocked through console because it is protected!";
+                            CreateNewConsoleLine();
+                        }
+                    }
+                    else
                     {
                         consoleText = "Error: Target is not an unlockable GameObject!";
-                        CreateNewConsoleLine();
-                    }
-                    else if ((target.GetComponent<Env_Door>() != null
-                             && !target.GetComponent<Env_Door>().isLocked)
-                             || (target.GetComponent<Inv_Container>() != null
-                             && !target.GetComponent<Inv_Container>().isLocked))
-                    {
-                        consoleText = "Error: Target is already unlocked!";
-                        CreateNewConsoleLine();
-                    }
-                    else if ((target.GetComponent<Env_Door>() != null
-                             && target.GetComponent<Env_Door>().isProtected)
-                             || (target.GetComponent<Inv_Container>() != null
-                             && target.GetComponent<Inv_Container>().isProtected))
-                    {
-                        consoleText = "Error: Target cannot be unlocked through console because it is protected!";
                         CreateNewConsoleLine();
                     }
                 }
@@ -1422,7 +1522,7 @@ public class Manager_Console : MonoBehaviour
                             }
                             else if (secondCommandName == "setvalue")
                             {
-                                target.GetComponent<Env_Item>().int_ItemValue = insertedValue;
+                                target.GetComponent<Env_Item>().int_maxItemValue = insertedValue;
 
                                 consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s value to " + insertedValue + ".";
                                 CreateNewConsoleLine();
