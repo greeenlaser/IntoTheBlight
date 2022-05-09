@@ -311,7 +311,7 @@ public class Item_Grenade : MonoBehaviour
                                      && target.GetComponent<AI_Health>().isKillable
                                      && target.GetComponent<AI_Health>().isAlive)
                             {
-                                target.GetComponent<AI_Health>().DealDamage("health", damageByDistance);
+                                target.GetComponent<AI_Health>().DealDamage(damageByDistance);
                                 //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
                             }
                             //if destroyable crate was in explosion range

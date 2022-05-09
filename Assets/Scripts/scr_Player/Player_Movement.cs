@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class Player_Movement : MonoBehaviour
 {
@@ -77,7 +76,6 @@ public class Player_Movement : MonoBehaviour
     private float staminaCooldown;
     private float minVelocity;
     private int alphaValue;
-    private string deathMessage;
 
     private float closestDistance;
     private string cellName;
@@ -464,12 +462,12 @@ public class Player_Movement : MonoBehaviour
         //move down
         if (Input.GetKey(KeyCode.LeftControl))
         {
-            transform.position += new Vector3(0, -1, 0) * nc_moveSpeed * Time.deltaTime;
+            transform.position += nc_moveSpeed * Time.deltaTime * new Vector3(0, -1, 0);
         }
         //move up
         else if (Input.GetKey(KeyCode.Space))
         {
-            transform.position += new Vector3(0, 1, 0) * nc_moveSpeed * Time.deltaTime;
+            transform.position += nc_moveSpeed * Time.deltaTime * new Vector3(0, 1, 0);
         }
     }
 

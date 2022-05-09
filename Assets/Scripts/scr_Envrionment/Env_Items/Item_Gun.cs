@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Item_Gun : MonoBehaviour
 {
@@ -104,10 +103,10 @@ public class Item_Gun : MonoBehaviour
     private float timer_gunSFX;
     private float timer_gunBullets;
     private float gunJamChance;
-    private List<GameObject> gunHitCursors = new List<GameObject>();
-    private List<GameObject> spawnedBulletCaseSFX = new List<GameObject>();
-    private List<GameObject> spawnedBulletCases = new List<GameObject>();
-    private List<GameObject> spawnedGunFireSFX = new List<GameObject>();
+    private readonly List<GameObject> gunHitCursors = new List<GameObject>();
+    private readonly List<GameObject> spawnedBulletCaseSFX = new List<GameObject>();
+    private readonly List<GameObject> spawnedBulletCases = new List<GameObject>();
+    private readonly List<GameObject> spawnedGunFireSFX = new List<GameObject>();
     private Manager_UIReuse UIReuseScript;
 
     private void Awake()
@@ -411,10 +410,9 @@ public class Item_Gun : MonoBehaviour
         LoadValues();
 
         //did the gun shoot anything
-        RaycastHit hit;
         if (Physics.Raycast(pos_shoot.position, 
                             pos_shoot.TransformDirection(Vector3.forward), 
-                            out hit, 
+                            out RaycastHit hit, 
                             maxRange,
                             LayerMask.NameToLayer("IgnoreRaycast"), 
                             QueryTriggerInteraction.Ignore))
@@ -427,7 +425,7 @@ public class Item_Gun : MonoBehaviour
                 && target.GetComponent<AI_Health>().isAlive)
             {
                 //deals damage to this AI if it can take damage
-                target.GetComponent<AI_Health>().DealDamage("health", Mathf.Round(damage * 10) / 10);
+                target.GetComponent<AI_Health>().DealDamage(Mathf.Round(damage * 10) / 10);
 
                 //if this AI has not yet detected this target and this target shot this AI
                 //and this AI is not currently chasing or attacking another target

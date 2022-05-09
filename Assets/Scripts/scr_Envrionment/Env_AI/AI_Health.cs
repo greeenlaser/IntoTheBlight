@@ -55,7 +55,7 @@ public class AI_Health : MonoBehaviour
     //NOTE: damageType is currently only a placeholder value,
     //      it will deal different element damage types like player health
     //      in the future
-    public void DealDamage(string damageType, float damageAmount)
+    public void DealDamage(float damageAmount)
     {
         if (currentHealth - damageAmount > 0)
         {

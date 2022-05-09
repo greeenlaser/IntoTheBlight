@@ -42,9 +42,8 @@ public class Env_Door : MonoBehaviour
     [HideInInspector] public bool isClosed;
 
     //private variables
-
     private float doorDistanceFromEndPos;
-    private List<GameObject> targetsInTrigger = new List<GameObject>();
+    private readonly List<GameObject> targetsInTrigger = new List<GameObject>();
 
     private void Start()
     {

@@ -133,7 +133,7 @@ public class Env_DamageType : MonoBehaviour
                         //damaging killable AI
                         else if (target.transform.GetComponent<AI_Health>() != null)
                         {
-                            target.transform.GetComponent<AI_Health>().DealDamage(theDamageType, finalDamage);
+                            target.transform.GetComponent<AI_Health>().DealDamage(finalDamage);
                             //Debug.Log("Dealt " + damageDealt + " " + damageType + " damage to " + target.name + "!");
                         }
                         //damaging destroyable crate

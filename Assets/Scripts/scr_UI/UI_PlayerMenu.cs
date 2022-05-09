@@ -9,11 +9,11 @@ public class UI_PlayerMenu : MonoBehaviour
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private Player_Health PlayerHealthScript;
-    [SerializeField] private Player_Exoskeleton ExoskeletonScript;
+    [SerializeField] private UI_Tooltip TooltipScript;
+    [SerializeField] private UI_AbilityManager AbilityManagerScript;
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public bool isExoskeletonEquipped;
     [HideInInspector] public bool isPlayerMenuOpen;
     [HideInInspector] public bool openedInventoryUI;
     [HideInInspector] public bool openedQuestUI;
@@ -33,6 +33,12 @@ public class UI_PlayerMenu : MonoBehaviour
     private readonly int factionUICode = 4;
     private readonly int radioUICode = 5;
     private readonly int mapUICode = 6;
+    private Manager_UIReuse UIReuseScript;
+
+    private void Awake()
+    {
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+    }
 
     private void Update()
     {
@@ -78,11 +84,11 @@ public class UI_PlayerMenu : MonoBehaviour
                 currentUI--;
                 if (currentUI == -1)
                 {
-                    if (!isExoskeletonEquipped)
+                    if (!AbilityManagerScript.hasExoskeleton)
                     {
                         currentUI = 1;
                     }
-                    else if (isExoskeletonEquipped)
+                    else if (AbilityManagerScript.hasExoskeleton)
                     {
                         currentUI = 6;
                     }
@@ -93,12 +99,12 @@ public class UI_PlayerMenu : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.DownArrow) && isPlayerMenuOpen)
             {
                 currentUI++;
-                if (!isExoskeletonEquipped
+                if (!AbilityManagerScript.hasExoskeleton
                     && currentUI == 2)
                 {
                     currentUI = 0;
                 }
-                else if (isExoskeletonEquipped
+                else if (AbilityManagerScript.hasExoskeleton
                          && currentUI == 7)
                 {
                     currentUI = 0;
@@ -141,11 +147,11 @@ public class UI_PlayerMenu : MonoBehaviour
     //open main player UI
     public void OpenPlayerMenuUI()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenu.SetActive(true);
+        UIReuseScript.par_PlayerMenu.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(ClosePlayerMenuUI);
+        UIReuseScript.btn_CloseUI.gameObject.SetActive(true);
+        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
+        UIReuseScript.btn_CloseUI.onClick.AddListener(ClosePlayerMenuUI);
 
         isPlayerMenuOpen = true;
         currentUI = 0;
@@ -160,35 +166,36 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        if (!isExoskeletonEquipped)
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        if (!AbilityManagerScript.hasExoskeleton)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Stats.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Factions.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Radio.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Map.GetComponent<Button>().interactable = false;
         }
-        else if (isExoskeletonEquipped)
+        else if (AbilityManagerScript.hasExoskeleton)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
         }
 
 
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
 
         PlayerInventoryScript.OpenInventory();
         //Debug.Log("Opened player inventory UI");
@@ -204,34 +211,35 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = false;
-        if (!isExoskeletonEquipped)
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = false;
+        if (!AbilityManagerScript.hasExoskeleton)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Stats.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Factions.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Radio.GetComponent<Button>().interactable = false;
+            UIReuseScript.btn_Map.GetComponent<Button>().interactable = false;
         }
-        else if (isExoskeletonEquipped)
+        else if (AbilityManagerScript.hasExoskeleton)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+            UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
         }
 
         PlayerInventoryScript.CloseInventory();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
 
         par_Managers.GetComponent<UI_AcceptedQuests>().OpenQuests();
         //Debug.Log("Opened quests UI");
@@ -247,24 +255,25 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Stats.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
 
         PlayerInventoryScript.CloseInventory();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(true);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerMenuStats.SetActive(true);
 
         par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
         //Debug.Log("Opened stats UI");
@@ -280,26 +289,28 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
 
         PlayerInventoryScript.CloseInventory();
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
 
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(true);
-        ExoskeletonScript.UpdateCellValues();
+        UIReuseScript.par_PlayerUpgrades.SetActive(true);
+        AbilityManagerScript.LoadUI();
+        AbilityManagerScript.ShowUpgradeButtonPositions();
+
         //Debug.Log("Opened upgrades UI");
     }
     //open factions
@@ -313,26 +324,27 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Factions.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
 
         PlayerInventoryScript.CloseInventory();
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(true);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+        UIReuseScript.UpdatePlayerFactionUI();
         //Debug.Log("Opened factions UI");
     }
     //open radio
@@ -346,25 +358,26 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = true;
         openedMapUI = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Radio.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Map.GetComponent<Button>().interactable = true;
 
         PlayerInventoryScript.CloseInventory();
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+        UIReuseScript.par_PlayerMenuMap.SetActive(false);
 
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(true);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(true);
         //Debug.Log("Opened radio UI");
     }
     //open map
@@ -378,24 +391,25 @@ public class UI_PlayerMenu : MonoBehaviour
         openedRadioUI = false;
         openedMapUI = true;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Inventory.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Quests.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Stats.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Upgrades.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Factions.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Radio.GetComponent<Button>().interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Map.GetComponent<Button>().interactable = false;
+        UIReuseScript.btn_Inventory.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Quests.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Stats.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Upgrades.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Factions.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Radio.GetComponent<Button>().interactable = true;
+        UIReuseScript.btn_Map.GetComponent<Button>().interactable = false;
 
         PlayerInventoryScript.CloseInventory();
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(true);
+        UIReuseScript.par_PlayerMenuStats.SetActive(false);
+        TooltipScript.showTooltipUI = false;
+        UIReuseScript.par_PlayerUpgrades.SetActive(false);
+        UIReuseScript.par_PlayerFactionUI.SetActive(false);
+        UIReuseScript.par_PlayerMenuRadio.SetActive(false);
+        UIReuseScript.par_PlayerMenuMap.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MainMapMask.transform, false);
-        par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MainMapMask.transform, false);
+        UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MainMapMask.transform, false);
+        UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MainMapMask.transform, false);
 
         //Debug.Log("Opened map UI");
     }
@@ -414,31 +428,32 @@ public class UI_PlayerMenu : MonoBehaviour
         }
         else if (openedStatsUI)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuStats.SetActive(false);
+            UIReuseScript.par_PlayerMenuStats.SetActive(false);
             openedStatsUI = false;
         }
         else if (openedUpgradeUI)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().par_PlayerUpgrades.SetActive(false);
+            TooltipScript.showTooltipUI = false;
+            UIReuseScript.par_PlayerUpgrades.SetActive(false);
             openedUpgradeUI = false;
         }
         else if (openedFactionUI)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().par_PlayerFactionUI.SetActive(false);
+            UIReuseScript.par_PlayerFactionUI.SetActive(false);
             openedFactionUI = false;
         }
         else if (openedRadioUI)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuRadio.SetActive(false);
+            UIReuseScript.par_PlayerMenuRadio.SetActive(false);
             openedRadioUI = false;
         }
         else if (openedMapUI)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().Minimap.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-            par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_MinimapMask.transform, false);
-            par_Managers.GetComponent<Manager_UIReuse>().MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
+            UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+            UIReuseScript.MinimapPlayerPosition.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
+            UIReuseScript.MinimapPlayerPosition.transform.position = par_Managers.GetComponent<UI_Minimap>().playerPosition;
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenuMap.SetActive(false);
+            UIReuseScript.par_PlayerMenuMap.SetActive(false);
             openedMapUI = false;
         }
 
@@ -457,9 +472,9 @@ public class UI_PlayerMenu : MonoBehaviour
 
         isPlayerMenuOpen = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
+        UIReuseScript.btn_CloseUI.onClick.RemoveAllListeners();
+        UIReuseScript.btn_CloseUI.gameObject.SetActive(false);
 
-        par_Managers.GetComponent<Manager_UIReuse>().par_PlayerMenu.SetActive(false);
+        UIReuseScript.par_PlayerMenu.SetActive(false);
     }
 }

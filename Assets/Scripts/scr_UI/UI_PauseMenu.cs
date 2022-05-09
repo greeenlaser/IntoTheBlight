@@ -247,6 +247,22 @@ public class UI_PauseMenu : MonoBehaviour
         }
     }
 
+    //doesnt pause the game but allows free cursor movement
+    public void LockCamera()
+    {
+        PlayerCameraScript.isCamEnabled = false;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+    public void UnlockCamera()
+    {
+        PlayerCameraScript.isCamEnabled = true;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     private void PauseSFX()
     {
         //pauses all playing player SFX audiosources

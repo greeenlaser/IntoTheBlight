@@ -34,7 +34,6 @@ public class UI_DialogueChoice : MonoBehaviour
     [HideInInspector] public int buttonIndex;
 
     //private variables
-    private Button button;
     private Manager_UIReuse UIReuseScript;
 
     private void Start()

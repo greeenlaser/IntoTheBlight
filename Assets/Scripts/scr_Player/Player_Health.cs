@@ -23,9 +23,8 @@ public class Player_Health : MonoBehaviour
     [HideInInspector] public List<GameObject> elementalDamageDealers = new List<GameObject>();
 
     //private variables
-    private string str_deathMessage;
     private Manager_UIReuse UIScript;
-    private List<string> damageTypes = new List<string>();
+    private readonly List<string> damageTypes = new List<string>();
 
     //damage variables
     private bool enableTimer;

@@ -30,11 +30,6 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
-    [SerializeField] private Player_Exoskeleton ExoskeletonScript;
-    [SerializeField] private UI_AbilityAssignManager AbilityAssignManagerScript;
-    [SerializeField] private UI_AbilitySlot1 AbilitySlot1Script;
-    [SerializeField] private UI_AbilitySlot2 AbilitySlot2Script;
-    [SerializeField] private UI_AbilitySlot3 AbilitySlot3Script;
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
@@ -48,7 +43,6 @@ public class Manager_GameSaving : MonoBehaviour
     private float time;
     private GameObject equippedWeapon;
     private GameObject equippedFlashlight;
-    private List<string> abilityNames = new List<string>();
 
     //player values
     private Vector3 pos_Player;
@@ -68,9 +62,7 @@ public class Manager_GameSaving : MonoBehaviour
                 DirectoryInfo di = Directory.CreateDirectory(path);
                 //Debug.Log("Successfully created save folder!");
 
-                isLoading = true;
                 firstload = true;
-
                 OpenLoadingMenuUI();
             }
             else if (Directory.Exists(path)
@@ -79,12 +71,8 @@ public class Manager_GameSaving : MonoBehaviour
                 //initial global cell reset
                 par_Managers.GetComponent<GameManager>().GlobalCellReset();
 
-                if (!isLoading)
-                {
-                    firstload = true;
-                    isLoading = true;
-                    OpenLoadingMenuUI();
-                }
+                firstload = true;
+                OpenLoadingMenuUI();
             }
         }
         catch (Exception e)
@@ -95,11 +83,7 @@ public class Manager_GameSaving : MonoBehaviour
         //loads game data if a save file was found
         if (File.Exists(path + @"\Save0001.txt"))
         {
-            if (!isLoading)
-            {
-                isLoading = true;
-                OpenLoadingMenuUI();
-            }
+            OpenLoadingMenuUI();
 
             //Debug.Log("Found save file! Loading data...");
             LoadGameData();
@@ -139,7 +123,7 @@ public class Manager_GameSaving : MonoBehaviour
 
             img_loadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
 
-            //two seconds to load first startup
+            //0.5 seconds to load first startup
             //otherwise waiting until game save file finishes loading
             if (time > 0.5f && firstload)
             {
@@ -168,6 +152,8 @@ public class Manager_GameSaving : MonoBehaviour
 
     public void OpenLoadingMenuUI()
     {
+        isLoading = true;
+
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
@@ -360,8 +346,7 @@ public class Manager_GameSaving : MonoBehaviour
                         exoskeleton.GetComponent<Rigidbody>().isKinematic = true;
                     }
 
-                    par_Managers.GetComponent<UI_PlayerMenu>().isExoskeletonEquipped = true;
-                    AbilityAssignManagerScript.hasExosuit = true;
+                    par_Managers.GetComponent<UI_AbilityManager>().hasExoskeleton = true;
                     par_Managers.GetComponent<Manager_UIReuse>().ShowExoskeletonUI();
 
                     exoskeleton.GetComponent<Env_Item>().DeactivateItem();
@@ -502,39 +487,6 @@ public class Manager_GameSaving : MonoBehaviour
                         }
                     }
                 }
-            }
-
-            //---
-            //loading player abilities
-            else if (line.Contains("pa_"))
-            {
-                //jump boost ability
-                if (line.Contains("jumpBoost"))
-                {
-                    abilityNames.Add("jumpBoost " + numbers[0] + " " + numbers[1] + " " + numbers[2] + " " + numbers[3]);
-                }
-                //sprint boost
-                else if (line.Contains("sprintBoost"))
-                {
-                    abilityNames.Add("sprintBoost " + numbers[0] + " " + numbers[1] + " " + numbers[2] + " " + numbers[3]);
-                }
-                //health regen
-                else if (line.Contains("healthRegen"))
-                {
-                    abilityNames.Add("healthRegen " + numbers[0] + " " + numbers[1] + " " + numbers[2] + " " + numbers[3]);
-                }
-                //stamina regen
-                else if (line.Contains("staminaRegen"))
-                {
-                    abilityNames.Add("staminaRegen " + numbers[0] + " " + numbers[1] + " " + numbers[2] + " " + numbers[3]);
-                }
-                //env protection
-                else if (line.Contains("envProtection"))
-                {
-                    abilityNames.Add("envProtection " + numbers[0] + " " + numbers[1] + " " + numbers[2] + " " + numbers[3]);
-                }
-
-                StartCoroutine(LoadAbilities());
             }
 
             //---
@@ -1242,7 +1194,7 @@ public class Manager_GameSaving : MonoBehaviour
         //save all players items
         if (PlayerInventoryScript.inventory.Count > 1
             || (PlayerInventoryScript.inventory.Count == 1
-            && PlayerInventoryScript.inventory[0].gameObject.name != "Exoskeleton"))
+            && PlayerInventoryScript.inventory[0].name != "Exoskeleton"))
         {
             saveFile.WriteLine("(1)count (all items)");
             saveFile.WriteLine("(2)current remainder (all consumables) / (2)current durability (all weapons with durability) (-1 means no battery equipped)");
@@ -1334,7 +1286,7 @@ public class Manager_GameSaving : MonoBehaviour
         }
         else if (PlayerInventoryScript.inventory.Count == 0
                 || (PlayerInventoryScript.inventory.Count == 1
-                && PlayerInventoryScript.inventory[0].gameObject.name == "Exoskeleton"))
+                && PlayerInventoryScript.inventory[0].name == "Exoskeleton"))
         {
             saveFile.WriteLine("<<<NO PLAYER INVENTORY ITEMS FOUND>>>");
             saveFile.WriteLine("");
@@ -1446,93 +1398,13 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("");
         //save exoskeleton if player picked it up
         bool hasExoskeleton = false;
-        foreach (GameObject playerItem in PlayerInventoryScript.inventory)
+        
+        if (par_Managers.GetComponent<UI_AbilityManager>().hasExoskeleton)
         {
-            if (playerItem.GetComponent<Env_Item>().str_ItemName == "Exoskeleton")
-            {
-                hasExoskeleton = true;
-
-                break;
-            }
+            hasExoskeleton = true;
         }
+
         saveFile.WriteLine("pi_hasExoskeleton = " + hasExoskeleton);
-
-        saveFile.WriteLine("");
-        saveFile.WriteLine("--- PLAYER ABILITIES ---");
-
-        saveFile.WriteLine("");
-        saveFile.WriteLine("(1)unlock and upgrade status (0 - not unlocked, 1 - unlocked, 2 - tier 2, 3 - tier 3),");
-        saveFile.WriteLine("(2)slot (1-3, 0 means unassigned),");
-        saveFile.WriteLine("(3)current timer,");
-        saveFile.WriteLine("(4)max timer");
-
-        saveFile.WriteLine("");
-        //save all player ability assign, unlock and upgrade abilities
-        int abilityIndex = 0;
-
-        foreach (GameObject ability in ExoskeletonScript.abilities)
-        {
-            //updates values
-            ExoskeletonScript.AddValues();
-
-            string str_abilityName = ability.GetComponent<UI_AbilityStatus>().ability.ToString();
-
-            //if the ability isnt unlocked then status = 0
-            //or if it is unlocked then status = 1
-            //or if it is upgraded to tier 2 then status = 2
-            //or if it is upgraded to tier 3 then status = 3
-            int status = 0;
-
-            if (ability.GetComponent<UI_AbilityStatus>().isUnlocked)
-            {
-                status = 1;
-            }
-            if (ability.GetComponent<UI_AbilityStatus>().isTier2)
-            {
-                status = 2;
-            }
-            if (ability.GetComponent<UI_AbilityStatus>().isTier3)
-            {
-                status = 3;
-            }
-
-            //if the ability isnt assigned to any slots then slot = 0
-            //or if the ability is assigned to slot 1 then slot = 1
-            //or if the ability is assigned to slot 2 then slot = 2
-            //or if the ability is assigned to slot 3 then slot = 3
-            int slot = 0;
-
-            if (AbilitySlot1Script.assignedAbility.ToString() == str_abilityName)
-            {
-                slot = 1;
-            }
-            else if (AbilitySlot2Script.assignedAbility.ToString() == str_abilityName)
-            {
-                slot = 2;
-            }
-            else if (AbilitySlot3Script.assignedAbility.ToString() == str_abilityName)
-            {
-                slot = 3;
-            }
-
-            //cooldown for each ability
-            float cooldown = ExoskeletonScript.cooldowns[abilityIndex];
-            if (cooldown < 0)
-            {
-                cooldown = 0;
-            }
-
-            //max cooldown for each ability
-            float maxCooldown = ExoskeletonScript.maxCooldowns[abilityIndex];
-
-            saveFile.WriteLine("pa_" + str_abilityName + " " +
-                               "= " + status +
-                               ", " + slot +
-                               ", " + Mathf.FloorToInt(Mathf.FloorToInt(cooldown)) +
-                               ", " + Mathf.FloorToInt(Mathf.FloorToInt(maxCooldown)));
-
-            abilityIndex++;
-        }
 
         saveFile.WriteLine("");
         saveFile.WriteLine("--- THROWN GRENADES ---");
@@ -2069,350 +1941,5 @@ public class Manager_GameSaving : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         Exoskeleton.SetActive(false);
-    }
-
-    private IEnumerator LoadAbilities()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        int mainIndex = 0;
-
-        foreach (string abilityName in abilityNames)
-        {
-            //get all separators in line
-            char[] separators = new char[] { ' ', ',', '=', '(', ')', '_' };
-            //remove unwanted separators and split line into separate strings
-            string[] values = abilityName.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-            //list of confirmed numbers
-            List<string> numbers = new List<string>();
-            //add all numbers to new list
-            foreach (string value in values)
-            {
-                bool isFloat = float.TryParse(value, out _);
-                if (isFloat)
-                {
-                    numbers.Add(value);
-                }
-            }
-
-            //if the ability is unlocked
-            if (int.Parse(numbers[0]) > 0)
-            {
-                GameObject ability = ExoskeletonScript.abilities[mainIndex];
-
-                //jump boost
-                if (abilityName == abilityNames[0])
-                {
-                    if (numbers[0] == "1")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-
-                        ExoskeletonScript.UnlockAbility_jumpBoost();
-                    }
-                    else if (numbers[0] == "2")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-
-                        ExoskeletonScript.UnlockAbility_jumpBoost();
-                        ExoskeletonScript.UnlockAbility_jumpBoost();
-                    }
-                    else if (numbers[0] == "3")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier3 = true;
-
-                        ExoskeletonScript.UnlockAbility_jumpBoost();
-                        ExoskeletonScript.UpgradeAbility_jumpBoost_Tier2();
-                        ExoskeletonScript.UpgradeAbility_jumpBoost_Tier3();
-                    }
-
-                    //if the ability is assigned to slot 1, 2 or 3
-                    if (int.Parse(numbers[1]) > 0)
-                    {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.onClick.RemoveAllListeners();
-
-                        //assigned to slot 1
-                        if (numbers[1] == "1")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1();
-                        }
-                        //assigned to slot 2
-                        else if (numbers[1] == "2")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2();
-                        }
-                        //assigned to slot 3
-                        else if (numbers[1] == "3")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignJumpBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3();
-                        }
-
-                        ExoskeletonScript.maxCooldown_jumpBoost = float.Parse(numbers[3]);
-
-                        //if this ability is in use
-                        if (int.Parse(numbers[2]) > 0)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-
-                            ExoskeletonScript.remainingCooldown_jumpBoost = float.Parse(numbers[2]);
-                            ExoskeletonScript.UseAbility_jumpBoost();
-                        }
-                    }
-                }
-                //sprint boost
-                else if (abilityName == abilityNames[1])
-                {
-                    if (numbers[0] == "1")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-
-                        ExoskeletonScript.UnlockAbility_sprintBoost();
-                    }
-                    else if (numbers[0] == "2")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-
-                        ExoskeletonScript.UnlockAbility_sprintBoost();
-                        ExoskeletonScript.UpgradeAbility_sprintBoost_Tier2();
-                    }
-                    else if (numbers[0] == "3")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier3 = true;
-
-                        ExoskeletonScript.UnlockAbility_sprintBoost();
-                        ExoskeletonScript.UpgradeAbility_sprintBoost_Tier2();
-                        ExoskeletonScript.UpgradeAbility_sprintBoost_Tier3();
-                    }
-
-                    //if the ability is assigned to slot 1, 2 or 3
-                    if (int.Parse(numbers[1]) > 0)
-                    {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.onClick.RemoveAllListeners();
-
-                        //assigned to slot 1
-                        if (numbers[1] == "1")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1();
-                        }
-                        //assigned to slot 2
-                        else if (numbers[1] == "2")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2();
-                        }
-                        //assigned to slot 3
-                        else if (numbers[1] == "3")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignSprintBoost.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3();
-                        }
-
-                        ExoskeletonScript.maxCooldown_sprintBoost = float.Parse(numbers[3]);
-
-                        //if this ability is in use
-                        if (int.Parse(numbers[2]) > 0)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-
-                            ExoskeletonScript.remainingCooldown_sprintBoost = float.Parse(numbers[2]);
-                            ExoskeletonScript.UseAbility_sprintBoost();
-                        }
-                    }
-                }
-                //health regen
-                else if (abilityName == abilityNames[2])
-                {
-                    if (numbers[0] == "1")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-
-                        ExoskeletonScript.UnlockAbility_healthRegen();
-                    }
-                    else if (numbers[0] == "2")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-
-                        ExoskeletonScript.UnlockAbility_healthRegen();
-                        ExoskeletonScript.UpgradeAbility_healthRegen_Tier2();
-                    }
-                    else if (numbers[0] == "3")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier3 = true;
-
-                        ExoskeletonScript.UnlockAbility_healthRegen();
-                        ExoskeletonScript.UpgradeAbility_healthRegen_Tier2();
-                        ExoskeletonScript.UpgradeAbility_healthRegen_Tier3();
-                    }
-
-                    //if the ability is assigned to slot 1, 2 or 3
-                    if (int.Parse(numbers[1]) > 0)
-                    {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.onClick.RemoveAllListeners();
-
-                        //assigned to slot 1
-                        if (numbers[1] == "1")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1();
-                        }
-                        //assigned to slot 2
-                        else if (numbers[1] == "2")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2();
-                        }
-                        //assigned to slot 3
-                        else if (numbers[1] == "3")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignHealthRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3();
-                        }
-
-                        ExoskeletonScript.maxCooldown_healthRegen = float.Parse(numbers[3]);
-
-                        //if this ability is in use
-                        if (int.Parse(numbers[2]) > 0)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-
-                            ExoskeletonScript.remainingCooldown_healthRegen = float.Parse(numbers[2]);
-                            ExoskeletonScript.UseAbility_healthRegen();
-                        }
-                    }
-                }
-                //stamina regen
-                else if (abilityName == abilityNames[3])
-                {
-                    if (numbers[0] == "1")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-
-                        ExoskeletonScript.UnlockAbility_staminaRegen();
-                    }
-                    else if (numbers[0] == "2")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-
-                        ExoskeletonScript.UnlockAbility_staminaRegen();
-                        ExoskeletonScript.UpgradeAbility_staminaRegen_Tier2();
-                    }
-                    else if (numbers[0] == "3")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier3 = true;
-
-                        ExoskeletonScript.UnlockAbility_staminaRegen();
-                        ExoskeletonScript.UpgradeAbility_staminaRegen_Tier2();
-                        ExoskeletonScript.UpgradeAbility_staminaRegen_Tier3();
-                    }
-
-                    //if the ability is assigned to slot 1, 2 or 3
-                    if (int.Parse(numbers[1]) > 0)
-                    {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.onClick.RemoveAllListeners();
-
-                        //assigned to slot 1
-                        if (numbers[1] == "1")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1();
-                        }
-                        //assigned to slot 2
-                        else if (numbers[1] == "2")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2();
-                        }
-                        //assigned to slot 3
-                        else if (numbers[1] == "3")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignStaminaRegen.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3();
-                        }
-
-                        ExoskeletonScript.maxCooldown_staminaRegen = float.Parse(numbers[3]);
-
-                        //if this ability is in use
-                        if (int.Parse(numbers[2]) > 0)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-
-                            ExoskeletonScript.remainingCooldown_staminaRegen = float.Parse(numbers[2]);
-                            ExoskeletonScript.UseAbility_staminaRegen();
-                        }
-                    }
-                }
-                //env protection
-                else if (abilityName == abilityNames[4])
-                {
-                    if (numbers[0] == "1")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-
-                        ExoskeletonScript.UnlockAbility_envProtection();
-                    }
-                    else if (numbers[0] == "2")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-
-                        ExoskeletonScript.UnlockAbility_envProtection();
-                        ExoskeletonScript.UpgradeAbility_envProtection_Tier2();
-                    }
-                    else if (numbers[0] == "3")
-                    {
-                        ability.GetComponent<UI_AbilityStatus>().isUnlocked = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier2 = true;
-                        ability.GetComponent<UI_AbilityStatus>().isTier3 = true;
-
-                        ExoskeletonScript.UnlockAbility_envProtection();
-                        ExoskeletonScript.UpgradeAbility_envProtection_Tier2();
-                        ExoskeletonScript.UpgradeAbility_envProtection_Tier3();
-                    }
-
-                    //if the ability is assigned to slot 1, 2 or 3
-                    if (int.Parse(numbers[1]) > 0)
-                    {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.onClick.RemoveAllListeners();
-
-                        //assigned to slot 1
-                        if (numbers[1] == "1")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot1();
-                        }
-                        //assigned to slot 2
-                        else if (numbers[1] == "2")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot2();
-                        }
-                        //assigned to slot 3
-                        else if (numbers[1] == "3")
-                        {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_assignEnvProtection.GetComponent<UI_AssignThisAbilityToSlot>().AssignToSlot3();
-                        }
-
-                        ExoskeletonScript.maxCooldown_envProtection = float.Parse(numbers[3]);
-
-                        //if this ability is in use
-                        if (int.Parse(numbers[2]) > 0)
-                        {
-                            yield return new WaitForSeconds(0.1f);
-
-                            ExoskeletonScript.remainingCooldown_envProtection = float.Parse(numbers[2]);
-                            ExoskeletonScript.UseAbility_envProtection();
-                        }
-                    }
-                }
-            }
-
-            mainIndex++;
-        }
     }
 }

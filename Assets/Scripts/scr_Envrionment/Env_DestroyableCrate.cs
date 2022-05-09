@@ -65,8 +65,8 @@ public class Env_DestroyableCrate : MonoBehaviour
                     if (thePlayer.GetComponent<Inv_Player>().equippedGun != null)
                     {
                         GameObject equippedWeapon = thePlayer.GetComponent<Inv_Player>().equippedGun;
-                        float durability = 0;
-                        float maxDurability = 0;
+                        float durability;
+                        float maxDurability;
 
                         if (equippedWeapon.GetComponent<Item_Gun>() != null)
                         {

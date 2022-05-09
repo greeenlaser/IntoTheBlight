@@ -140,13 +140,13 @@ public class GameManager : MonoBehaviour
             Transform pos_randomSpawn = theCell.GetComponent<Manager_CurrentCell>().respawnPositions[randomSpawnPosIndex];
             //spawn the npc at the position
             GameObject respawnedNPC = Instantiate(templateNPC,
-                                                 templateNPC.transform.position,
+                                                 pos_randomSpawn.position,
                                                  Quaternion.identity,
                                                  theCell.GetComponent<Manager_CurrentCell>().par_CellNPCs);
             //assign the spawned npc to the npcs list in the current cell
             theCell.GetComponent<Manager_CurrentCell>().AI.Add(respawnedNPC);
             //activate the NPC
-            respawnedNPC.gameObject.SetActive(true);
+            respawnedNPC.SetActive(true);
         }
     }
 }

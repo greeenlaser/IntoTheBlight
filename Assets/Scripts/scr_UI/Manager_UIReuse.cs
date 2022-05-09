@@ -14,9 +14,6 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_CloseUI;
     public RawImage bgr_PlayerStun;
 
-    // --------
-    // ### PLAYER MENU ASSIGNABLES START ###
-
     [Header("Player menu")]
     public GameObject par_PlayerMenu;
     public Button btn_Inventory;
@@ -33,10 +30,6 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_PlayerFactionUI;
     public GameObject par_PlayerMenuRadio;
     public GameObject par_PlayerMenuMap;
-
-    // ### PLAYER MENU ASSIGNABLES END ###
-    // --------
-    // ### INVENTORY ASSIGNABLES START ###
 
     [Header("Inventory")]
     public GameObject par_Panel;
@@ -94,10 +87,6 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_ConfirmCount;
     public Button btn_CancelCount;
 
-    // ### INVENTORY ASSIGNABLES END ###
-    // --------
-    // ### QUEST ASSIGNABLES START ###
-
     [Header("Quests")]
     //hover quest parts
     public TMP_Text txt_QuestHoverTitle;
@@ -115,10 +104,6 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_AcceptedQuests;
     public Button btn_FinishedQuests;
     [SerializeField] private UI_AcceptedQuests PlayerQuestsScript;
-
-    // ### QUEST ASSIGNABLES END ###
-    // --------
-    // ### STATS ASSIGNABLES START ###
 
     [Header("Player menu stats")]
     public GameObject par_EquippedHandgun;
@@ -149,64 +134,11 @@ public class Manager_UIReuse : MonoBehaviour
     public RawImage playerStatsModeratePsyDamage;
     public RawImage playerStatsSeverePsyDamage;
 
-    // ### STATS ASSIGNABLES END ###
-    // --------
-    // ### UPGRADE ASSIGNABLES START ###
-
-    [Header("Ability slot UI")]
-    public GameObject par_AssingedAbilityButtonUI;
-    public TMP_Text txt_timerSlot1;
-    public TMP_Text txt_timerSlot2;
-    public TMP_Text txt_timerSlot3;
-    public Button btn_AbilitySlot1;
-    public Button btn_AbilitySlot2;
-    public Button btn_AbilitySlot3;
-
     [Header("Ability UI")]
-    public GameObject par_AbilityUI;
-    public TMP_Text txt_abilityJumpBoostAssignedKey;
-    public Button btn_assignJumpBoost;
-    public TMP_Text txt_abilitySprintBoostAssignedKey;
-    public Button btn_assignSprintBoost;
-    public TMP_Text txt_abilityHealthRegenAssignedKey;
-    public Button btn_assignHealthRegen;
-    public TMP_Text txt_abilityStaminaRegenAssignedKey;
-    public Button btn_assignStaminaRegen;
-    public TMP_Text txt_abilityEnvProtectionAssignedKey;
-    public Button btn_assignEnvProtection;
-
-    [Header("Upgrade assignables")]
-    public TMP_Text txt_RadCellPowerValue;
+    public TMP_Text txt_assigningToSlot;
     public TMP_Text txt_UpgradeCellCount;
-    //jump boost
-    public Button btn_JumpBoost;
-    public RawImage img_UpgradeTier1_JumpBoost;
-    public RawImage img_UpgradeTier2_JumpBoost;
-    public RawImage img_UpgradeTier3_JumpBoost;
-    //sprint boost
-    public Button btn_SprintBoost;
-    public RawImage img_UpgradeTier1_SprintBoost;
-    public RawImage img_UpgradeTier2_SprintBoost;
-    public RawImage img_UpgradeTier3_SprintBoost;
-    //health regen boost
-    public Button btn_HealthRegen;
-    public RawImage img_UpgradeTier1_HealthRegen;
-    public RawImage img_UpgradeTier2_HealthRegen;
-    public RawImage img_UpgradeTier3_HealthRegen;
-    //stamina regen boost
-    public Button btn_StaminaRegen;
-    public RawImage img_UpgradeTier1_StaminaRegen;
-    public RawImage img_UpgradeTier2_StaminaRegen;
-    public RawImage img_UpgradeTier3_StaminaRegen;
-    //env protection
-    public Button btn_EnvProtection;
-    public RawImage img_UpgradeTier1_EnvProtection;
-    public RawImage img_UpgradeTier2_EnvProtection;
-    public RawImage img_UpgradeTier3_EnvProtection;
-
-    // ### UPGRADE ASSIGNABLES END ###
-    // --------
-    // ### FACTION ASSIGNABLES START ###
+    public GameObject par_AbilityUI;
+    public GameObject par_AssingedAbilityButtonUI;
 
     [Header("Faction relationships")]
     //player vs others
@@ -276,10 +208,6 @@ public class Manager_UIReuse : MonoBehaviour
     [SerializeField] private List<TMP_Text> texts = new List<TMP_Text>();
     public Manager_FactionReputation FactionManagerScript;
 
-    // ### FACTION ASSIGNABLES END ###
-    // --------
-    // ### MAP ASSIGNABLES START ###
-
     [Header("Player map")]
     public GameObject par_MainMapMask;
     public GameObject par_PlayerMinimap;
@@ -290,10 +218,6 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_Teleport;
     public Button btn_ConfirmTeleport;
     public Button btn_CancelTeleport;
-
-    // ### MAP ASSIGNABLES END ###
-    // --------
-    // ### PLAYER MAIN UI BAR ASSIGNABLES START ###
 
     [HideInInspector] public float health;
     [HideInInspector] public float maxHealth;
@@ -358,10 +282,6 @@ public class Manager_UIReuse : MonoBehaviour
     [SerializeField] private RawImage bgr_flashlight9;
     [SerializeField] private RawImage bgr_flashlight10;
 
-    // ### PLAYER MAIN UI BAR ASSIGNABLES END ###
-    // --------
-    // ### PLAYER MAIN UI ICON ASSIGNABLES START ###
-
     [Header("Element damage types")]
     [SerializeField] private GameObject par_PlayerMainUIElementIcons;
     public RawImage minorRadiationDamage;
@@ -379,9 +299,6 @@ public class Manager_UIReuse : MonoBehaviour
     public RawImage minorPsyDamage;
     public RawImage moderatePsyDamage;
     public RawImage severePsyDamage;
-
-    // ### PLAYER MAIN UI ICON ASSIGNABLES START ###
-    // --------
 
     [Header("Gun values")]
     public TMP_Text txt_ammoInClip;
@@ -457,24 +374,15 @@ public class Manager_UIReuse : MonoBehaviour
         bgr_PlayerStun.transform.localPosition = new Vector3(0, -1200, 0);
 
         HideExoskeletonUI();
-        DisableUpgadeUI();
-        ClearAssignUI();
 
-        txt_abilityJumpBoostAssignedKey.text = "";
-        txt_abilitySprintBoostAssignedKey.text = "";
-        txt_abilityHealthRegenAssignedKey.text = "";
-        txt_abilityStaminaRegenAssignedKey.text = "";
-        txt_abilityEnvProtectionAssignedKey.text = "";
-
-        txt_timerSlot1.text = "0";
-        txt_timerSlot2.text = "0";
-        txt_timerSlot3.text = "0";
-
-        CloseAllDialogueUI();
+        par_AbilityUI.SetActive(false);
+        txt_assigningToSlot.text = "";
 
         ClearWeaponUI();
 
         ClearGrenadeUI();
+
+        ClearFlashlightUI();
 
         ClearStatsUI();
 
@@ -598,49 +506,6 @@ public class Manager_UIReuse : MonoBehaviour
         par_PlayerMainUIElementIcons.transform.localPosition += new Vector3(100, 0, 0);
         par_AbilityUI.transform.localPosition += new Vector3(0, 1000, 0);
         par_AssingedAbilityButtonUI.transform.localPosition += new Vector3(0, 300, 0);
-    }
-
-    private void DisableUpgadeUI()
-    {
-        img_UpgradeTier1_JumpBoost.gameObject.SetActive(false);
-        img_UpgradeTier2_JumpBoost.gameObject.SetActive(false);
-        img_UpgradeTier3_JumpBoost.gameObject.SetActive(false);
-
-        img_UpgradeTier1_SprintBoost.gameObject.SetActive(false);
-        img_UpgradeTier2_SprintBoost.gameObject.SetActive(false);
-        img_UpgradeTier3_SprintBoost.gameObject.SetActive(false);
-
-        img_UpgradeTier1_HealthRegen.gameObject.SetActive(false);
-        img_UpgradeTier2_HealthRegen.gameObject.SetActive(false);
-        img_UpgradeTier3_HealthRegen.gameObject.SetActive(false);
-
-        img_UpgradeTier1_StaminaRegen.gameObject.SetActive(false);
-        img_UpgradeTier2_StaminaRegen.gameObject.SetActive(false);
-        img_UpgradeTier3_StaminaRegen.gameObject.SetActive(false);
-
-        img_UpgradeTier1_EnvProtection.gameObject.SetActive(false);
-        img_UpgradeTier2_EnvProtection.gameObject.SetActive(false);
-        img_UpgradeTier3_EnvProtection.gameObject.SetActive(false);
-    }
-
-    public void ClearAssignUI()
-    {
-        btn_assignJumpBoost.interactable = false;
-        btn_assignJumpBoost.onClick.RemoveAllListeners();
-
-        btn_assignSprintBoost.interactable = false;
-        btn_assignSprintBoost.onClick.RemoveAllListeners();
-
-        btn_assignHealthRegen.interactable = false;
-        btn_assignHealthRegen.onClick.RemoveAllListeners();
-
-        btn_assignStaminaRegen.interactable = false;
-        btn_assignStaminaRegen.onClick.RemoveAllListeners();
-
-        btn_assignEnvProtection.interactable = false;
-        btn_assignEnvProtection.onClick.RemoveAllListeners();
-
-        par_AbilityUI.SetActive(false);
     }
 
     public void RebuildPlayerInventory()

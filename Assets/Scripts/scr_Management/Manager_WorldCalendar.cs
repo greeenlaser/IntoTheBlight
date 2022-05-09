@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 public class Manager_WorldCalendar : MonoBehaviour
 {
@@ -17,7 +16,7 @@ public class Manager_WorldCalendar : MonoBehaviour
 
     //private variables
     private int monthLastDayNumber;
-    private List<string> monthEndDayNumbers = new List<string>();
+    private readonly List<string> monthEndDayNumbers = new List<string>();
 
     private void Start()
     {

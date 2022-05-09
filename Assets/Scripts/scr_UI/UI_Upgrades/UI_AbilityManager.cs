@@ -1,91 +1,359 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_AbilityManager : MonoBehaviour
 {
-    [Header("Assignables")]
-    public List<GameObject> allAbilities = new List<GameObject>();
+    [Header("Abilities")]
+    [SerializeField] private Transform pos_ButtonHide;
+    public List<GameObject> abilities = new List<GameObject>();
+    [SerializeField] private GameObject assignedAbilitiesPlaceholder1;
+    [SerializeField] private GameObject assignedAbilitiesPlaceholder2;
+    [SerializeField] private GameObject assignedAbilitiesPlaceholder3;
 
     [Header("Scripts")]
+    [SerializeField] private Inv_Player PlayerInventoryScript;
+    [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public int assigningToSlot;
-    [HideInInspector] public float abilityAssignTimer;
-    [HideInInspector] public List<GameObject> assignedAbilities = new List<GameObject>();
-    [HideInInspector] public List<GameObject> unlockedAbilities = new List<GameObject>();
+    [HideInInspector] public bool hasExoskeleton;
+    [HideInInspector] public int upgradeCellCount;
+    [HideInInspector] public List<GameObject> slots = new List<GameObject>();
 
-    //TODO: FILL SHOWABILITYTREE AND HIDEABILITYTREE FUNCTIONS
+    //private variables
+    private bool startAssignTimer;
+    private bool calledAbilityAssignUIOnce;
+    private int selectedSlot;
+    private float assignTimer;
+    private GameObject upgradeCell;
+    private Manager_UIReuse UIReuseScript;
 
-    //TODO: ADD ABILITY TIER LOGOS TO UI_ABILITY SCRIPTS
-    //TODO: ADD ABILITY REUSE COOLDOWN VISUAL CONFIRMATION TO EACH ASSIGNED ABILITY SLOT
-
-    //TODO: ADD ALL ABILITY UNLOCK/UPGRADE AND USE STATUS TO SAVE SYSTEM
-    //TODO: ADD ALL ABILITY LENGTH AND REUSE COOLDOWNS TO SAVE SYSTEM
-
-    private void Start()
+    private void Awake()
     {
-        assigningToSlot = -1;
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+
+        HideButtons();
+        FillEmptyAbilitySlots();
     }
 
     private void Update()
     {
-        if (abilityAssignTimer == 0)
+        if (hasExoskeleton
+            && !par_Managers.GetComponent<Manager_Console>().consoleOpen
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading
+            && PlayerHealthScript.isPlayerAlive)
         {
-            if (Input.GetKeyDown(KeyCode.Z))
+            //if ability counter hasnt started
+            if (!startAssignTimer
+                && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused)
             {
-                assigningToSlot = 0;
-                abilityAssignTimer += Time.deltaTime;
-            }
-            else if (Input.GetKeyDown(KeyCode.X))
-            {
-                assigningToSlot = 1;
-                abilityAssignTimer += Time.deltaTime;
-            }
-            else if (Input.GetKeyDown(KeyCode.X))
-            {
-                assigningToSlot = 2;
-                abilityAssignTimer += Time.deltaTime;
-            }
-        }
+                if (Input.GetKey(KeyCode.Z))
+                {
+                    selectedSlot = 1;
 
-        else if (abilityAssignTimer > 0
-                 && abilityAssignTimer < 0.2f)
-        {
-            if (Input.GetKeyUp(KeyCode.Z))
-            {
-                UseAbility(0);
+                    startAssignTimer = true;
+                }
+                else if (Input.GetKey(KeyCode.X))
+                {
+                    selectedSlot = 2;
+
+                    startAssignTimer = true;
+                }
+                else if (Input.GetKey(KeyCode.C))
+                {
+                    selectedSlot = 3;
+
+                    startAssignTimer = true;
+                }
             }
-            else if (Input.GetKeyUp(KeyCode.X))
+            //if ability counter has started
+            else if (startAssignTimer)
             {
-                UseAbility(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.C))
-            {
-                UseAbility(2);
+                assignTimer += Time.deltaTime;
+
+                //if assign key was held
+                if (assignTimer > 0.2f
+                    && !calledAbilityAssignUIOnce)
+                {
+                    LoadUI();
+                    ShowAssignButtonPositions(selectedSlot);
+                }
+                //if assign key was released
+                else if ((Input.GetKeyUp(KeyCode.Z)
+                         && selectedSlot == 1)
+                         || (Input.GetKeyUp(KeyCode.X)
+                         && selectedSlot == 2)
+                         || (Input.GetKeyUp(KeyCode.C)
+                         && selectedSlot == 3))
+                {
+                    //use assigned slot ability
+                    if (assignTimer < 0.2f)
+                    {
+                        UseAbility(selectedSlot);
+                    }
+                    //hide ability assign ui
+                    else if (assignTimer >= 0.2f)
+                    {
+                        HideButtons();
+
+                        UIReuseScript.txt_assigningToSlot.text = "";
+
+                        par_Managers.GetComponent<UI_PauseMenu>().UnlockCamera();
+                    }
+                }
             }
         }
     }
 
+    //uses the ability in assigned slot
     private void UseAbility(int slot)
     {
-        assigningToSlot = -1;
+        startAssignTimer = false;
+        calledAbilityAssignUIOnce = false;
+        assignTimer = 0;
+        UIReuseScript.par_AbilityUI.SetActive(false);
 
-        if (assignedAbilities.Count > 0
-            && assignedAbilities[slot].GetComponent<UI_Ability>() != null
-            && assignedAbilities[slot].GetComponent<UI_Ability>().assignedSlot == slot)
+        //if a valid ability is assigned and it is not in use
+        if (slots[slot - 1].GetComponent<UI_Ability>() != null
+            && !slots[slot - 1].GetComponent<UI_Ability>().isCooldownTimeRunning
+            && !slots[slot - 1].GetComponent<UI_Ability>().isReuseTimeRunning)
         {
-            assignedAbilities[slot].GetComponent<UI_Ability>().UseAbility();
+            UI_Ability ability = slots[slot - 1].GetComponent<UI_Ability>();
+
+            ability.UseAbility();
+        }
+    }
+    //assigns an ability to the slot
+    public void AssignToSlot(int slot, int newAbilityIndex)
+    {
+        UI_Ability newAbility = abilities[newAbilityIndex].GetComponent<UI_Ability>();
+
+        //if nothing is assigned to the slot
+        //or a placeholder is assigned to the slot
+        if (slots[slot - 1] == null
+            || (slots[slot - 1] != null
+            && slots[slot - 1].GetComponent<UI_Ability>() == null))
+        {
+            newAbility.assignStatus = slot;
+
+            //Debug.Log("Assigned " + newAbility.abilityName + " to slot " + slot + ".");
+
+            FillEmptyAbilitySlots();
+        }
+        //if an ability is assigned to the slot
+        else if (slots[slot - 1] != null
+                 && slots[slot - 1].GetComponent<UI_Ability>() != null)
+        {
+            UI_Ability oldAbility = slots[slot - 1].GetComponent<UI_Ability>();
+
+            //if old ability is still in use
+            if (oldAbility.isCooldownTimeRunning
+                || oldAbility.isReuseTimeRunning)
+            {
+                string oldAbilityName = oldAbility.abilityName;
+                string newAbilityName = newAbility.abilityName;
+                Debug.LogWarning("Error: Cannot switch old ability " + oldAbilityName + " with new ability " + newAbilityName + " because the old ability is still in use!");
+            }
+            //if old ability is no longer in use
+            else
+            {
+                oldAbility.assignStatus = 0;
+                newAbility.assignStatus = slot;
+
+                //Debug.Log("Assigned " + newAbility.abilityName + " to slot " + slot + ".");
+
+                FillEmptyAbilitySlots();
+            }
+        }
+    }
+    //fills empty ability slots if no abilities are assigned in one or more slots
+    public void FillEmptyAbilitySlots()
+    {
+        //clears slot list
+        slots.Clear();
+
+        GameObject ability1 = null;
+        GameObject ability2 = null;
+        GameObject ability3 = null;
+
+        //finds all assigned abilities
+        foreach (GameObject ability in abilities)
+        {
+            UI_Ability abilityScript = ability.GetComponent<UI_Ability>();
+
+            if (abilityScript.assignStatus == 1)
+            {
+                ability1 = ability;
+            }
+            else if (abilityScript.assignStatus == 2)
+            {
+                ability2 = ability;
+            }
+            else if (abilityScript.assignStatus == 3)
+            {
+                ability3 = ability;
+            }
+        }
+
+        //assigns abilities to list
+        if (ability1 != null)
+        {
+            slots.Add(ability1);
+        }
+        else
+        {
+            slots.Add(assignedAbilitiesPlaceholder1);
+        }
+        if (ability2 != null)
+        {
+            slots.Add(ability2);
+        }
+        else
+        {
+            slots.Add(assignedAbilitiesPlaceholder2);
+        }
+        if (ability3 != null)
+        {
+            slots.Add(ability3);
+        }
+        else
+        {
+            slots.Add(assignedAbilitiesPlaceholder3);
         }
     }
 
-    public void ShowAbilityTree()
+    //initial ui load for both upgrade and ability assign ui
+    public void LoadUI()
     {
+        upgradeCell = null;
+        foreach (GameObject item in PlayerInventoryScript.inventory)
+        {
+            if (item != null
+                && item.name == "Upgrade_cell")
+            {
+                upgradeCell = item;
+                break;
+            }
+        }
 
+        if (upgradeCell != null)
+        {
+            upgradeCellCount = upgradeCell.GetComponent<Env_Item>().int_itemCount;
+            UIReuseScript.txt_UpgradeCellCount.text = upgradeCellCount.ToString();
+        }
+        else
+        {
+            upgradeCellCount = 0;
+            UIReuseScript.txt_UpgradeCellCount.text = "0";
+        }
+
+        foreach (GameObject ability in abilities)
+        {
+            UI_Ability abilityScript = ability.GetComponent<UI_Ability>();
+
+            abilityScript.img_Tier1.gameObject.SetActive(false);
+            abilityScript.img_Tier2.gameObject.SetActive(false);
+            abilityScript.img_Tier3.gameObject.SetActive(false);
+
+            abilityScript.GetComponent<Button>().interactable = false;
+            abilityScript.GetComponent<Button>().onClick.RemoveAllListeners();
+
+            if (abilityScript.upgradeStatus == 1)
+            {
+                abilityScript.img_Tier1.gameObject.SetActive(true);
+            }
+            else if (abilityScript.upgradeStatus == 2)
+            {
+                abilityScript.img_Tier1.gameObject.SetActive(true);
+                abilityScript.img_Tier2.gameObject.SetActive(true);
+            }
+            else if (abilityScript.upgradeStatus == 3)
+            {
+                abilityScript.img_Tier1.gameObject.SetActive(true);
+                abilityScript.img_Tier2.gameObject.SetActive(true);
+                abilityScript.img_Tier3.gameObject.SetActive(true);
+            }
+        }
     }
-    private void HideAbilityTree()
+    //displays the upgrade ui
+    public void ShowUpgradeButtonPositions()
     {
+        foreach (GameObject button in abilities)
+        {
+            UI_Ability abilityScript = button.GetComponent<UI_Ability>();
 
+            button.transform.SetParent(abilityScript.pos_Upgrade, false);
+            button.transform.position = abilityScript.pos_Upgrade.position;
+
+            if (upgradeCell != null
+                && abilityScript.upgradeStatus == 0
+                && upgradeCellCount >= abilityScript.cost_unlock)
+            {
+                abilityScript.GetComponent<Button>().interactable = true;
+
+                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+            }
+            else if (upgradeCell != null
+                     && abilityScript.upgradeStatus == 1
+                     && upgradeCellCount >= abilityScript.cost_tier2
+                     && !abilityScript.isCooldownTimeRunning
+                     && !abilityScript.isReuseTimeRunning)
+            {
+                abilityScript.GetComponent<Button>().interactable = true;
+
+                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+            }
+            else if (upgradeCell != null
+                     && abilityScript.upgradeStatus == 2
+                     && upgradeCellCount >= abilityScript.cost_tier3
+                     && !abilityScript.isCooldownTimeRunning
+                     && !abilityScript.isReuseTimeRunning)
+            {
+                abilityScript.GetComponent<Button>().interactable = true;
+
+                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+            }
+        }
+    }
+    //displays the assign ui
+    public void ShowAssignButtonPositions(int slot)
+    {
+        foreach (GameObject button in abilities)
+        {
+            UI_Ability abilityScript = button.GetComponent<UI_Ability>();
+
+            button.transform.SetParent(abilityScript.pos_Assign, false);
+            button.transform.position = abilityScript.pos_Assign.position;
+
+            abilityScript.selectedSlot = slot;
+
+            if (abilityScript.upgradeStatus >= 1)
+            {
+                abilityScript.GetComponent<Button>().interactable = true;
+            }
+        }
+
+        UIReuseScript.par_AbilityUI.SetActive(true);
+        UIReuseScript.txt_assigningToSlot.text = "Assigning to slot " + slot.ToString();
+
+        calledAbilityAssignUIOnce = true;
+
+        par_Managers.GetComponent<UI_PauseMenu>().LockCamera();
+    }
+    //hides upgrade and assign ui
+    public void HideButtons()
+    {
+        foreach (GameObject button in abilities)
+        {
+            button.transform.SetParent(pos_ButtonHide, false);
+            button.transform.position = pos_ButtonHide.position;
+        }
+
+        startAssignTimer = false;
+        calledAbilityAssignUIOnce = false;
+        assignTimer = 0;
+        UIReuseScript.par_AbilityUI.SetActive(false);
     }
 }

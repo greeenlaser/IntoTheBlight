@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class UI_QuestContent : MonoBehaviour
 {
@@ -36,36 +34,46 @@ public class UI_QuestContent : MonoBehaviour
     [HideInInspector] public bool failedQuest;
     [HideInInspector] public int questCurrentStage;
 
+    //private variables
+    Manager_UIReuse UIReuseScript;
+
+    private void Awake()
+    {
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+    }
+
     public void ShowStats()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestName.text = str_questTitle;
-        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestGiver.text = AIScript.str_NPCName;
-        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestGiverClan.text = AIScript.faction.ToString();
+        UIReuseScript.txt_QuestName.text = str_questTitle;
+        UIReuseScript.txt_QuestGiver.text = AIScript.str_NPCName;
+        UIReuseScript.txt_QuestGiverClan.text = AIScript.faction.ToString();
         if (startedQuest)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Started";
+            UIReuseScript.txt_QuestStatus.text = "Started";
         }
         else if (completedQuest)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Completed";
+            UIReuseScript.txt_QuestStatus.text = "Completed";
         }
         else if (turnedInQuest)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Finished";
+            UIReuseScript.txt_QuestStatus.text = "Finished";
         }
         else if (failedQuest)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_QuestStatus.text = "Failed";
+            UIReuseScript.txt_QuestStatus.text = "Failed";
         }
-        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestRewards.text = "None";
-        par_Managers.GetComponent<Manager_UIReuse>().txt_QuestDescription.text = str_questDescription;
+        UIReuseScript.txt_QuestRewards.text = "None";
+        UIReuseScript.txt_QuestDescription.text = str_questDescription;
     }
 
     public void AcceptedQuest()
     {
         startedQuest = true;
-        par_Managers.GetComponent<Manager_UIReuse>().questTitle = str_questTitle;
-        par_Managers.GetComponent<Manager_UIReuse>().StartCoroutine("StartedQuestUI");
+        UIReuseScript.questTitle = str_questTitle;
+
+
+        UIReuseScript.StartCoroutine(UIReuseScript.StartedQuestUI());
         questCurrentStage = 1;
         Debug.Log("Accepted " + str_questTitle + "!");
 
@@ -78,8 +86,8 @@ public class UI_QuestContent : MonoBehaviour
     {
         //completed quest but need to turn it in first from the npc who gave the quest
         completedQuest = true;
-        par_Managers.GetComponent<Manager_UIReuse>().questTitle = str_questTitle;
-        par_Managers.GetComponent<Manager_UIReuse>().StartCoroutine("CompletedQuestUI");
+        UIReuseScript.questTitle = str_questTitle;
+        UIReuseScript.StartCoroutine(UIReuseScript.CompletedQuestUI());
         Debug.Log("Completed " + str_questTitle + "! Waiting until player turns it in...");
     }
     public void TurnedInQuest()

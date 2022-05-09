@@ -77,7 +77,7 @@ public class Item_Melee : MonoBehaviour
                 && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isAlive
                 && MeleeTargetsScript.targets[i].GetComponent<AI_Health>().isKillable)
             {
-                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().DealDamage("health", Mathf.Round(damage * 10) / 10);
+                MeleeTargetsScript.targets[i].GetComponent<AI_Health>().DealDamage(Mathf.Round(damage * 10) / 10);
                 //Debug.Log("Dealt " + meleeDamage + " damage to " + MeleeTargetsScript.targets[i].GetComponent<UI_AIContent>().str_NPCName + "! Targets remaining health is " + MeleeTargetsScript.targets[i].GetComponent<AI_Health>().currentHealth + ".");
             }
             //deals damage to all non-broken destroyable crates in melee range
@@ -103,8 +103,6 @@ public class Item_Melee : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().durability = durability;
             par_Managers.GetComponent<Manager_UIReuse>().maxDurability = maxDurability;
             par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
-
-            hitSomething = false;
         }
     }
 

@@ -58,10 +58,6 @@ public class Env_Item : MonoBehaviour
     public bool disableAtStart;
     [SerializeField] private QuestStage_General QuestStage;
 
-    [Header("Exoskeleton assignables")]
-    [SerializeField] private UI_PlayerMenu PlayerMenuScript;
-    [SerializeField] private UI_AbilityAssignManager AbilityAssignManagerScript;
-
     //public but hidden variables
     [HideInInspector] public bool isInPlayerInventory;
     [HideInInspector] public bool isInContainer;
@@ -91,7 +87,6 @@ public class Env_Item : MonoBehaviour
     private bool isTakingMultipleItems;
     private bool isPlacingMultipleItems;
     private bool hasBatteriesInInv;
-    private bool hasBatteriesInTarget;
     private int int_selectedCount;
     private int int_confirmedCount;
     private GameObject selectedGun;
@@ -791,7 +786,7 @@ public class Env_Item : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
             par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
 
-            int_finalPrice = int_finalPrice / 2;
+            int_finalPrice /= 2;
             par_Managers.GetComponent<Manager_UIReuse>().txt_ItemValue.text = int_finalPrice.ToString();
 
             par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(
@@ -1211,11 +1206,11 @@ public class Env_Item : MonoBehaviour
                 {
                     QuestStage.PickedUpItem();
                 }
-                //this is only called if the gameobject is the Exoskeleton
+
+                //this is only called if the player picked up the exoskeleton
                 if (str_ItemName == "Exoskeleton")
                 {
-                    PlayerMenuScript.isExoskeletonEquipped = true;
-                    AbilityAssignManagerScript.hasExosuit = true;
+                    par_Managers.GetComponent<UI_AbilityManager>().hasExoskeleton = true;
                     par_Managers.GetComponent<Manager_UIReuse>().ShowExoskeletonUI();
                 }
 

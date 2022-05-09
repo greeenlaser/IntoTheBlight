@@ -63,7 +63,7 @@ public class Manager_Console : MonoBehaviour
     private GameObject duplicate;
     private readonly List<string> separatedWords = new List<string>();
     private readonly List<GameObject> createdTexts = new List<GameObject>();
-    private List<string> insertedCommands = new List<string>();
+    private readonly List<string> insertedCommands = new List<string>();
 
     //spawn and remove multiple items
     private GameObject spawnableItem;
@@ -75,14 +75,13 @@ public class Manager_Console : MonoBehaviour
     private string cameraAngle;
     private string playerSpeed;
     private Vector3 lastPos;
-    private List<GameObject> removables = new List<GameObject>();
-    private List<string> factionNames = new List<string>();
+    private readonly List<GameObject> removables = new List<GameObject>();
+    private readonly List<string> factionNames = new List<string>();
 
     //unity log variables
     private bool startedWait;
     private string lastOutput;
     private string output;
-    private string stack;
 
     private void Awake()
     {
@@ -260,13 +259,13 @@ public class Manager_Console : MonoBehaviour
 
     private void ToggleConsole()
     {
-        if (!consoleOpen)
+        if (!consoleOpen
+            && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (!par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen 
                 && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen 
                 && !par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI
                 && !par_Managers.GetComponent<UI_PauseMenu>().isWaitableUIOpen
-                && !par_Managers.GetComponent<Manager_GameSaving>().isLoading
                 && lockpickUI == null)
             {
                 par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
@@ -876,11 +875,7 @@ public class Manager_Console : MonoBehaviour
         //loads game data if a save file was found
         if (File.Exists(savingScript.path + @"\Save0001.txt"))
         {
-            if (!savingScript.isLoading)
-            {
-                savingScript.isLoading = true;
-                savingScript.OpenLoadingMenuUI();
-            }
+            savingScript.OpenLoadingMenuUI();
 
             //Debug.Log("Found save file! Loading data...");
             savingScript.LoadGameData();
@@ -3254,6 +3249,15 @@ public class Manager_Console : MonoBehaviour
                         consoleText = "Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.";
                         CreateNewConsoleLine();
                     }
+
+                    //update upgrade ui if upgrade cell was added
+                    //and if upgrade ui is open
+                    if (itemName == "Upgrade_cell"
+                        && par_Managers.GetComponent<UI_PlayerMenu>().openedUpgradeUI)
+                    {
+                        par_Managers.GetComponent<UI_AbilityManager>().LoadUI();
+                        par_Managers.GetComponent<UI_AbilityManager>().ShowUpgradeButtonPositions();
+                    }
                 }
                 else if (spawnableItemWeight * insertedValue > currentPlayerInvFreeSpace)
                 {
@@ -3428,6 +3432,15 @@ public class Manager_Console : MonoBehaviour
                         consoleText = "Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.";
                         CreateNewConsoleLine();
                     }
+
+                    //update upgrade ui if upgrade cell was added
+                    //and if upgrade ui is open
+                    if (itemName == "Upgrade_cell"
+                        && par_Managers.GetComponent<UI_PlayerMenu>().openedUpgradeUI)
+                    {
+                        par_Managers.GetComponent<UI_AbilityManager>().LoadUI();
+                        par_Managers.GetComponent<UI_AbilityManager>().ShowUpgradeButtonPositions();
+                    }
                 }
                 canContinueItemRemoval = true;
             }
@@ -3462,46 +3475,6 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
 
-    //shows all player repairable items and their durability
-    private void Command_ShowAllRepairableItems()
-    {
-        insertedCommands.Add("player showallrepairableitems");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
-        consoleText = "All player inventory repairable items: <item name> <condition> <percentage from maximum durability> <breakable status - breakable/not breakable>";
-        CreateNewConsoleLine();
-
-        for (int i = 0; i < PlayerInventoryScript.inventory.Count; i++)
-        {
-            displayableItem = PlayerInventoryScript.inventory[i];
-
-            if (displayableItem.GetComponent<Item_Gun>() != null)
-            {
-                float itemDurability = 
-                    displayableItem.GetComponent<Item_Gun>().durability 
-                    / displayableItem.GetComponent<Item_Gun>().maxDurability * 100;
-                string consoleLine = displayableItem.name + " " +
-                    "(" + displayableItem.GetComponent<Item_Gun>().durability + ") " +
-                    "(" + itemDurability.ToString() + "%)";
-
-                //extra tag behind item name if its breakable or not
-                if (displayableItem.GetComponent<Env_Item>().isProtected)
-                {
-                    consoleLine += " <not breakable>";
-                }
-                else if (!displayableItem.GetComponent<Env_Item>().isProtected)
-                {
-                    consoleLine += " <breakable>";
-                }
-
-                consoleText = consoleLine;
-                CreateNewConsoleLine();
-            }
-        }
-        separatedWords.Clear();
-    }
     //fixes all repairable items for free
     private void Command_FixAllItems()
     {
@@ -3849,12 +3822,11 @@ public class Manager_Console : MonoBehaviour
         yield return null;
     }
 
-    private void HandleLog(string logString, string stackTrace, LogType type)
+    private void HandleLog(string logString, string unusedStackString, LogType type)
     {
         if (par_Managers != null)
         {
             output = logString;
-            stack = stackTrace;
 
             if (displayUnityLogs && !startedWait)
             {
