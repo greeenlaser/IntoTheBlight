@@ -656,7 +656,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46034f97bd6ffa742bae6747360405e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  str_GameVersion: 0.5.0.2_2
+  str_GameVersion: 0.5.0.2_2_indev
   txt_GameVersion: {fileID: 962294958}
   maxFPS: 300
   fpsUpdateSpeed: 0.1
@@ -670,8 +670,6 @@ MonoBehaviour:
     know how you figured out how to do that...
   - Jumping can be dangerous
   - Stay away from flashing lights
-  respawnNPCs: 0
-  respawnCount: 0
   thrownGrenades: []
 --- !u!114 &188475529
 MonoBehaviour:
@@ -2423,7 +2421,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 263.09998, y: -36.80005}
+  m_AnchoredPosition: {x: 263.09998, y: 38.19995}
   m_SizeDelta: {x: 487, y: 40.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &985729989
@@ -3272,7 +3270,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 84, y: -85.7}
+  m_AnchoredPosition: {x: 84, y: 39.29999}
   m_SizeDelta: {x: 129.97, y: 40.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1483036526

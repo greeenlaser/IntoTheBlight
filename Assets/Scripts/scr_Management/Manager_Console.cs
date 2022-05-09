@@ -827,7 +827,7 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
     //toggles the debug menu on and off
-    private void Command_ToggleDebugMenu()
+    public void Command_ToggleDebugMenu()
     {
         insertedCommands.Add("tdm"); 
         currentSelectedInsertedCommand = insertedCommands.Count;

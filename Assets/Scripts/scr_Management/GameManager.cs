@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -38,6 +39,23 @@ public class GameManager : MonoBehaviour
         Screen.SetResolution(1920, 1080, true, maxFPS);
 
         InvokeRepeating(nameof(GetFPS), 1, fpsUpdateSpeed);
+
+        //get current scene index
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        if (str_GameVersion.Contains("indev"))
+        {
+            //show fps and game version in main scene
+            if (sceneIndex == 0)
+            {
+                txt_GameVersion.transform.localPosition -= new Vector3(0, 75, 0);
+                txt_fpsValue.transform.localPosition -= new Vector3(0, 125, 0);
+            }
+            //show debug menu in game scene
+            else if (sceneIndex == 1)
+            {
+                par_Managers.GetComponent<Manager_Console>().Command_ToggleDebugMenu();
+            }
+        }
     }
 
     private void Update()
