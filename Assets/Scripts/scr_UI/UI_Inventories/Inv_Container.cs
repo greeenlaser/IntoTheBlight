@@ -13,7 +13,7 @@ public class Inv_Container : MonoBehaviour
     public GameObject par_ContainerItems;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private GameObject par_Managers;
-    public List<GameObject> inventory = new();
+    public List<GameObject> inventory;
 
     [Header("For containers")]
     public bool isProtected;
@@ -36,7 +36,7 @@ public class Inv_Container : MonoBehaviour
     [HideInInspector] public bool showingAllAmmo;
     [HideInInspector] public bool showingAllGear;
     [HideInInspector] public bool showingAllMisc;
-    [HideInInspector] public List<GameObject> buttons = new();
+    [HideInInspector] public List<GameObject> buttons;
 
     //private variables
     private bool destroySelf;

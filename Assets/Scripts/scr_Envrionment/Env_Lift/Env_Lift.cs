@@ -11,7 +11,7 @@ public class Env_Lift : MonoBehaviour
     [SerializeField] private Transform pos_Lift;
     [SerializeField] private Transform par_Lift;
     [SerializeField] private Env_Door LiftDoorScript;
-    [SerializeField] private List<Transform> floors = new();
+    [SerializeField] private List<Transform> floors;
 
     //public but hidden variables
     [HideInInspector] public bool liftIsMoving;

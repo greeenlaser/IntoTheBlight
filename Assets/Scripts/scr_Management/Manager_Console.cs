@@ -19,8 +19,8 @@ public class Manager_Console : MonoBehaviour
     [SerializeField] private TMP_Text txt_PlayerSpeed;
     [SerializeField] private TMP_Text txt_SelectedTargetName;
     [SerializeField] private TMP_InputField txt_ConsoleInputField;
-    public List<GameObject> allCells = new();
-    public List<GameObject> spawnables = new();
+    public List<GameObject> allCells;
+    public List<GameObject> spawnables;
 
     [Header("Scripts")]
     [SerializeField] private Player_Health PlayerHealthScript;
@@ -39,9 +39,9 @@ public class Manager_Console : MonoBehaviour
     [HideInInspector] public int originalSpeed;
     [HideInInspector] public int originalJumpHeight;
     [HideInInspector] public int originalMaxInvspace;
-    [HideInInspector] private readonly List<string> cellnames = new();
-    [HideInInspector] private readonly List<string> itemnames = new();
-    [HideInInspector] public List<string> playeritemnames = new();
+    [HideInInspector] public List<string> cellnames;
+    [HideInInspector] public List<string> itemnames;
+    [HideInInspector] public List<string> playeritemnames;
     [HideInInspector] public GameObject lockpickUI;
 
     //private variables
@@ -53,7 +53,6 @@ public class Manager_Console : MonoBehaviour
     private int invSpace;
     private int currentSelectedInsertedCommand;
     private string input;
-    private string consoleText;
     private readonly char[] separators = new char[] { ' ' };
     private GameObject selectedItem;
     private GameObject selectedGun;
@@ -76,7 +75,6 @@ public class Manager_Console : MonoBehaviour
     private string playerSpeed;
     private Vector3 lastPos;
     private readonly List<GameObject> removables = new();
-    private readonly List<string> factionNames = new();
 
     //unity log variables
     private bool startedWait;
@@ -120,26 +118,14 @@ public class Manager_Console : MonoBehaviour
             playeritemnames.Add(addableItemName);
         }
 
-        factionNames.Add("scientists");
-        factionNames.Add("geifers");
-        factionNames.Add("annies");
-        factionNames.Add("verbannte");
-        factionNames.Add("raiders");
-        factionNames.Add("military");
-        factionNames.Add("verteidiger");
-        factionNames.Add("others");
-
         txt_SelectedTargetName.text = "";
 
         //start recieving unity logs
         Application.logMessageReceived += HandleLog;
 
-        consoleText = "---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---";
-        CreateNewConsoleLine();
-        consoleText = "";
-        CreateNewConsoleLine();
-        consoleText = "---Type help to list all game commands---";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---");
+        CreateNewConsoleLine("");
+        CreateNewConsoleLine("---Type help to list all game commands---");
     }
 
     private void Update()
@@ -221,8 +207,8 @@ public class Manager_Console : MonoBehaviour
                     //if selected gameobject isnt empty
                     if (hit.transform.gameObject != null)
                     {
-                        consoleText = "Selected " + hit.collider.name + "!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Selected " + hit.collider.name + "!");
+
                         target = hit.transform.gameObject;
                         txt_SelectedTargetName.text = "selected target: " + target.name.ToString();
 
@@ -238,8 +224,8 @@ public class Manager_Console : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Escape) && isSelectingTarget)
         {
-            consoleText = "Cancelled target selection.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Cancelled target selection.");
+
             txt_SelectedTargetName.text = "";
             target = null;
 
@@ -305,7 +291,7 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
 
-    //reads inserted text
+    //reads inserted text from input field in console UI
     //disabled while player is selecting target with selecttarget
     public void ReadStringInput(string s)
     {
@@ -331,19 +317,17 @@ public class Manager_Console : MonoBehaviour
             separatedWords.Add(word);
         }
 
+        insertedCommands.Add(input);
+        currentSelectedInsertedCommand = insertedCommands.Count - 1;
+        CreateNewConsoleLine("--" + input + "--");
+
         //if inserted text was not empty and player pressed enter
         if (separatedWords.Count >= 1)
         {
             bool isInt = int.TryParse(separatedWords[0], out _);
             if (isInt)
             {
-                insertedCommands.Add(input);
-                currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                consoleText = "--" + input + "--";
-                CreateNewConsoleLine();
-
-                consoleText = "Error: Console command cannot start with a number!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Console command cannot start with a number!");
             }
             else if (!isInt)
             {
@@ -353,11 +337,6 @@ public class Manager_Console : MonoBehaviour
                     Command_Help();
                 }
 
-                //show the intro message
-                else if (separatedWords[0] == "intromessage" && separatedWords.Count == 1)
-                {
-                    Command_ShowIntroMessage();
-                }
                 //toggle debug menu
                 else if (separatedWords[0] == "tdm" && separatedWords.Count == 1)
                 {
@@ -482,13 +461,7 @@ public class Manager_Console : MonoBehaviour
                         || separatedWords[0] == "tp" && separatedWords.Count == 4
                         || separatedWords[0] == "tpcell" && separatedWords.Count == 2)
                     {
-                        insertedCommands.Add(input);
-                        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                        consoleText = "--" + input + "--";
-                        CreateNewConsoleLine();
-
-                        consoleText = "Error: This command has been disabled because the player is dead!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: This command has been disabled because the player is dead!");
                     }
                 }
 
@@ -546,11 +519,6 @@ public class Manager_Console : MonoBehaviour
                     {
                         Command_FixAllItems();
                     }
-                    //gets all quest ids of the players quests
-                    else if (separatedWords.Count == 2 && separatedWords[1] == "getallquestids")
-                    {
-                        Command_GetAllPlayerQuestIDs();
-                    }
 
                     //some commands are disabled if the player is dead
                     else if (!PlayerHealthScript.isPlayerAlive)
@@ -564,11 +532,8 @@ public class Manager_Console : MonoBehaviour
                         {
                             insertedCommands.Add(input);
                             currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                            consoleText = "--" + input + "--";
-                            CreateNewConsoleLine();
 
-                            consoleText = "Error: This command has been disabled because the player is dead!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: This command has been disabled because the player is dead!");
                         }
                     }
 
@@ -576,47 +541,17 @@ public class Manager_Console : MonoBehaviour
                     {
                         insertedCommands.Add(input);
                         currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                        consoleText = "--" + input + "--";
-                        CreateNewConsoleLine();
-
-                        consoleText = "Error: Unknown or incorrect command!";
-                        CreateNewConsoleLine();
+                        
+                        CreateNewConsoleLine("Error: Unknown or incorrect command!");
                     }
-                }
-
-                //get or set a quest value
-                else if (separatedWords[0] == "quest")
-                {
-                    insertedCommands.Add(input);
-                    currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                    consoleText = "--" + input + "--";
-                    CreateNewConsoleLine();
-
-                    consoleText = "Error: Unknown or incorrect command!";
-                    CreateNewConsoleLine();
-                }
-
-                //get or set a graphics value
-                else if (separatedWords[0] == "graphics")
-                {
-                    insertedCommands.Add(input);
-                    currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                    consoleText = "--" + input + "--";
-                    CreateNewConsoleLine();
-
-                    consoleText = "Error: Unknown or incorrect command!";
-                    CreateNewConsoleLine();
                 }
 
                 else
                 {
                     insertedCommands.Add(input);
                     currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                    consoleText = "--" + input + "--";
-                    CreateNewConsoleLine();
 
-                    consoleText = "Error: Unknown or incorrect command!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Unknown or incorrect command!");
                 }
             }
         }
@@ -625,22 +560,16 @@ public class Manager_Console : MonoBehaviour
         {
             insertedCommands.Add(input);
             currentSelectedInsertedCommand = insertedCommands.Count - 1;
-            consoleText = "--" + input + "--";
-            CreateNewConsoleLine();
 
-            consoleText = "Error: No command was inserted! Type help to list all commands.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: No command was inserted! Type help to list all commands.");
         }
 
         else
         {
             insertedCommands.Add(input);
             currentSelectedInsertedCommand = insertedCommands.Count - 1;
-            consoleText = "--" + input + "--";
-            CreateNewConsoleLine();
 
-            consoleText = "Error: Unknown or incorrect command!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Unknown or incorrect command!");
         }
 
         separatedWords.Clear();
@@ -648,8 +577,8 @@ public class Manager_Console : MonoBehaviour
         input = "";
     }
 
-    //create a new text object
-    private void CreateNewConsoleLine()
+    //add a new line to the console
+    public void CreateNewConsoleLine(string message)
     {
         if (par_Managers != null)
         {
@@ -668,78 +597,39 @@ public class Manager_Console : MonoBehaviour
             }
 
             newConsoleText.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Content.transform, false);
-            newConsoleText.GetComponent<TMP_Text>().text = consoleText;
+            newConsoleText.GetComponent<TMP_Text>().text = message;
         }
     }
 
     private void Command_Help()
     {
-        insertedCommands.Add(input);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         //lists all console commands
         if (separatedWords.Count == 1)
         {
-            consoleText = "intromessage - Displays the default intro message that pops up whenever the player first opens up the console.";
-            CreateNewConsoleLine();
-            consoleText = "tdm - Toggles the Debug menu on and off.";
-            CreateNewConsoleLine();
-            consoleText = "tul - Toggles the Unity logs on and off.";
-            CreateNewConsoleLine();
-            consoleText = "save - Saves current game progress.";
-            CreateNewConsoleLine();
-            consoleText = "restart - Loads the newest save if saves exist or restarts the game from the beginning.";
-            CreateNewConsoleLine();
-            consoleText = "das - deletes all the game saves - WARNING: All deleted saves are lost forever!";
-            CreateNewConsoleLine();
-            consoleText = "tgm - toggles godmode for player.";
-            CreateNewConsoleLine();
-            consoleText = "tnc - toggles noclip for player.";
-            CreateNewConsoleLine();
-            consoleText = "taid - toggles ai detection for player.";
-            CreateNewConsoleLine();
-            consoleText = "gcr - Global cell reset.";
-            CreateNewConsoleLine();
-            consoleText = "clear - Clears the console log.";
-            CreateNewConsoleLine();
-            consoleText = "quit - Quits the game.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("tdm - Toggles the Debug menu on and off.");
+            CreateNewConsoleLine("tul - Toggles the Unity logs on and off.");
+            CreateNewConsoleLine("save - Saves current game progress.");
+            CreateNewConsoleLine("restart - Loads the newest save if saves exist or restarts the game from the beginning.");
+            CreateNewConsoleLine("das - deletes all the game saves - WARNING: All deleted saves are lost forever!");
+            CreateNewConsoleLine("tgm - toggles godmode for player.");
+            CreateNewConsoleLine("tnc - toggles noclip for player.");
+            CreateNewConsoleLine("taid - toggles ai detection for player.");
+            CreateNewConsoleLine("gcr - Global cell reset.");
+            CreateNewConsoleLine("clear - Clears the console log.");
+            CreateNewConsoleLine("quit - Quits the game.");
 
-            consoleText = "--------";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("--------");
 
-            consoleText = "st - select target - Hides and disables the console UI until player selects a target.";
-            CreateNewConsoleLine();
-            consoleText = "target ... - Special command which must have more words after it - use target showinfo to show target states and commands.";
-            CreateNewConsoleLine();
-            consoleText = "target showinfo - Shows target states and commands.";
-            CreateNewConsoleLine();
-            consoleText = "sasi - shows all items that can be spawned.";
-            CreateNewConsoleLine();
-            consoleText = "showfactions - Shows all the game factions.";
-            CreateNewConsoleLine();
-            consoleText = "setrep faction1 faction2 repValue - Changes the reputation between faction1 and faction2 to repValue.";
-            CreateNewConsoleLine();
-            consoleText = "tp xValue yValue zValue - Teleports the player to xValue, yValue and zValue coordinates.";
-            CreateNewConsoleLine();
-            consoleText = "sac - Shows all the games cells.";
-            CreateNewConsoleLine();
-            consoleText = "dac - Enables all the games cells.";
-            CreateNewConsoleLine();
-            consoleText = "tpcell cellName - Teleports the player to cell cellName.";
-            CreateNewConsoleLine();
-
-            consoleText = "--------";
-            CreateNewConsoleLine();
-
-            consoleText = "help player - more commands related to the player";
-            CreateNewConsoleLine();
-            consoleText = "help quest - more commands related to quests";
-            CreateNewConsoleLine();
-            consoleText = "help graphics - more commands related to graphics";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("st - select target - Hides and disables the console UI until player selects a target.");
+            CreateNewConsoleLine("target ... - Special command which must have more words after it - use target showinfo to show target states and commands.");
+            CreateNewConsoleLine("target showinfo - Shows target states and commands.");
+            CreateNewConsoleLine("sasi - shows all items that can be spawned.");
+            CreateNewConsoleLine("showfactions - Shows all the game factions.");
+            CreateNewConsoleLine("setrep faction1 faction2 repValue - Changes the reputation between faction1 and faction2 to repValue.");
+            CreateNewConsoleLine("tp xValue yValue zValue - Teleports the player to xValue, yValue and zValue coordinates.");
+            CreateNewConsoleLine("sac - Shows all the games cells.");
+            CreateNewConsoleLine("dac - Enables all the games cells.");
+            CreateNewConsoleLine("tpcell cellName - Teleports the player to cell cellName.");
         }
 
         //displays specifics about each command
@@ -751,49 +641,16 @@ public class Manager_Console : MonoBehaviour
             //if player wants to know about player-related commands
             if (helpCommand == "player")
             {
-                consoleText = "Gets or sets a value of the player:";
-                CreateNewConsoleLine();
-                consoleText = "player currcoords - gets the current location of the player coordinates.";
-                CreateNewConsoleLine();
-                consoleText = "player showstats - shows all player stats.";
-                CreateNewConsoleLine();
-                consoleText = "player resetstats - resets all player stats to their original values.";
-                CreateNewConsoleLine();
-                consoleText = "player setstat statName statValue - sets statName to statValue.";
-                CreateNewConsoleLine();
-                consoleText = "player setrep faction repValue - sets the reputation between player and faction to factionValue";
-                CreateNewConsoleLine();
-                consoleText = "player showallitems - shows all player items.";
-                CreateNewConsoleLine();
-                consoleText = "player additem itemName count - adds count of itemName to players inventory.";
-                CreateNewConsoleLine();
-                consoleText = "player removeitem itemName count - removes count of itemName from players inventory - ITEM WILL BE DELETED!";
-                CreateNewConsoleLine();
-                consoleText = "player fixallitems - fixes all repairable items for free.";
-                CreateNewConsoleLine();
-                consoleText = "player getallquestids - gets all players quest IDs <NOT YET FUNCTIONAL>.";
-            }
-
-            //--------
-
-            //if player wants to know about quest-related commands
-            else if (helpCommand == "quest")
-            {
-                consoleText = "quest getquestid questName - gets the ID of questName <NOT YET FUNCTIONAL>.";
-                CreateNewConsoleLine();
-                consoleText = "quest questID getallstages - gets all the stages of questID <NOT YET FUNCTIONAL>.";
-                CreateNewConsoleLine();
-                consoleText = "quest questID setstage stageValue - sets the stage of questID to stageValue <NOT YET FUNCTIONAL>.";
-                CreateNewConsoleLine();
-            }
-
-            //--------
-
-            //if player wants to know about quest-related commands
-            else if (helpCommand == "graphics")
-            {
-                consoleText = "<GRAPHICS COMMANDS COMING IN VERSION 0.6>";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Gets or sets a value of the player:");
+                CreateNewConsoleLine("player currcoords - gets the current location of the player coordinates.");
+                CreateNewConsoleLine("player showstats - shows all player stats.");
+                CreateNewConsoleLine("player resetstats - resets all player stats to their original values.");
+                CreateNewConsoleLine("player setstat statName statValue - sets statName to statValue.");
+                CreateNewConsoleLine("player setrep faction repValue - sets the reputation between player and faction to factionValue");
+                CreateNewConsoleLine("player showallitems - shows all player items.");
+                CreateNewConsoleLine("player additem itemName count - adds count of itemName to players inventory.");
+                CreateNewConsoleLine("player removeitem itemName count - removes count of itemName from players inventory - ITEM WILL BE DELETED!");
+                CreateNewConsoleLine("player fixallitems - fixes all repairable items for free.");
             }
         }
 
@@ -801,75 +658,33 @@ public class Manager_Console : MonoBehaviour
 
         else
         {
-            consoleText = "Error: Unknown or incorrect command!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Unknown or incorrect command!");
         }
-
-        separatedWords.Clear();
-    }
-
-    //shows the console intro message
-    private void Command_ShowIntroMessage()
-    {
-        insertedCommands.Add("intromessage");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
-        consoleText = "---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---";
-        CreateNewConsoleLine();
-
-        consoleText = "";
-        CreateNewConsoleLine();
-        consoleText = "---TYPE HELP FOR COMMANDS---";
-        CreateNewConsoleLine();
-
-        separatedWords.Clear();
     }
     //toggles the debug menu on and off
     public void Command_ToggleDebugMenu()
     {
-        insertedCommands.Add("tdm"); 
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         if (!displayDebugMenu)
         {
             par_DebugUI.transform.localPosition = new Vector3(0, 0, 0);
-            consoleText = "Showing Debug menu.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Showing Debug menu.");
             displayDebugMenu = true;
         }
         else if (displayDebugMenu)
         {
             par_DebugUI.transform.localPosition = new Vector3(0, 300, 0);
-            consoleText = "No longer showing Debug menu.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("No longer showing Debug menu.");
             displayDebugMenu = false;
         }
-        separatedWords.Clear();
     }
     //saves the current game progress
     private void Command_Save()
     {
-        insertedCommands.Add("save");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--save--";
-        CreateNewConsoleLine();
-
         par_Managers.GetComponent<UI_PauseMenu>().Save();
-
-        separatedWords.Clear();
     }
     //loads newest save if save was found, otherwise restarts scene
     private void Command_Restart()
     {
-        insertedCommands.Add("restart");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--restart--";
-        CreateNewConsoleLine();
-
         var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
         //loads game data if a save file was found
@@ -884,17 +699,10 @@ public class Manager_Console : MonoBehaviour
         {
             SceneManager.LoadScene(1);
         }
-
-        separatedWords.Clear();
     }
     //deletes all saves
     private void Command_DeleteAllSaves()
     {
-        insertedCommands.Add("das");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
         DirectoryInfo di = new(path);
 
@@ -913,57 +721,38 @@ public class Manager_Console : MonoBehaviour
                     }
                 }
 
-                consoleText = "Successfully deleted all save files from " + path + "!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Successfully deleted all save files from " + path + "!");
             }
             else
             {
-                consoleText = "Error: " + path + " has no save files to delete!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: " + path + " has no save files to delete!");
             }
         }
-
-        separatedWords.Clear();
     }
     //toggles the unity logs on and off
     private void Command_ToggleUnityLogs()
     {
-        insertedCommands.Add("tul");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         if (!displayUnityLogs)
         {
-            consoleText = "Showing Unity logs.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Showing Unity logs.");
             displayUnityLogs = true;
         }
 
         else if (displayUnityLogs)
         {
-            consoleText = "No longer showing Unity logs.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("No longer showing Unity logs.");
             displayUnityLogs = false;
         }
-        separatedWords.Clear();
     }
-    //adds time in hours
+    //resets all game cells
     public void Command_GlobalCellReset()
     {
-        insertedCommands.Add("gcr");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--gcr--";
-        CreateNewConsoleLine();
-
         foreach (GameObject cell in allCells)
         {
             cell.GetComponent<Manager_CurrentCell>().CellReset();
         }
 
-        Debug.Log("System: Global cell reset.");
-
-        separatedWords.Clear();
+        CreateNewConsoleLine("System: Global cell reset.");
     }
     //clears the console
     private void Command_ClearConsole()
@@ -981,19 +770,13 @@ public class Manager_Console : MonoBehaviour
     //quits the game
     private void Command_Quit()
     {
-        consoleText = "Bye.";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("Bye.");
         Application.Quit();
     }
 
     private void Command_SelectTarget()
     {
-        insertedCommands.Add("selecttarget");
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-        consoleText = "Selecting target - Click on any object on screen or press ESC to cancel selection and to return back to console.";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("Selecting target - Click on any object on screen or press ESC to cancel selection and to return back to console.");
 
         txt_SelectedTargetName.text = "Click on a GameObject to select it as a target.";
         par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, -3000, 0);
@@ -1001,17 +784,10 @@ public class Manager_Console : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().txt_InsertedTextSlot.DeactivateInputField();
 
         isSelectingTarget = true;
-
-        separatedWords.Clear();
     }
 
     private void Command_EditTarget()
     {
-        insertedCommands.Add(input);
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         if (target != null)
         {
             //two words command
@@ -1027,140 +803,87 @@ public class Manager_Console : MonoBehaviour
                     //AI states and variables
                     if (target.GetComponent<UI_AIContent>() != null)
                     {
-                        consoleText = "--- target states:";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("--- target states:");
 
                         if (target.GetComponent<AI_Health>() != null)
                         {
                             //killableState
-                            if (target.GetComponent<AI_Health>().isKillable)
-                            {
-                                consoleText = "canBeKilled = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!target.GetComponent<AI_Health>().isKillable)
-                            {
-                                consoleText = "canBeKilled = false";
-                                CreateNewConsoleLine();
-                            }
+                            CreateNewConsoleLine("canBeKilled = " + target.GetComponent<AI_Health>().isKillable);
                             //hostileState
-                            if (target.GetComponent<AI_Health>().canBeHostile)
-                            {
-                                consoleText = "canBeHostile = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!target.GetComponent<AI_Health>().canBeHostile)
-                            {
-                                consoleText = "canBeHostile = false";
-                                CreateNewConsoleLine();
-                            }
+                            CreateNewConsoleLine("canBeHostile = " + target.GetComponent<AI_Health>().canBeHostile);
                         }
                         else if (target.GetComponent<AI_Health>() == null)
                         {
-                            consoleText = "canBeKilled = false";
-                            CreateNewConsoleLine();
-                            consoleText = "canBeHostile = false";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("canBeKilled = False\n" +
+                                                 "canBeHostile = False");
                         }
-                        consoleText = "factionName = " + target.GetComponent<UI_AIContent>().faction.ToString();
-                        CreateNewConsoleLine();
-
-                        consoleText = "--- target commands:";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("factionName = " + target.GetComponent<UI_AIContent>().faction.ToString() + "\n" +
+                                             "--- target commands:");
 
                         if (target.GetComponent<AI_Health>() != null)
                         {
-                            consoleText = "target kill - kills the target if it is not protected.";
-                            CreateNewConsoleLine();
-                            consoleText = "target sethostilestate hostileStateValue - sets target hostile state to either 0 or 1. 0 means target is no longer hostile towards anyone who attacks it, 1 means targets original battle rules have been enabled";
-                            CreateNewConsoleLine();
-                            consoleText = "target setkillablestate killableStateValue - sets target killable state to either 0 or 1. 0 means target is no longer killable, 1 means target is killable again. protected npc/monsters are permanently unkillable and cannot be set to killable";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("target kill - kills the target if it is not protected.\n" +
+                                                 "target sethostilestate hostileStateValue -\n" +
+                                                 "sets target hostile state to either 0 or 1.\n" +
+                                                 "0 means target is no longer hostile towards anyone who attacks it,\n" +
+                                                 " 1 means targets original battle rules have been enabled\n\n" +
+
+                                                 "target setkillablestate killableStateValue -\n" +
+                                                 "sets target killable state to either 0 or 1. 0 means target is no longer killable,\n" +
+                                                 "1 means target is killable again. protected npc/monsters are permanently\n" +
+                                                 "unkillable and cannot be set to killable");
                         }
 
-                        consoleText = "target setfaction factionName - changes targets faction to factionName";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("target setfaction factionName - changes targets faction to factionName");
                     }
                     //item states and commands
                     else if (target.GetComponent<Env_Item>() != null)
                     {
-                        consoleText = "--- target states:";
-                        CreateNewConsoleLine();
+                        Env_Item itemScript = target.GetComponent<Env_Item>();
+
+                        CreateNewConsoleLine("--- target states:");
 
                         //is item protected
-                        if (target.GetComponent<Env_Item>().isProtected)
-                        {
-                            consoleText = "isProtected = true";
-                            CreateNewConsoleLine();
-                        }
-                        else if (!target.GetComponent<Env_Item>().isProtected)
-                        {
-                            consoleText = "isProtected = false";
-                            CreateNewConsoleLine();
-                        }
+                        CreateNewConsoleLine("isProtected = " + itemScript.isProtected);
                         //is item stackable
-                        if (target.GetComponent<Env_Item>().isStackable)
-                        {
-                            consoleText = "isStackable = true";
-                            CreateNewConsoleLine();
-                        }
-                        else if (!target.GetComponent<Env_Item>().isStackable)
-                        {
-                            consoleText = "isStackable = false";
-                            CreateNewConsoleLine();
-                        }
+                        CreateNewConsoleLine("isStackable = " + itemScript.isStackable);
 
-                        consoleText = "itemCount = " + target.GetComponent<Env_Item>().int_itemCount;
-                        CreateNewConsoleLine();
-                        consoleText = "itemValue = " + target.GetComponent<Env_Item>().int_ItemValue + " (" + target.GetComponent<Env_Item>().int_ItemValue * target.GetComponent<Env_Item>().int_itemCount + ")";
-                        CreateNewConsoleLine();
-                        consoleText = "itemWeight = " + target.GetComponent<Env_Item>().int_ItemWeight  + " (" + target.GetComponent<Env_Item>().int_ItemWeight * target.GetComponent<Env_Item>().int_itemCount + ")";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("itemCount = " + itemScript.int_itemCount + "\n" +
+                                             "itemValue = " + itemScript.int_ItemValue + " (" + itemScript.int_ItemValue * itemScript.int_itemCount + ")\n" +
+                                             "itemWeight = " + itemScript.int_ItemWeight + " (" + itemScript.int_ItemWeight * itemScript.int_itemCount + ")");
                         if (target.GetComponent<Item_Gun>() != null)
                         {
-                            consoleText = "currentDurability = " + target.GetComponent<Item_Gun>().durability;
-                            CreateNewConsoleLine();
-                            consoleText = "maxDurability = " + target.GetComponent<Item_Gun>().maxDurability;
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("currentDurability = " + target.GetComponent<Item_Gun>().durability + "\n" +
+                                                 "maxDurability = " + target.GetComponent<Item_Gun>().maxDurability);
                         }
                         else if (target.GetComponent<Item_Melee>() != null)
                         {
-                            consoleText = "currentdurability = " + target.GetComponent<Item_Melee>().durability;
-                            CreateNewConsoleLine();
-                            consoleText = "maxdurability = " + target.GetComponent<Item_Melee>().maxDurability;
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("currentdurability = " + target.GetComponent<Item_Melee>().durability + "\n" +
+                                                 "maxdurability = " + target.GetComponent<Item_Melee>().maxDurability);
                         }
 
-                        consoleText = "--- target commands:";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("--- target commands:\n" +
 
-                        //default modifiable variables for all gameobjects
-                        consoleText = "target disable - disables gameobject if it isn't protected";
-                        CreateNewConsoleLine();
-                        consoleText = "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed";
-                        CreateNewConsoleLine();
+                                             //default modifiable variables for all gameobjects
+                                             "target disable - disables gameobject if it isn't protected\n" +
+                                             "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed\n" +
 
-                        consoleText = "target setcount countValue - changes the item count to countValue if it is stackable";
-                        CreateNewConsoleLine();
-                        consoleText = "target setvalue valueValue - changes individual item value to valueValue";
-                        CreateNewConsoleLine();
-                        consoleText = "target setweight weightValue - changes individual item weight to weightValue";
-                        CreateNewConsoleLine();
+                                             "target setcount countValue - changes the item count to countValue if it is stackable\n" +
+                                             "target setvalue valueValue - changes individual item value to valueValue\n" +
+                                             "target setweight weightValue - changes individual item weight to weightValue");
+
                         if (target.GetComponent<Item_Gun>() != null
                             || target.GetComponent<Item_Melee>() != null)
                         {
-                            consoleText = "target setdurability durabilityValue - changes individual item durability to durabilityValue";
-                            CreateNewConsoleLine();
-                            consoleText = "target setmaxdurability maxDurabilityValue - changes individual item max durability to maxDurabilityValue";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("target setdurability durabilityValue - changes individual item durability to durabilityValue\n" +
+                                                 "target setmaxdurability maxDurabilityValue - changes individual item max durability to maxDurabilityValue");
                         }
                     }
                     //door/container states and commands
                     else if (target.name == "door_interactable"
                              || target.GetComponent<Inv_Container>() != null)
                     {
-                        consoleText = "--- target states:";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("--- target states:");
 
                         Transform par = target.transform.parent.parent;
                         GameObject door = null;
@@ -1185,64 +908,22 @@ public class Manager_Console : MonoBehaviour
                         //is door locked and protected or not
                         if (door.GetComponent<Env_Door>() != null)
                         {
-                            if (door.GetComponent<Env_Door>().isProtected)
-                            {
-                                consoleText = "isprotected = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!door.GetComponent<Env_Door>().isProtected)
-                            {
-                                consoleText = "isprotected = false";
-                                CreateNewConsoleLine();
-                            }
-
-                            if (door.GetComponent<Env_Door>().isLocked)
-                            {
-                                consoleText = "islocked = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!door.GetComponent<Env_Door>().isLocked)
-                            {
-                                consoleText = "islocked = false";
-                                CreateNewConsoleLine();
-                            }
+                            CreateNewConsoleLine("isprotected = " + door.GetComponent<Env_Door>().isProtected + "\n" +
+                                                 "islocked = " + door.GetComponent<Env_Door>().isLocked);
                         }
                         //is container locked and protected or not
                         else if (container.GetComponent<Inv_Container>() != null)
                         {
-                            if (container.GetComponent<Inv_Container>().isProtected)
-                            {
-                                consoleText = "isprotected = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!container.GetComponent<Inv_Container>().isProtected)
-                            {
-                                consoleText = "isprotected = false";
-                                CreateNewConsoleLine();
-                            }
-
-                            if (container.GetComponent<Inv_Container>().isLocked)
-                            {
-                                consoleText = "islocked = true";
-                                CreateNewConsoleLine();
-                            }
-                            else if (!container.GetComponent<Inv_Container>().isLocked)
-                            {
-                                consoleText = "islocked = false";
-                                CreateNewConsoleLine();
-                            }
+                            CreateNewConsoleLine("isprotected = " + container.GetComponent<Inv_Container>().isProtected + "\n" +
+                                                 "islocked = " + container.GetComponent<Inv_Container>().isLocked);
                         }
 
-                        consoleText = "--- target commands:";
-                        CreateNewConsoleLine();
-
-                        consoleText = "target unlock - unlocks the door/container if it isn't protected";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("--- target commands:\n" +
+                                             "target unlock - unlocks the door/container if it isn't protected");
                     }
                     else
                     {
-                        consoleText = "No commands found for selected target.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("No commands found for selected target.");
                     }
                 }
 
@@ -1251,24 +932,23 @@ public class Manager_Console : MonoBehaviour
                     && !secondCommand)
                 {
                     //selected AI
-                    if (target.GetComponent<UI_AIContent>() != null)
+                    if (target.GetComponent<UI_AIContent>() != null
+                        && target.GetComponent<AI_Health>() != null
+                        && target.GetComponent<AI_Health>().isKillable)
                     {
-                        consoleText = "Disabled " + target.GetComponent<UI_AIContent>().str_NPCName + ".";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Disabled " + target.GetComponent<UI_AIContent>().str_NPCName + ".");
                         target.SetActive(false);
                     }
                     //selected non-protected interactable item
                     else if (target.GetComponent<Env_Item>() != null
                              && !target.GetComponent<Env_Item>().isProtected)
                     {
-                        consoleText = "Disabled " + target.GetComponent<Env_Item>().str_ItemName + ".";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Disabled " + target.GetComponent<Env_Item>().str_ItemName + ".");
                         target.SetActive(false);
                     }
                     else
                     {
-                        consoleText = "Error: " + target.name + " cannot be disabled! Please select another one.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: " + target.name + " cannot be disabled! Please select another one.");
                     }
                 }
                 //enable target if same target is disabled and still selected
@@ -1278,14 +958,18 @@ public class Manager_Console : MonoBehaviour
                     //selected AI
                     if (target.GetComponent<UI_AIContent>() != null)
                     {
-                        consoleText = "Enabled " + target.GetComponent<UI_AIContent>().str_NPCName + ".";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Enabled " + target.GetComponent<UI_AIContent>().str_NPCName + ".");
+                        target.SetActive(true);
+                    }
+                    //selected non-protected interactable item
+                    else if (target.GetComponent<Env_Item>() != null)
+                    {
+                        CreateNewConsoleLine("Enabled " + target.GetComponent<Env_Item>().str_ItemName + ".");
                         target.SetActive(true);
                     }
                     else
                     {
-                        consoleText = "Error: " + target.name + " is already enabled!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: " + target.name + " is already enabled!");
                     }
                 }
 
@@ -1299,15 +983,13 @@ public class Manager_Console : MonoBehaviour
                         && target.GetComponent<AI_Health>().isKillable)
                     {
                         target.GetComponent<AI_Health>().Death();
-                        consoleText = "Killed " + target.GetComponent<UI_AIContent>().str_NPCName + " through console.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Killed " + target.GetComponent<UI_AIContent>().str_NPCName + " through console.");
                     }
 
                     //custom kill errors
                     else if (target.GetComponent<UI_AIContent>() == null)
                     {
-                        consoleText = "Error: Target is not a killable GameObject!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Target is not a killable GameObject!");
                     }
                     else if ((target.GetComponent<UI_AIContent>() != null
                              && target.GetComponent<AI_Health>() != null
@@ -1315,8 +997,7 @@ public class Manager_Console : MonoBehaviour
                              || (target.GetComponent<UI_AIContent>() != null
                              && target.GetComponent<AI_Health>() == null))
                     {
-                        consoleText = "Error: Target cannot be killed through console because it is protected!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Target cannot be killed through console because it is protected!");
                     }
                 }
 
@@ -1350,21 +1031,18 @@ public class Manager_Console : MonoBehaviour
                         && !door.GetComponent<Env_Door>().isProtected)
                         {
                             door.GetComponent<Env_Lock>().Unlock();
-                            consoleText = "Unlocked this door.";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Unlocked this door.");
                         }
 
                         //custom unlock errors
                         else if (!door.GetComponent<Env_Door>().isLocked
                                  || door.GetComponent<Env_Lock>() == null)
                         {
-                            consoleText = "Error: Target is already unlocked!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: Target is already unlocked!");
                         }
                         else if (door.GetComponent<Env_Door>().isProtected)
                         {
-                            consoleText = "Error: Target cannot be unlocked through console because it is protected!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: Target cannot be unlocked through console because it is protected!");
                         }
                     }
                     else if (container != null)
@@ -1373,34 +1051,29 @@ public class Manager_Console : MonoBehaviour
                             && !container.GetComponent<Inv_Container>().isProtected)
                         {
                             container.GetComponent<Inv_Container>().isLocked = false;
-                            consoleText = "Unlocked this container.";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Unlocked this container.");
                         }
 
                         //custom unlock errors
                         else if (!container.GetComponent<Inv_Container>().isLocked
                                  || container.GetComponent<Env_Lock>() == null)
                         {
-                            consoleText = "Error: Target is already unlocked!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: Target is already unlocked!");
                         }
                         else if (container.GetComponent<Inv_Container>().isProtected)
                         {
-                            consoleText = "Error: Target cannot be unlocked through console because it is protected!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: Target cannot be unlocked through console because it is protected!");
                         }
                     }
                     else
                     {
-                        consoleText = "Error: Target is not an unlockable GameObject!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Target is not an unlockable GameObject!");
                     }
                 }
                 //incorrect or unknown command
                 else
                 {
-                    consoleText = "Error: Incorrect or unknown command!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Incorrect or unknown command!");
                 }
             }
             //three words command
@@ -1413,15 +1086,6 @@ public class Manager_Console : MonoBehaviour
                 if (thirdCommand)
                 {
                     insertedValue = int.Parse(separatedWords[2]);
-                }
-
-                string factionName = "none";
-                foreach (string realFactionName in factionNames)
-                {
-                    if (thirdCommandName == realFactionName)
-                    {
-                        factionName = realFactionName;
-                    }
                 }
 
                 //selected AI
@@ -1439,64 +1103,59 @@ public class Manager_Console : MonoBehaviour
                         if (insertedValue == 0)
                         {
                             target.GetComponent<AI_Health>().canBeHostile = false;
-                            consoleText = "Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s hostile state to " + thirdCommandName + ". Target is no longer hostile towards anyone.";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s hostile state to " + thirdCommandName + ". Target is no longer hostile towards anyone.");
                         }
                         //hostile towards others
                         else if (insertedValue == 1)
                         {
                             target.GetComponent<AI_Health>().canBeHostile = true;
-                            consoleText = "Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s hostile state to " + thirdCommandName + ". Target can now be hostile towards attackers again.";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s hostile state to " + thirdCommandName + ". Target can now be hostile towards attackers again.");
                         }
                     }
                     //set faction for AI
                     else if (secondCommandName == "setfaction"
                              && !secondCommand
-                             && !thirdCommand
-                             && factionName != "none")
+                             && !thirdCommand)
                     {
                         //stupid way to check which role was selected but it works
-                        if (factionName == UI_AIContent.Faction.scientists.ToString())
+                        if (thirdCommandName == UI_AIContent.Faction.scientists.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.scientists;
                         }
-                        else if (factionName == UI_AIContent.Faction.geifers.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.geifers.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.geifers;
                         }
-                        else if (factionName == UI_AIContent.Faction.annies.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.annies.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.annies;
                         }
-                        else if (factionName == UI_AIContent.Faction.verbannte.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.verbannte.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.verbannte;
                         }
-                        else if (factionName == UI_AIContent.Faction.raiders.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.raiders.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.raiders;
                         }
-                        else if (factionName == UI_AIContent.Faction.military.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.military.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.military;
                         }
-                        else if (factionName == UI_AIContent.Faction.verteidiger.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.verteidiger.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.verteidiger;
                         }
-                        else if (factionName == UI_AIContent.Faction.others.ToString())
+                        else if (thirdCommandName == UI_AIContent.Faction.others.ToString())
                         {
                             target.GetComponent<UI_AIContent>().faction = UI_AIContent.Faction.others;
                         }
 
-                        consoleText = "Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s faction to " + thirdCommandName + ".";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Set " + target.GetComponent<UI_AIContent>().str_NPCName + "'s faction to " + thirdCommandName + ".");
                     }
                     else
                     {
-                        consoleText = "Error: Incorrect or unknown command or selected targets value cannot be edited!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Incorrect or unknown command or selected targets value cannot be edited!");
                     }
                 }
 
@@ -1517,22 +1176,19 @@ public class Manager_Console : MonoBehaviour
                             {
                                 target.GetComponent<Env_Item>().int_itemCount = insertedValue;
                                 
-                                consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s count to " + insertedValue + ".";
-                                CreateNewConsoleLine();
+                                CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s count to " + insertedValue + ".");
                             }
                             else if (secondCommandName == "setvalue")
                             {
                                 target.GetComponent<Env_Item>().int_maxItemValue = insertedValue;
 
-                                consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s value to " + insertedValue + ".";
-                                CreateNewConsoleLine();
+                               CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s value to " + insertedValue + ".");
                             }
                             else if (secondCommandName == "setweight")
                             {
                                 target.GetComponent<Env_Item>().int_ItemWeight = insertedValue;
 
-                                consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s weight to " + insertedValue + ".";
-                                CreateNewConsoleLine();
+                                CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s weight to " + insertedValue + ".");
                             }
                             else if (secondCommandName == "setdurability")
                             {
@@ -1541,16 +1197,14 @@ public class Manager_Console : MonoBehaviour
                                 {
                                     target.GetComponent<Item_Gun>().durability = insertedValue;
 
-                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".");
                                 }
                                 else if (target.GetComponent<Item_Melee>() != null
                                          && insertedValue <= target.GetComponent<Item_Melee>().maxDurability)
                                 {
                                     target.GetComponent<Item_Melee>().durability = insertedValue;
 
-                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s durability to " + insertedValue + ".");
                                 }
 
                                 //custom error message for too high durability
@@ -1559,15 +1213,13 @@ public class Manager_Console : MonoBehaviour
                                          || (target.GetComponent<Item_Melee>() != null
                                          && insertedValue > target.GetComponent<Item_Melee>().maxDurability))
                                 {
-                                    consoleText = "Error: Target item durability cannot be higher than its max durability!";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Error: Target item durability cannot be higher than its max durability!");
                                 }
                                 //custom error message for weapon not found
                                 else if (target.GetComponent<Item_Gun>() == null
                                          && target.GetComponent<Item_Melee>() == null)
                                 {
-                                    consoleText = "Error: Targets durability cannot be edited. Target is not an item with any durability!";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Error: Targets durability cannot be edited. Target is not an item with any durability!");
                                 }
                             }
                             else if (secondCommandName == "setmaxdurability")
@@ -1577,16 +1229,14 @@ public class Manager_Console : MonoBehaviour
                                 {
                                     target.GetComponent<Item_Gun>().maxDurability = insertedValue;
 
-                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".");
                                 }
                                 else if (target.GetComponent<Item_Melee>() != null
                                          && insertedValue > target.GetComponent<Item_Melee>().durability)
                                 {
                                     target.GetComponent<Item_Melee>().maxDurability = insertedValue;
 
-                                    consoleText = "Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Changed " + target.GetComponent<Env_Item>().str_ItemName + "'s max durability to " + insertedValue + ".");
                                 }
 
                                 //custom error message for too low max durability
@@ -1595,103 +1245,68 @@ public class Manager_Console : MonoBehaviour
                                          || (target.GetComponent<Item_Melee>() != null
                                          && insertedValue < target.GetComponent<Item_Melee>().durability))
                                 {
-                                    consoleText = "Error: Target item max durability cannot be lower than its durability!";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Error: Target item max durability cannot be lower than its durability!");
                                 }
                                 //custom error message for weapon not found
                                 else if (target.GetComponent<Item_Gun>() == null
                                          && target.GetComponent<Item_Melee>() == null)
                                 {
-                                    consoleText = "Error: Targets max durability cannot be edited. Target is not an item with any durability!";
-                                    CreateNewConsoleLine();
+                                    CreateNewConsoleLine("Error: Targets max durability cannot be edited. Target is not an item with any durability!");
                                 }
                             }
 
                             else if (secondCommandName == "setcount"
                                      && !target.GetComponent<Env_Item>().isStackable)
                             {
-                                consoleText = "Error: Target count cannot be edited because it is not stackable!";
-                                CreateNewConsoleLine();
+                                CreateNewConsoleLine("Error: Target count cannot be edited because it is not stackable!");
                             }
                             else
                             {
-                                consoleText = "Error: Incorrect or unknown command!";
-                                CreateNewConsoleLine();
+                                CreateNewConsoleLine("Error: Incorrect or unknown command!");
                             }
                         }
                         else
                         {
-                            consoleText = "Error: Selected targets value is out of range!";
-                            CreateNewConsoleLine();
+                            CreateNewConsoleLine("Error: Selected targets value is out of range!");
                         }
                     }
                     else
                     {
-                        consoleText = "Error: Target values cannot be edited because target is protected!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Target values cannot be edited because target is protected!");
                     }
                 }
 
                 //incorrect or unknown command
                 else
                 {
-                    consoleText = "Error: Incorrect or unknown command!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Incorrect or unknown command!");
                 }
             }
-            /*
-            else if (separatedWords.Count == 4)
-            {
-                string secondCommandName = separatedWords[1];
-                bool secondCommand = int.TryParse(secondCommandName, out _);
-                string thirdCommandName = separatedWords[2];
-                bool thirdCommand = int.TryParse(thirdCommandName, out _);
-                string fourthCommandName = separatedWords[3];
-                bool fourthCommand = int.TryParse(fourthCommandName, out _);
-            }
-            */
             //incorrect or unknown command
             else
             {
-                consoleText = "Error: Incorrect or unknown command!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Incorrect or unknown command!");
             }
         }
         else if (target == null)
         {
-            consoleText = "Error: No target was selected! Use the selecttarget command to select a target to edit.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: No target was selected! Use the selecttarget command to select a target to edit.");
         }
-
-        separatedWords.Clear();
     }
 
     //shows all game factions
     private void Command_ShowFactions()
     {
-        insertedCommands.Add("showfactions");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-        consoleText = "Game factions:";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("Game factions:");
 
-        foreach (string factionName in factionNames)
+        foreach (GameObject faction in par_Managers.GetComponent<GameManager>().gameFactions)
         {
-            consoleText = factionName;
-            CreateNewConsoleLine();
+            CreateNewConsoleLine(faction.GetComponent<Manager_FactionReputation>().faction.ToString());
         }
-
-        separatedWords.Clear();
     }
-    //sets reputation value between two factions
+    //gets the reputation values between two factions
     private void Command_SetRep()
     {
-        insertedCommands.Add("setrep " + separatedWords[1] + " " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         string factionName1 = separatedWords[1];
         string factionName2 = separatedWords[2];
         bool isInt1 = int.TryParse(factionName1, out _);
@@ -1699,560 +1314,79 @@ public class Manager_Console : MonoBehaviour
         bool isInsertedValueInt = int.TryParse(separatedWords[3], out _);
         if (isInt1 || isInt2)
         {
-            consoleText = "Error: Faction name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Faction name cannot be a number!");
         }
         else if (!isInsertedValueInt)
         {
-            consoleText = "Error: Inserted value must be a whole number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Inserted value must be a whole number!");
         }
         else if (!isInt1 && !isInt2 && isInsertedValueInt)
         {
             int value = int.Parse(separatedWords[3]);
             if (value > -1001 && value < 1001)
             {
-                string confirmedFactionName1 = "none";
-                string confirmedFactionName2 = "none";
-
-                foreach (string possibleFactionName1 in factionNames)
+                foreach (GameObject faction in par_Managers.GetComponent<GameManager>().gameFactions)
                 {
-                    if (factionName1 == possibleFactionName1)
+                    Manager_FactionReputation targetFactionScript = faction.GetComponent<Manager_FactionReputation>();
+                    if (targetFactionScript.faction.ToString() == factionName1)
                     {
-                        confirmedFactionName1 = factionName1;
-
-                        foreach (string possibleFactionName2 in factionNames)
+                        if (factionName2 == "Player")
                         {
-                            if (factionName2 == possibleFactionName2)
-                            {
-                                confirmedFactionName2 = factionName2;
-                                break;
-                            }
+                            targetFactionScript.vsPlayer = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
                         }
+                        else if (factionName2 == "Scientists")
+                        {
+                            targetFactionScript.vsScientists = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Geifers")
+                        {
+                            targetFactionScript.vsGeifers = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Annies")
+                        {
+                            targetFactionScript.vsAnnies = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Verbannte")
+                        {
+                            targetFactionScript.vsVerbannte = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Raiders")
+                        {
+                            targetFactionScript.vsRaiders = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Military")
+                        {
+                            targetFactionScript.vsMilitary = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Verteidiger")
+                        {
+                            targetFactionScript.vsVerteidiger = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+                        else if (factionName2 == "Others")
+                        {
+                            targetFactionScript.vsOthers = value;
+                            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                            CreateNewConsoleLine("Changed " + factionName1 + " and " + factionName2 + "'s reputation to " + value + "!");
+                        }
+
+                        break;
                     }
-                }
-                if (confirmedFactionName1 != "none" && confirmedFactionName2 != "none")
-                {
-                    //scientists vs others
-                    if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "scientists" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //geifers vs others
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "geifers" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //annies vs others
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "annies" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //verbannte vs others
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verbannte" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //raiders vs others
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "raiders" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //military vs others
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "military" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //verteidiger vs others
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "verteidiger" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v8 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    //others vs others
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v1 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v2 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v3 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v4 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v5 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v6 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v7 = value;
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName1 == "others" && confirmedFactionName2 == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed " + confirmedFactionName1 + " and " + confirmedFactionName2 + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                }
-                else if (confirmedFactionName1 == "none")
-                {
-                    Debug.LogError("Error: First inserted faction name was not found!");
-                }
-                else if (confirmedFactionName2 == "none")
-                {
-                    Debug.LogError("Error: Second inserted faction name was not found!");
                 }
             }
             else if (value <= -1001)
@@ -2264,13 +1398,11 @@ public class Manager_Console : MonoBehaviour
                 Debug.LogError("Error: Inserted reputation value must be lower than 1001!");
             }
         }
-        separatedWords.Clear();
     }
+
     //allows to teleport to custom location with coordinates
     private void Command_TeleportToVector3Location()
     {
-        insertedCommands.Add("tp " + separatedWords[1] + " " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
         string secondWord = separatedWords[1];
         string thirdWord = separatedWords[2];
         string fourthWord = separatedWords[3];
@@ -2280,18 +1412,15 @@ public class Manager_Console : MonoBehaviour
         bool thirdFloatCorrect = float.TryParse(fourthWord, out float thirdVec);
         if (!firstFloatCorrect)
         {
-            consoleText = "Error: Teleport coordinate first input must be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Teleport coordinate first input must be a number!");
         }
         if (!secondFloatCorrect)
         {
-            consoleText = "Error: Teleport coordinate second input must be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Teleport coordinate second input must be a number!");
         }
         if (!thirdFloatCorrect)
         {
-            consoleText = "Error: Teleport coordinate third input must be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Teleport coordinate third input must be a number!");
         }
 
         //if all 3 are numbers then assign them as
@@ -2300,18 +1429,15 @@ public class Manager_Console : MonoBehaviour
         {
             if (firstVec >= 1000001 || firstVec <= -1000001)
             {
-                consoleText = "Error: Teleport coordinate first input cannot be higher than 1000000 and lower than -1000000!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Teleport coordinate first input cannot be higher than 1000000 and lower than -1000000!");
             }
             if (secondVec >= 1000001 || secondVec <= -1000001)
             {
-                consoleText = "Error: Teleport coordinate second input cannot be higher than 1000000 and lower than -1000000!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Teleport coordinate second input cannot be higher than 1000000 and lower than -1000000!");
             }
             if (thirdVec >= 1000001 || thirdVec <= -1000001)
             {
-                consoleText = "Error: Teleport coordinate third input cannot be higher than 1000000 and lower than -1000000!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Teleport coordinate third input cannot be higher than 1000000 and lower than -1000000!");
             }
 
             else
@@ -2319,44 +1445,27 @@ public class Manager_Console : MonoBehaviour
                 //set teleportPos;
                 Vector3 teleportPos = new(firstVec, secondVec, thirdVec);
 
-                consoleText = "--tp " + firstVec + " " + secondVec + " " + thirdVec + "--";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("--tp " + firstVec + " " + secondVec + " " + thirdVec + "--\n" +
+                                     "Success: Teleported player to " + teleportPos + "!");
 
-                consoleText = "Success: Teleported player to " + teleportPos + "!";
-                CreateNewConsoleLine();
                 thePlayer.transform.position = teleportPos;
                 ToggleConsole();
-
-                separatedWords.Clear();
             }
         }
     }
     //list all valid game cell names
     private void Command_ShowAllCells()
     {
-        insertedCommands.Add("sac");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-        consoleText = "All game cells:";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("All game cells:");
 
         foreach (string cellname in cellnames)
         {
-            consoleText = cellname;
-            CreateNewConsoleLine();
+            CreateNewConsoleLine(cellname);
         }
-
-        separatedWords.Clear();
     }
     //discover all game cell names
     private void Command_DiscoverAllCells()
     {
-        insertedCommands.Add("dac");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         foreach (GameObject cell in allCells)
         {
             if (!cell.GetComponent<Manager_CurrentCell>().discoveredCell)
@@ -2366,24 +1475,16 @@ public class Manager_Console : MonoBehaviour
             }
         }
 
-        consoleText = "All cells are now discovered!";
-        CreateNewConsoleLine();
-
-        separatedWords.Clear();
+        CreateNewConsoleLine("All cells are now discovered!");
     }
     //teleport to specific cell spawn point
     private void Command_TeleportToCell()
     {
-        insertedCommands.Add("tpcell " + separatedWords[1]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
         string cellName = separatedWords[1];
-        consoleText = "--tpcell " + cellName + "--";
-        CreateNewConsoleLine();
         bool isInt = int.TryParse(cellName, out _);
         if (isInt)
         {
-            consoleText = "Error: Cell name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Cell name cannot be a number!");
         }
         else if (!isInt)
         {
@@ -2393,8 +1494,7 @@ public class Manager_Console : MonoBehaviour
                 GameObject lastCell = allCells[^1];
                 if (cellName == cell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
-                    consoleText = "Teleported to cell " + cellName + "!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Teleported to cell " + cellName + "!");
                     //get vector3 from valid cell
                     Transform teleportLoc = cell.GetComponent<Manager_CurrentCell>().currentCellSpawnpoint;
                     //move player to cell
@@ -2407,12 +1507,10 @@ public class Manager_Console : MonoBehaviour
                 else if (i == allCells.Count -1
                         && cellName != lastCell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
-                    consoleText = "Error: Cell name not found! Use sac to list all valid game cells.";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Cell name not found! Use sac to list all valid game cells.");
                 }
             }
         }
-        separatedWords.Clear();
     }
 
     //get player current coordinates
@@ -2420,164 +1518,109 @@ public class Manager_Console : MonoBehaviour
     {
         if (separatedWords.Count == 2)
         {
-            insertedCommands.Add("player currcoords");
-            currentSelectedInsertedCommand = insertedCommands.Count;
             Vector3 currCoords = thePlayer.transform.position;
 
-            consoleText = "--" + input + "--";
-            CreateNewConsoleLine();
-            consoleText = "Player current coordinates are " + currCoords + ".";
-            CreateNewConsoleLine();
-            separatedWords.Clear();
+            CreateNewConsoleLine("Player current coordinates are " + currCoords + ".");
         }
     }
     //toggles godmode on and off
     private void Command_ToggleGodMode()
     {
-        insertedCommands.Add("tgm");
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
         if (!thePlayer.GetComponent<Player_Health>().canTakeDamage)
         {
             thePlayer.GetComponent<Player_Health>().canTakeDamage = true;
-            consoleText = "Disabled godmode.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Disabled godmode.");
         }
 
         else if (thePlayer.GetComponent<Player_Health>().canTakeDamage)
         {
             thePlayer.GetComponent<Player_Health>().canTakeDamage = false;
-            consoleText = "Enabled godmode.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Enabled godmode.");
         }
-        separatedWords.Clear();
     }
     //toggles noclip on and off
     private void Command_ToggleNoclip()
     {
-        insertedCommands.Add("tnc");
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         if (!thePlayer.GetComponent<Player_Movement>().isNoclipping)
         {
-            consoleText = "Enabled noclip.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Enabled noclip.");
 
             thePlayer.GetComponent<Player_Movement>().isClimbingLadder = false;
             thePlayer.GetComponent<Player_Movement>().isNoclipping = true;
         }
         else if (thePlayer.GetComponent<Player_Movement>().isNoclipping)
         {
-            consoleText = "Disabled noclip.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Disabled noclip.");
 
             thePlayer.GetComponent<Player_Movement>().isNoclipping = false;
         }
-
-        separatedWords.Clear();
     }
     //toggles AI detection on and off
     private void Command_ToggleAIDetection()
     {
-        insertedCommands.Add("taid");
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
         if (!toggleAIDetection)
         {
             toggleAIDetection = true;
-            consoleText = "Enabled AI detection.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Enabled AI detection.");
         }
 
         else if (toggleAIDetection)
         {
             toggleAIDetection = false;
-            consoleText = "Disabled AI detection.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Disabled AI detection.");
         }
-        separatedWords.Clear();
     }
 
     //shows all player stats
     private void Command_ShowPlayerStats()
     {
-        insertedCommands.Add("player showstats");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-        consoleText = "Player stats:";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("Player stats:");
 
         //get current player health
         string health = thePlayer.GetComponent<Player_Health>().health.ToString();
-        consoleText = "health: " + health;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("health: " + health);
         //get players current max health
         string maxHealth = thePlayer.GetComponent<Player_Health>().maxHealth.ToString();
-        consoleText = "maxhealth: " + maxHealth;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("maxhealth: " + maxHealth);
         //get player current stamina
         float stamina = thePlayer.GetComponent<Player_Movement>().currentStamina;
-        consoleText = "stamina: " + stamina;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("stamina: " + stamina);
         //get player max stamina
         float maxstamina = thePlayer.GetComponent<Player_Movement>().maxStamina;
-        consoleText = "maxstamina: " + maxstamina;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("maxstamina: " + maxstamina);
         //get player current mental state
         float mentalstate = thePlayer.GetComponent<Player_Health>().mentalState;
-        consoleText = "mentalstate: " + mentalstate;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("mentalstate: " + mentalstate);
         //get player max mental state
         float maxmentalstate = thePlayer.GetComponent<Player_Health>().maxMentalState;
-        consoleText = "maxmentalstate: " + maxmentalstate;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("maxmentalstate: " + maxmentalstate);
         //get player current radiation
         float radiation = thePlayer.GetComponent<Player_Health>().radiation;
-        consoleText = "radiation: " + radiation;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("radiation: " + radiation);
         //get player max radiation
         float maxradiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
-        consoleText = "maxradiation: " + maxradiation;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("maxradiation: " + maxradiation);
         //get player stamina recharge speed
         float staminarecharge = thePlayer.GetComponent<Player_Movement>().staminaRecharge;
-        consoleText = "staminarecharge: " + staminarecharge;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("staminarecharge: " + staminarecharge);
         //get player speed
         float speed = thePlayer.GetComponent<Player_Movement>().speedIncrease;
-        consoleText = "speed: " + speed;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("speed: " + speed);
         //get player jump height
         float jumpheight = thePlayer.GetComponent<Player_Movement>().jumpHeight;
-        consoleText = "jumpheight: " + jumpheight;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("jumpheight: " + jumpheight);
         //get player current inventory space
         int currentSpace = thePlayer.GetComponent<Inv_Player>().invSpace;
-        consoleText = "current used inv space: " + currentSpace + " <not editable>";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("current used inv space: " + currentSpace + " <not editable>");
         //get player max inventory space
         int maxInvSpace = thePlayer.GetComponent<Inv_Player>().maxInvSpace;
-        consoleText = "maxinvspace: " + maxInvSpace;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("maxinvspace: " + maxInvSpace);
         //get player current money
         int money = thePlayer.GetComponent<Inv_Player>().money;
-        consoleText = "money: " + money;
-        CreateNewConsoleLine();
-
-        separatedWords.Clear();
+        CreateNewConsoleLine("money: " + money);
     }
     private void Command_ResetPlayerStats()
     {
-        insertedCommands.Add("player resetstats");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         if (thePlayer.GetComponent<Player_Health>().health == originalMaxHealth
             && thePlayer.GetComponent<Player_Health>().maxHealth == originalMaxHealth
             && thePlayer.GetComponent<Player_Movement>().currentStamina == originalMaxStamina
@@ -2589,13 +1632,11 @@ public class Manager_Console : MonoBehaviour
             && thePlayer.GetComponent<Player_Movement>().jumpHeight == originalJumpHeight + 0.75f
             && thePlayer.GetComponent<Inv_Player>().maxInvSpace == originalMaxInvspace)
         {
-            consoleText = "Error: All player stats already are at their original value.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: All player stats already are at their original value.");
         }
         else
         {
-            consoleText = "All modifiable player stats were reset to their original values.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("All modifiable player stats were reset to their original values.");
 
             thePlayer.GetComponent<Player_Health>().health = originalMaxHealth;
             thePlayer.GetComponent<Player_Health>().maxHealth = originalMaxHealth;
@@ -2627,30 +1668,21 @@ public class Manager_Console : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = originalMaxMentalState;
             par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
         }
-
-        separatedWords.Clear();
     }
     //set a player stat
     private void Command_SetPlayerStat()
     {
-        insertedCommands.Add("player setstat " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         string statName = separatedWords[2];
 
         bool isInt = int.TryParse(statName, out _);
         bool isInsertedValueInt = int.TryParse(separatedWords[3], out _);
         if (isInt)
         {
-            consoleText = "Error: Player stat name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Player stat name cannot be a number!");
         }
         else if (!isInsertedValueInt)
         {
-            consoleText = "Error: Inserted value must be a whole number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Inserted value must be a whole number!");
         }
         else if (!isInt && isInsertedValueInt)
         {
@@ -2662,8 +1694,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().health = insertedValue;
                     string health = thePlayer.GetComponent<Player_Health>().health.ToString();
-                    consoleText = "Changed player current health to " + health + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player current health to " + health + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().health = thePlayer.GetComponent<Player_Health>().health;
                     par_Managers.GetComponent<Manager_UIReuse>().maxHealth = thePlayer.GetComponent<Player_Health>().maxHealth;
@@ -2673,13 +1704,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Health>().maxHealth)
                 {
-                    consoleText = "Error: Player current health cannot be set over player max health!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current health cannot be set over player max health!");
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player current health must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current health must be set over -1!");
                 }
             }
             //when changing player max health
@@ -2690,8 +1719,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().maxHealth = insertedValue;
                     string maxhealth = thePlayer.GetComponent<Player_Health>().maxHealth.ToString();
-                    consoleText = "Changed player max health to " + maxhealth + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max health to " + maxhealth + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().health = thePlayer.GetComponent<Player_Health>().health;
                     par_Managers.GetComponent<Manager_UIReuse>().maxHealth = thePlayer.GetComponent<Player_Health>().maxHealth;
@@ -2701,13 +1729,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Health>().health)
                 {
-                    consoleText = "Error: Player max health cannot be set under player current health!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max health cannot be set under player current health!");
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player max health must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max health must be set below 1000001!");
                 }
             }
             //when changing player stamina
@@ -2718,8 +1744,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Movement>().currentStamina = insertedValue;
                     string stamina = thePlayer.GetComponent<Player_Movement>().currentStamina.ToString();
-                    consoleText = "Changed player current stamina to " + stamina + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player current stamina to " + stamina + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().stamina = thePlayer.GetComponent<Player_Movement>().currentStamina;
                     par_Managers.GetComponent<Manager_UIReuse>().maxStamina = thePlayer.GetComponent<Player_Movement>().maxStamina;
@@ -2729,13 +1754,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player current stamina must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current stamina must be set over -1!");
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Movement>().maxStamina)
                 {
-                    consoleText = "Error: Player current stamina cannot be set over player max stamina!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current stamina cannot be set over player max stamina!");
                 }
             }
             //when changing player max stamina
@@ -2746,8 +1769,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Movement>().maxStamina = insertedValue;
                     string maxstamina = thePlayer.GetComponent<Player_Movement>().maxStamina.ToString();
-                    consoleText = "Changed player max stamina to " + maxstamina + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max stamina to " + maxstamina + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().stamina = thePlayer.GetComponent<Player_Movement>().currentStamina;
                     par_Managers.GetComponent<Manager_UIReuse>().maxStamina = thePlayer.GetComponent<Player_Movement>().maxStamina;
@@ -2757,13 +1779,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player max stamina must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max stamina must be set below 1000001!");
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Movement>().currentStamina)
                 {
-                    consoleText = "Error: Player max stamina cannot be set under player current stamina!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max stamina cannot be set under player current stamina!");
                 }
             }
             //when changing player mental state
@@ -2774,8 +1794,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().mentalState = insertedValue;
                     string mentalstate = thePlayer.GetComponent<Player_Health>().mentalState.ToString();
-                    consoleText = "Changed player current mental state to " + mentalstate + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player current mental state to " + mentalstate + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().mentalState = thePlayer.GetComponent<Player_Health>().mentalState;
                     par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = thePlayer.GetComponent<Player_Health>().maxMentalState;
@@ -2785,13 +1804,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player current mental stamina must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current mental stamina must be set over -1!");
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Health>().maxMentalState)
                 {
-                    consoleText = "Error: Player current mental state cannot be set over player max mental state!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current mental state cannot be set over player max mental state!");
                 }
             }
             //when changing player max mental state
@@ -2802,8 +1819,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().maxMentalState = insertedValue;
                     string maxmentalstate = thePlayer.GetComponent<Player_Health>().maxMentalState.ToString();
-                    consoleText = "Changed player max mental state to " + maxmentalstate + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max mental state to " + maxmentalstate + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().mentalState = thePlayer.GetComponent<Player_Health>().mentalState;
                     par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = thePlayer.GetComponent<Player_Health>().maxMentalState;
@@ -2813,13 +1829,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player max mental state must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max mental state must be set below 1000001!");
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Health>().mentalState)
                 {
-                    consoleText = "Error: Player max mental state cannot be set under mental state!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max mental state cannot be set under mental state!");
                 }
             }
             //when changing player radiation
@@ -2830,8 +1844,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().radiation = insertedValue;
                     string radiation = thePlayer.GetComponent<Player_Health>().radiation.ToString();
-                    consoleText = "Changed player current radiation to " + radiation + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player current radiation to " + radiation + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().radiation = thePlayer.GetComponent<Player_Health>().radiation;
                     par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
@@ -2841,13 +1854,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player current radiation must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current radiation must be set over -1!");
                 }
                 else if (insertedValue > thePlayer.GetComponent<Player_Health>().maxRadiation)
                 {
-                    consoleText = "Error: Player current radiation cannot be set over player max radiation!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player current radiation cannot be set over player max radiation!");
                 }
             }
             //when changing player max radiation
@@ -2858,8 +1869,7 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Health>().maxRadiation = insertedValue;
                     string maxradiation = thePlayer.GetComponent<Player_Health>().maxRadiation.ToString();
-                    consoleText = "Changed player max radiation to " + maxradiation + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max radiation to " + maxradiation + ".");
 
                     par_Managers.GetComponent<Manager_UIReuse>().radiation = thePlayer.GetComponent<Player_Health>().radiation;
                     par_Managers.GetComponent<Manager_UIReuse>().maxRadiation = thePlayer.GetComponent<Player_Health>().maxRadiation;
@@ -2869,13 +1879,11 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player max radiation must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max radiation must be set below 1000001!");
                 }
                 else if (insertedValue < thePlayer.GetComponent<Player_Health>().radiation)
                 {
-                    consoleText = "Error: Player max radiation cannot be set under radiation!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max radiation cannot be set under radiation!");
                 }
             }
             //when changing player stamina recharge
@@ -2885,18 +1893,15 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Movement>().staminaRecharge = insertedValue;
                     string staminarecharge = thePlayer.GetComponent<Player_Movement>().staminaRecharge.ToString();
-                    consoleText = "Changed player stamina recharge speed to " + staminarecharge + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player stamina recharge speed to " + staminarecharge + ".");
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player stamina recharge must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player stamina recharge must be set below 1000001!");
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player stamina recharge speed must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player stamina recharge speed must be set over -1!");
                 }
             }
             //when changing player speed
@@ -2906,18 +1911,15 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Movement>().speedIncrease = insertedValue;
                     string speed = thePlayer.GetComponent<Player_Movement>().speedIncrease.ToString();
-                    consoleText = "Changed player speed to " + speed + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player speed to " + speed + ".");
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player speed must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player speed must be set below 1000001!");
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player speed must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player speed must be set over -1!");
                 }
             }
             //when changing player jump height
@@ -2927,18 +1929,15 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Player_Movement>().jumpHeight = insertedValue;
                     string jumpheight = thePlayer.GetComponent<Player_Movement>().jumpHeight.ToString();
-                    consoleText = "Changed player jumpheight to " + jumpheight + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player jumpheight to " + jumpheight + ".");
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player jump height must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player jump height must be set below 1000001!");
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player jump height must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player jump height must be set over -1!");
                 }
             }
             //when changing player max inv space
@@ -2962,8 +1961,7 @@ public class Manager_Console : MonoBehaviour
                         thePlayer.GetComponent<Inv_Player>().invSpace -= itemWeight;
                     }
                     invSpace = 0;
-                    consoleText = "Changed player max inv space to " + maxinvspace + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max inv space to " + maxinvspace + ".");
                 }
                 else if (insertedValue == invSpace)
                 {
@@ -2971,19 +1969,16 @@ public class Manager_Console : MonoBehaviour
                     string maxinvspace = thePlayer.GetComponent<Inv_Player>().maxInvSpace.ToString();
                     thePlayer.GetComponent<Inv_Player>().invSpace = 0;
                     invSpace = 0;
-                    consoleText = "Changed player max inv space to " + maxinvspace + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player max inv space to " + maxinvspace + ".");
                 }
                 else if (insertedValue < invSpace)
                 {
                     invSpace = 0;
-                    consoleText = "Error: Player max inv space cannot be set under current inventory space!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max inv space cannot be set under current inventory space!");
                 }
                 else if (insertedValue >= 1000001)
                 {
-                    consoleText = "Error: Player max inv space must be set below 1000001!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player max inv space must be set below 1000001!");
                 }
             }
             //when changing player money
@@ -2993,33 +1988,23 @@ public class Manager_Console : MonoBehaviour
                 {
                     thePlayer.GetComponent<Inv_Player>().money = insertedValue;
                     string newMoney = thePlayer.GetComponent<Inv_Player>().money.ToString();
-                    consoleText = "Changed player money to " + newMoney + ".";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Changed player money to " + newMoney + ".");
                 }
                 else if (insertedValue < 0)
                 {
-                    consoleText = "Error: Player money must be set over -1!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Player money must be set over -1!");
                 }
             }
             else
             {
-                consoleText = "Error: Player stat not found! Type player showstats to list all player stats.";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Player stat not found! Type player showstats to list all player stats.");
             }
         }
-
-        separatedWords.Clear();
     }
 
     //list all spawnable game items
     private void Command_ShowAllSpawnableItems()
     {
-        insertedCommands.Add("sasi");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         for (int i = 0; i < itemnames.Count; i++)
         {
             string consoleLine;
@@ -3048,8 +2033,7 @@ public class Manager_Console : MonoBehaviour
                     consoleLine += " <not stackable>";
                 }
 
-                consoleText = consoleLine;
-                CreateNewConsoleLine();
+                CreateNewConsoleLine(consoleLine);
             }
             else if (itemWeight > 0)
             {
@@ -3062,24 +2046,16 @@ public class Manager_Console : MonoBehaviour
                     consoleLine += " <not stackable>";
                 }
 
-                consoleText = consoleLine;
-                CreateNewConsoleLine();
+                CreateNewConsoleLine(consoleLine);
             }
 
             spawnableItem = null;
         }
-        separatedWords.Clear();
     }
     //list all player inventory items
     private void Command_ShowAllPlayerItems()
     {
-        insertedCommands.Add("player showallitems");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
-        consoleText = "All player inventory items:";
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("All player inventory items:");
 
         for (int i = 0; i < PlayerInventoryScript.inventory.Count; i++)
         {
@@ -3117,18 +2093,12 @@ public class Manager_Console : MonoBehaviour
                 consoleLine += " <protected>";
             }
 
-            consoleText = consoleLine;
-            CreateNewConsoleLine();
+            CreateNewConsoleLine(consoleLine);
         }
-        separatedWords.Clear();
     }
     //add item/items to players inventory
     private void Command_AddItem()
     {
-        insertedCommands.Add("player additem " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--player additem " + separatedWords[2] + " " + separatedWords[3] +"--";
-        CreateNewConsoleLine();
         foundDuplicate = false;
         duplicate = null;
 
@@ -3138,13 +2108,11 @@ public class Manager_Console : MonoBehaviour
         bool isinsertedValueInt = int.TryParse(separatedWords[3], out _);
         if (isInt)
         {
-            consoleText = "Error: Added item name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Added item name cannot be a number!");
         }
         else if (!isinsertedValueInt)
         {
-            consoleText = "Error: Inserted addable item count must be a whole number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Inserted addable item count must be a whole number!");
         }
         else if (!isInt && isinsertedValueInt)
         {
@@ -3200,8 +2168,7 @@ public class Manager_Console : MonoBehaviour
 
                         RebuildInventoryUI();
 
-                        consoleText = "Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.");
                     }
                     //if the spawnable item isnt a duplicate and its a stackable or its not a stackable and the spawnable amount is only 1
                     else if (!foundDuplicate 
@@ -3241,8 +2208,7 @@ public class Manager_Console : MonoBehaviour
 
                         newDuplicate.GetComponent<Env_Item>().DeactivateItem();
 
-                        consoleText = "Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.");
                     }
                     //if the spawnable item isnt stackable and the player wants to spawn more than one of it
                     else if (!spawnableItem.GetComponent<Env_Item>().isStackable && insertedValue > 1)
@@ -3251,8 +2217,7 @@ public class Manager_Console : MonoBehaviour
 
                         StartCoroutine(SpawnMultipleNonStackables());
 
-                        consoleText = "Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.");
                     }
 
                     //update upgrade ui if upgrade cell was added
@@ -3266,50 +2231,39 @@ public class Manager_Console : MonoBehaviour
                 }
                 else if (spawnableItemWeight * insertedValue > currentPlayerInvFreeSpace)
                 {
-                    consoleText = "Error: Not enough inventory space to add " + selectedItem.name + " to players inventory!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Not enough inventory space to add " + selectedItem.name + " to players inventory!");
                 }
             }
             else if (!itemnames.Contains(itemName))
             {
-                consoleText = "Error: Item not found! Type sasi to display all spawnable items.";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item not found! Type sasi to display all spawnable items.");
             }
             else if (insertedValue <= 0)
             {
-                consoleText = "Error: Item count must be over 0!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item count must be over 0!");
             }
             else if (insertedValue >= 1000001)
             {
-                consoleText = "Error: Item count must be less than 1000001!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item count must be less than 1000001!");
             }
         }
 
         selectedItem = null;
-        separatedWords.Clear();
     }
     //remove item/items from players inventory
     private void Command_RemoveItem()
     {
-        insertedCommands.Add("player removeitem " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--player removeitem " + separatedWords[2] + " " + separatedWords[3] + "--";
-        CreateNewConsoleLine();
         string itemName = separatedWords[2];
 
         bool isInt = int.TryParse(itemName, out _);
         bool isInsertedValueInt = int.TryParse(separatedWords[3], out _);
         if (isInt)
         {
-            consoleText = "Error: Removed item name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Removed item name cannot be a number!");
         }
         else if (!isInsertedValueInt)
         {
-            consoleText = "Error: Inserted removable item count must be a whole number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Inserted removable item count must be a whole number!");
         }
         else if (!isInt && isInsertedValueInt)
         {
@@ -3336,8 +2290,7 @@ public class Manager_Console : MonoBehaviour
                     && PlayerInventoryScript.equippedGun == selectedItem
                     && selectedItem.GetComponent<Item_Gun>().isReloading)
                 {
-                    consoleText = "Error: Can't delete " + selectedItem.GetComponent<Env_Item>().str_ItemName + " through console while it is reloading!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Error: Can't delete " + selectedItem.GetComponent<Env_Item>().str_ItemName + " through console while it is reloading!");
                     canContinueItemRemoval = false;
                 }
                 else if (selectedItem.GetComponent<Item_Gun>() == null
@@ -3367,8 +2320,7 @@ public class Manager_Console : MonoBehaviour
                         == selectedItem.GetComponent<Item_Ammo>().caseType.ToString()
                         && selectedGun.GetComponent<Item_Gun>().isReloading)
                     {
-                        consoleText = "Error: Can't delete " + selectedItem.GetComponent<Env_Item>().str_ItemName + " through console while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Error: Can't delete " + selectedItem.GetComponent<Env_Item>().str_ItemName + " through console while " + selectedGun.GetComponent<Env_Item>().str_ItemName + " is reloading!");
                         canContinueItemRemoval = false;
                     }
                     else if (selectedGun == null
@@ -3399,8 +2351,7 @@ public class Manager_Console : MonoBehaviour
                         playeritemnames.Remove(selectedItem.GetComponent<Env_Item>().str_ItemName);
 
                         int spawnableItemWeight = selectedItem.GetComponent<Env_Item>().int_ItemWeight;
-                        consoleText = "Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.");
 
                         Destroy(selectedItem);
                     }
@@ -3413,8 +2364,7 @@ public class Manager_Console : MonoBehaviour
                         RebuildInventoryUI();
 
                         int spawnableItemWeight = selectedItem.GetComponent<Env_Item>().int_ItemWeight;
-                        consoleText = "Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.");
                     }
                     //if you want to remove more than one of a non-stackable item with the same name
                     else if (!removableItem.GetComponent<Env_Item>().isStackable
@@ -3434,8 +2384,7 @@ public class Manager_Console : MonoBehaviour
                         StartCoroutine(RemoveMultipleNonStackables());
 
                         int spawnableItemWeight = selectedItem.GetComponent<Env_Item>().int_ItemWeight;
-                        consoleText = "Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.";
-                        CreateNewConsoleLine();
+                        CreateNewConsoleLine("Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.");
                     }
 
                     //update upgrade ui if upgrade cell was added
@@ -3451,43 +2400,32 @@ public class Manager_Console : MonoBehaviour
             }
             else if (!playeritemnames.Contains(separatedWords[2]))
             {
-                consoleText = "Error: Item not found! Type player showallitems to display all spawnable items.";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item not found! Type player showallitems to display all spawnable items.");
             }
             else if (selectedItem.GetComponent<Env_Item>().isProtected)
             {
-                consoleText = "Error: This item is protected and can't be removed from the players inventory!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: This item is protected and can't be removed from the players inventory!");
             }
             else if (insertedValue <= 0)
             {
-                consoleText = "Error: Item count must be over 0!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item count must be over 0!");
             }
             else if (insertedValue > selectedItem.GetComponent<Env_Item>().int_itemCount)
             {
-                consoleText = "Error: Trying to remove too many of this item!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Trying to remove too many of this item!");
             }
             else if (insertedValue >= 1000001)
             {
-                consoleText = "Error: Item count must be less than 1000001!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Item count must be less than 1000001!");
             }
         }
 
         selectedItem = null;
-        separatedWords.Clear();
     }
 
     //fixes all repairable items for free
     private void Command_FixAllItems()
     {
-        insertedCommands.Add("player fixallitems");
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         foreach (GameObject repairable in PlayerInventoryScript.inventory)
         {
             if (repairable.GetComponent<Item_Gun>() != null
@@ -3515,147 +2453,95 @@ public class Manager_Console : MonoBehaviour
                         par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
                     }
 
-                    consoleText = "Fully repaired " + displayableItem.GetComponent<Env_Item>().str_ItemName + "!";
-                    CreateNewConsoleLine();
+                    CreateNewConsoleLine("Fully repaired " + displayableItem.GetComponent<Env_Item>().str_ItemName + "!");
                 }
             }
         }
         else if (!foundRepairable)
         {
-            consoleText = "Error: No repairable items were found in the players inventory or all items are already fully repaired!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: No repairable items were found in the players inventory or all items are already fully repaired!");
         }
         foundRepairable = false;
-        separatedWords.Clear();
-    }
-    //lists all players quest IDs
-    private void Command_GetAllPlayerQuestIDs()
-    {
-        insertedCommands.Add("player getallquestids");
-        currentSelectedInsertedCommand = insertedCommands.Count - 1;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
-        consoleText = "Error: This command has no functions yet!";
-        CreateNewConsoleLine();
-
-        separatedWords.Clear();
     }
 
     //set player reputation with a faction
     private void Command_SetPlayerRep()
     {
-        insertedCommands.Add("player setrep " + separatedWords[2] + " " + separatedWords[3]);
-        currentSelectedInsertedCommand = insertedCommands.Count;
-        consoleText = "--" + input + "--";
-        CreateNewConsoleLine();
-
         string factionName = separatedWords[2];
         bool isInt = int.TryParse(factionName, out _);
         bool isInsertedValueInt = int.TryParse(separatedWords[3], out _);
 
         if (isInt)
         {
-            consoleText = "Error: Faction name cannot be a number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Faction name cannot be a number!");
         }
         else if (!isInsertedValueInt)
         {
-            consoleText = "Error: Inserted value must be a whole number!";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Error: Inserted value must be a whole number!");
         }
         else if (!isInt && isInsertedValueInt)
         {
             int value = int.Parse(separatedWords[3]);
             if (value > -1001 && value < 1001)
             {
-                string confirmedFactionName = "none";
-
-                foreach (string possibleFactionName in factionNames)
+                if (factionName == "Scientists")
                 {
-                    if (factionName == possibleFactionName)
-                    {
-                        confirmedFactionName = factionName;
-                        break;
-                    }
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsScientists = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
                 }
-                if (confirmedFactionName != "none")
+                else if (factionName == "Geifers")
                 {
-                    if (confirmedFactionName == "scientists")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv1 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "geifers")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv2 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "annies")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv3 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "verbannte")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv4 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "raiders")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv5 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "military")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv6 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "verteidiger")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv7 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
-                    else if (confirmedFactionName == "others")
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv8 = value;
-                        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
-                        consoleText = "Changed player and " + confirmedFactionName + " reputation to " + value + "!";
-                        CreateNewConsoleLine();
-                    }
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsGeifers = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
                 }
-                else if (confirmedFactionName == "none")
+                else if (factionName == "Annies")
                 {
-                    consoleText = "Error: Faction name was not found!";
-                    CreateNewConsoleLine();
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsAnnies = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
+                }
+                else if (factionName == "Verbannte")
+                {
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsVerbannte = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
+                }
+                else if (factionName == "Raiders")
+                {
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsRaiders = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
+                }
+                else if (factionName == "Military")
+                {
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsMilitary = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
+                }
+                else if (factionName == "Verteidiger")
+                {
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsVerteidiger = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
+                }
+                else if (factionName == "Others")
+                {
+                    par_Managers.GetComponent<Manager_FactionReputation>().vsOthers = value;
+                    par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
+                    CreateNewConsoleLine("Changed player and " + factionName + " reputation to " + value + "!");
                 }
             }
             else if (value <= -1001)
             {
-                consoleText = "Error: Inserted reputation value must be higher than -1001!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Inserted reputation value must be higher than -1001!");
             }
             else if (value >= 1001)
             {
-                consoleText = "Error: Inserted reputation value must be lower than 1001!";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Error: Inserted reputation value must be lower than 1001!");
             }
         }
-        separatedWords.Clear();
     }
 
     private void RebuildInventoryUI()
@@ -3714,8 +2600,7 @@ public class Manager_Console : MonoBehaviour
         {
             selectedItem.GetComponent<Item_Gun>().UnequipGun();
 
-            consoleText = "Unequipped this gun because player removed it from their inventory.";
-            CreateNewConsoleLine();
+            CreateNewConsoleLine("Unequipped this gun because player removed it from their inventory.");
         }
         //if the player is removing a gun from their inventory with a clip that isnt empty
         if (selectedItem.GetComponent<Item_Gun>() != null
@@ -3749,8 +2634,7 @@ public class Manager_Console : MonoBehaviour
                     }
                 }
 
-                consoleText = "Unloaded this gun and added " + removedAmmo + " ammo to existing ammo clip in players inventory.";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Unloaded this gun and added " + removedAmmo + " ammo to existing ammo clip in players inventory.");
             }
             //if no ammo clip for this gun was found in the players inventory then a new clip is created
             else if (correctAmmo == null)
@@ -3766,8 +2650,7 @@ public class Manager_Console : MonoBehaviour
 
                 RebuildInventoryUI();
 
-                consoleText = "Unloaded this gun and added " + removedAmmo + " ammo to new ammo clip in players inventory.";
-                CreateNewConsoleLine();
+                CreateNewConsoleLine("Unloaded this gun and added " + removedAmmo + " ammo to new ammo clip in players inventory.");
             }
         }
         par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
@@ -3848,8 +2731,7 @@ public class Manager_Console : MonoBehaviour
 
     private void NewUnitylogMessage()
     {
-        consoleText = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]" + " - " + output;
-        CreateNewConsoleLine();
+        CreateNewConsoleLine("[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]" + " - " + output);
         lastOutput = output;
     }
 

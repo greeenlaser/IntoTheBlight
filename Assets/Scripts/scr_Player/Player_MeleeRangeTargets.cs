@@ -5,7 +5,7 @@ using UnityEngine;
 public class Player_MeleeRangeTargets : MonoBehaviour
 {
     //public but hidden variables
-    public List<GameObject> targets = new();
+    public List<GameObject> targets;
 
     //private variables
     private bool startedTargetListUpdater;

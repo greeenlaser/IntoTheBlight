@@ -7,7 +7,7 @@ public class UI_AbilityManager : MonoBehaviour
 {
     [Header("Abilities")]
     [SerializeField] private Transform pos_ButtonHide;
-    public List<GameObject> abilities = new();
+    public List<GameObject> abilities;
     [SerializeField] private GameObject assignedAbilitiesPlaceholder1;
     [SerializeField] private GameObject assignedAbilitiesPlaceholder2;
     [SerializeField] private GameObject assignedAbilitiesPlaceholder3;
@@ -20,7 +20,7 @@ public class UI_AbilityManager : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool hasExoskeleton;
     [HideInInspector] public int upgradeCellCount;
-    [HideInInspector] public List<GameObject> slots = new();
+    [HideInInspector] public List<GameObject> slots;
 
     //private variables
     private bool startAssignTimer;

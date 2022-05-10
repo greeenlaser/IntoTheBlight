@@ -140,73 +140,11 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_AbilityUI;
     public GameObject par_AssingedAbilityButtonUI;
 
-    [Header("Faction relationships")]
-    //player vs others
-    public TMP_Text txt_pv1;
-    public TMP_Text txt_pv2;
-    public TMP_Text txt_pv3;
-    public TMP_Text txt_pv4;
-    public TMP_Text txt_pv5;
-    public TMP_Text txt_pv6;
-    public TMP_Text txt_pv7;
-    //scientists vs others
-    public TMP_Text txt_1v1;
-    public TMP_Text txt_1v2;
-    public TMP_Text txt_1v3;
-    public TMP_Text txt_1v4;
-    public TMP_Text txt_1v5;
-    public TMP_Text txt_1v6;
-    public TMP_Text txt_1v7;
-    //geifers vs others
-    public TMP_Text txt_2v1;
-    public TMP_Text txt_2v2;
-    public TMP_Text txt_2v3;
-    public TMP_Text txt_2v4;
-    public TMP_Text txt_2v5;
-    public TMP_Text txt_2v6;
-    public TMP_Text txt_2v7;
-    //annies vs others
-    public TMP_Text txt_3v1;
-    public TMP_Text txt_3v2;
-    public TMP_Text txt_3v3;
-    public TMP_Text txt_3v4;
-    public TMP_Text txt_3v5;
-    public TMP_Text txt_3v6;
-    public TMP_Text txt_3v7;
-    //verbannte vs others
-    public TMP_Text txt_4v1;
-    public TMP_Text txt_4v2;
-    public TMP_Text txt_4v3;
-    public TMP_Text txt_4v4;
-    public TMP_Text txt_4v5;
-    public TMP_Text txt_4v6;
-    public TMP_Text txt_4v7;
-    //raiders vs others
-    public TMP_Text txt_5v1;
-    public TMP_Text txt_5v2;
-    public TMP_Text txt_5v3;
-    public TMP_Text txt_5v4;
-    public TMP_Text txt_5v5;
-    public TMP_Text txt_5v6;
-    public TMP_Text txt_5v7;
-    //military vs others
-    public TMP_Text txt_6v1;
-    public TMP_Text txt_6v2;
-    public TMP_Text txt_6v3;
-    public TMP_Text txt_6v4;
-    public TMP_Text txt_6v5;
-    public TMP_Text txt_6v6;
-    public TMP_Text txt_6v7;
-    //verteidiger vs others
-    public TMP_Text txt_7v1;
-    public TMP_Text txt_7v2;
-    public TMP_Text txt_7v3;
-    public TMP_Text txt_7v4;
-    public TMP_Text txt_7v5;
-    public TMP_Text txt_7v6;
-    public TMP_Text txt_7v7;
-    [SerializeField] private List<TMP_Text> texts = new();
-    public Manager_FactionReputation FactionManagerScript;
+    [Header("Factions")]
+    [SerializeField] private TMP_Text txt_factionRepTemplate;
+    [SerializeField] private Transform pos_factionRepTemplateSpawn;
+    [SerializeField] private Transform par_textSpawn;
+    [HideInInspector] public List<TMP_Text> texts;
 
     [Header("Player map")]
     public GameObject par_MainMapMask;
@@ -329,7 +267,7 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_NPCDialogue;
     public Button btn_dialogueTemplate;
     public GameObject par_DialoguePanel;
-    [HideInInspector] public List<Button> buttons = new();
+    [HideInInspector] public List<Button> buttons;
 
     [Header("Time")]
     public GameObject par_TimeSlider;
@@ -1277,86 +1215,132 @@ public class Manager_UIReuse : MonoBehaviour
 
     public void UpdatePlayerFactionUI()
     {
-        //players vs others
-        txt_pv1.text = FactionManagerScript.pv1.ToString();
-        txt_pv2.text = FactionManagerScript.pv2.ToString();
-        txt_pv3.text = FactionManagerScript.pv3.ToString();
-        txt_pv4.text = FactionManagerScript.pv4.ToString();
-        txt_pv5.text = FactionManagerScript.pv5.ToString();
-        txt_pv6.text = FactionManagerScript.pv6.ToString();
-        txt_pv7.text = FactionManagerScript.pv7.ToString();
-        //scientists vs others
-        txt_1v1.text = FactionManagerScript.rep1v1.ToString();
-        txt_1v2.text = FactionManagerScript.rep1v2.ToString();
-        txt_1v3.text = FactionManagerScript.rep1v3.ToString();
-        txt_1v4.text = FactionManagerScript.rep1v4.ToString();
-        txt_1v5.text = FactionManagerScript.rep1v5.ToString();
-        txt_1v6.text = FactionManagerScript.rep1v6.ToString();
-        txt_1v7.text = FactionManagerScript.rep1v7.ToString();
-        //geifers vs others
-        txt_2v1.text = FactionManagerScript.rep2v1.ToString();
-        txt_2v2.text = FactionManagerScript.rep2v2.ToString();
-        txt_2v3.text = FactionManagerScript.rep2v3.ToString();
-        txt_2v4.text = FactionManagerScript.rep2v4.ToString();
-        txt_2v5.text = FactionManagerScript.rep2v5.ToString();
-        txt_2v6.text = FactionManagerScript.rep2v6.ToString();
-        txt_2v7.text = FactionManagerScript.rep2v7.ToString();
-        //annies vs others
-        txt_3v1.text = FactionManagerScript.rep3v1.ToString();
-        txt_3v2.text = FactionManagerScript.rep3v2.ToString();
-        txt_3v3.text = FactionManagerScript.rep3v3.ToString();
-        txt_3v4.text = FactionManagerScript.rep3v4.ToString();
-        txt_3v5.text = FactionManagerScript.rep3v5.ToString();
-        txt_3v6.text = FactionManagerScript.rep3v6.ToString();
-        txt_3v7.text = FactionManagerScript.rep3v7.ToString();
-        //verbannte vs others
-        txt_4v1.text = FactionManagerScript.rep4v1.ToString();
-        txt_4v2.text = FactionManagerScript.rep4v2.ToString();
-        txt_4v3.text = FactionManagerScript.rep4v3.ToString();
-        txt_4v4.text = FactionManagerScript.rep4v4.ToString();
-        txt_4v5.text = FactionManagerScript.rep4v5.ToString();
-        txt_4v6.text = FactionManagerScript.rep4v6.ToString();
-        txt_4v7.text = FactionManagerScript.rep4v7.ToString();
-        //raiders vs others
-        txt_5v1.text = FactionManagerScript.rep5v1.ToString();
-        txt_5v2.text = FactionManagerScript.rep5v2.ToString();
-        txt_5v3.text = FactionManagerScript.rep5v3.ToString();
-        txt_5v4.text = FactionManagerScript.rep5v4.ToString();
-        txt_5v5.text = FactionManagerScript.rep5v5.ToString();
-        txt_5v6.text = FactionManagerScript.rep5v6.ToString();
-        txt_5v7.text = FactionManagerScript.rep5v7.ToString();
-        //military vs others
-        txt_6v1.text = FactionManagerScript.rep6v1.ToString();
-        txt_6v2.text = FactionManagerScript.rep6v2.ToString();
-        txt_6v3.text = FactionManagerScript.rep6v3.ToString();
-        txt_6v4.text = FactionManagerScript.rep6v4.ToString();
-        txt_6v5.text = FactionManagerScript.rep6v5.ToString();
-        txt_6v6.text = FactionManagerScript.rep6v6.ToString();
-        txt_6v7.text = FactionManagerScript.rep6v7.ToString();
-        //verteidiger vs others
-        txt_7v1.text = FactionManagerScript.rep7v1.ToString();
-        txt_7v2.text = FactionManagerScript.rep7v2.ToString();
-        txt_7v3.text = FactionManagerScript.rep7v3.ToString();
-        txt_7v4.text = FactionManagerScript.rep7v4.ToString();
-        txt_7v5.text = FactionManagerScript.rep7v5.ToString();
-        txt_7v6.text = FactionManagerScript.rep7v6.ToString();
-        txt_7v7.text = FactionManagerScript.rep7v7.ToString();
+        //clear texts list
+        if (texts.Count > 0)
+        {
+            foreach (TMP_Text text in texts)
+            {
+                Destroy(text.gameObject);
+            }
+            texts.Clear();
+        }
 
+        //how far down per faction turn
+        float down = -56f;
+        //how far right per faction value turn
+        float right = 145f;
+        //reset last height
+        float lastHeight;
+
+        //original spawn position
+        Vector3 spawnPos = pos_factionRepTemplateSpawn.position;
+        //new spawn position
+        Vector3 newPos = spawnPos;
+
+        //each turn moves the text down
+        foreach (GameObject faction in gameObject.GetComponent<GameManager>().gameFactions)
+        {
+            //ignores others faction
+            if (faction.GetComponent<Manager_FactionReputation>().faction.ToString() != "Others")
+            {
+                //save last height
+                lastHeight = newPos.y;
+                //replace last positions x position with original and keep last height
+                newPos = new(spawnPos.x, lastHeight, spawnPos.z);
+                //move position down
+                newPos += new Vector3(0, down, 0);
+                //create 9 new texts
+                UpdateIndividualFactionUI(faction, newPos, right);
+            }
+        }
+        //updates each texts color according to its value
         foreach (TMP_Text text in texts)
         {
-            int textValue = int.Parse(text.text.ToString());
-            if (textValue <= -250)
+            int value = int.Parse(text.text);
+
+            //under 500 - hates you
+            if (value <= -500)
             {
                 text.color = Color.red;
             }
-            else if (textValue > 250 && textValue < 250)
+            //between -500 and -100 - doesnt like you
+            else if (value > -500 && value < -100)
+            {
+                text.color = new Color32(255, 255, 0, 255);
+            }
+            //between -100 and 100 - tolerates you
+            else if (value >= -100 && value < 100)
             {
                 text.color = Color.white;
             }
-            else if (textValue >= 250)
+            //between 100 and 500 - likes you
+            else if (value >= 100 && value < 500)
+            {
+                text.color = new Color32(0, 255, 100, 255);
+            }
+            //over 500 - idolizes you
+            else if (value >= 500)
             {
                 text.color = Color.green;
             }
+        }
+    }
+    private void UpdateIndividualFactionUI(GameObject faction, Vector3 pos, float right)
+    {
+        int i = 1;
+        Manager_FactionReputation factionscript = faction.GetComponent<Manager_FactionReputation>();
+
+        //each turn moves the text right,
+        //ignores others faction
+        while (i < 9)
+        {
+            //move right
+            pos += new Vector3(right, 0, 0);
+            //increase right measurement slowly
+            right += 0.5f;
+            //create new text at pos
+            TMP_Text text = Instantiate(txt_factionRepTemplate,
+                                        pos,
+                                        Quaternion.identity,
+                                        par_textSpawn);
+
+            texts.Add(text);
+
+            //add each factions value to new text
+            if (i == 1)
+            {
+                text.text = factionscript.vsPlayer.ToString();
+            }
+            else if (i == 2)
+            {
+                text.text = factionscript.vsScientists.ToString();
+            }
+            else if (i == 3)
+            {
+                text.text = factionscript.vsGeifers.ToString();
+            }
+            else if (i == 4)
+            {
+                text.text = factionscript.vsAnnies.ToString();
+            }
+            else if (i == 5)
+            {
+                text.text = factionscript.vsVerbannte.ToString();
+            }
+            else if (i == 6)
+            {
+                text.text = factionscript.vsRaiders.ToString();
+            }
+            else if (i == 7)
+            {
+                text.text = factionscript.vsMilitary.ToString();
+            }
+            else if (i == 8)
+            {
+                text.text = factionscript.vsVerteidiger.ToString();
+            }
+
+            i++;
         }
     }
 }

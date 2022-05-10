@@ -48,45 +48,48 @@ public class Manager_GameSaving : MonoBehaviour
     private Vector3 pos_Player;
     private Vector3 rot_Player;
     private Vector3 rot_PlayerCamera;
+    private GameManager gameManagerScript;
 
     private void Awake()
     {
+        gameManagerScript = GetComponent<GameManager>();
+
         //get path to game saves folder
         path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
 
         try
         {
+            par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
+
             //create LightsOff save folder if it doesnt already exist
             if (!Directory.Exists(path))
             {
                 DirectoryInfo di = Directory.CreateDirectory(path);
-                //Debug.Log("Successfully created save folder!");
 
                 firstload = true;
                 OpenLoadingMenuUI();
             }
-            else if (Directory.Exists(path)
-                     && !File.Exists(path + @"\Save0001.txt"))
+            //if save folder already exists
+            else
             {
-                //initial global cell reset
-                par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
+                //if a save file was not found
+                if (!File.Exists(path + @"\Save0001.txt"))
+                {
+                    firstload = true;
+                    OpenLoadingMenuUI();
+                }
+                //loads game data if a save file was found
+                else
+                {
+                    OpenLoadingMenuUI();
 
-                firstload = true;
-                OpenLoadingMenuUI();
+                    LoadGameData();
+                }
             }
         }
         catch (Exception e)
         {
             Debug.LogError("Error: Failed to create save folder at " + path + "! " + e.Message + ".");
-        }
-
-        //loads game data if a save file was found
-        if (File.Exists(path + @"\Save0001.txt"))
-        {
-            OpenLoadingMenuUI();
-
-            //Debug.Log("Found save file! Loading data...");
-            LoadGameData();
         }
     }
 
@@ -133,8 +136,8 @@ public class Manager_GameSaving : MonoBehaviour
             }
             if (time > 10)
             {
-                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count - 1));
-                txt_TipText.text = par_Managers.GetComponent<GameManager>().tips[randomTip];
+                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, gameManagerScript.tips.Count - 1));
+                txt_TipText.text = gameManagerScript.tips[randomTip];
 
                 time = 0;
             }
@@ -157,8 +160,8 @@ public class Manager_GameSaving : MonoBehaviour
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
-        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, par_Managers.GetComponent<GameManager>().tips.Count - 1));
-        txt_TipText.text = par_Managers.GetComponent<GameManager>().tips[randomTip];
+        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, gameManagerScript.tips.Count - 1));
+        txt_TipText.text = gameManagerScript.tips[randomTip];
 
         btn_Continue.gameObject.SetActive(false);
     }
@@ -547,7 +550,7 @@ public class Manager_GameSaving : MonoBehaviour
                                                  Quaternion.identity);
 
                 //add to thrown grenades list
-                par_Managers.GetComponent<GameManager>().thrownGrenades.Add(grenade);
+                gameManagerScript.thrownGrenades.Add(grenade);
                 //apply the velocity
                 grenade.GetComponent<Rigidbody>().velocity = velocity;
 
@@ -576,8 +579,6 @@ public class Manager_GameSaving : MonoBehaviour
                         cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
                         cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
                     }
-
-                    cell.GetComponent<Manager_CurrentCell>().CellReset();
                 }
             }
 
@@ -764,333 +765,91 @@ public class Manager_GameSaving : MonoBehaviour
                 //loading player faction
                 if (line.Contains("playerFaction"))
                 {
-                    //temporary list of all factions
-                    List<Manager_FactionReputation.PlayerFaction> factions
-                                = Enum.GetValues(typeof(Manager_FactionReputation.PlayerFaction))
-                                .Cast<Manager_FactionReputation.PlayerFaction>()
-                                .ToList();
-
-                    //get the correct faction
-                    string factionName = "";
-                    foreach (var faction in factions)
+                    if (values[2] == "Scientists")
                     {
-                        if (faction.ToString().Contains(values[2]))
-                        {
-                            factionName = values[2];
-                            break;
-                        }
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Scientists;
                     }
-
-                    //convert faction name from string to enum and assign players correct faction in factions script
-                    par_Managers.GetComponent<Manager_FactionReputation>().playerFaction = (Manager_FactionReputation.PlayerFaction)Enum.Parse(typeof(Manager_FactionReputation.PlayerFaction), factionName);
+                    else if (values[2] == "Geifers")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Geifers;
+                    }
+                    else if (values[2] == "Annies")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Annies;
+                    }
+                    else if (values[2] == "Verbannte")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Verbannte;
+                    }
+                    else if (values[2] == "Raiders")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Raiders;
+                    }
+                    else if (values[2] == "Military")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Military;
+                    }
+                    else if (values[2] == "Verteidiger")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Verteidiger;
+                    }
+                    else if (values[2] == "Others")
+                    {
+                        gameManagerScript.playerFaction = GameManager.PlayerFaction.Others;
+                    }
                 }
                 //loading faction values
                 else if (line.Contains("vs"))
                 {
-                    //player vs others
-                    if (line.Contains("player_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("player_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().pv8 = int.Parse(numbers[0]);
-                    }
+                    string factionName1 = values[1];
+                    string factionName2 = values[2];
+                    int value = int.Parse(numbers[0]);
 
-                    //scientists vs others
-                    if (line.Contains("scientists_vs_scientists"))
+                    foreach (GameObject faction in gameManagerScript.gameFactions)
                     {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("scientists_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep1v8 = int.Parse(numbers[0]);
-                    }
+                        Manager_FactionReputation targetFactionScript = faction.GetComponent<Manager_FactionReputation>();
 
-                    //geifers vs others
-                    if (line.Contains("geifers_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("geifers_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep2v8 = int.Parse(numbers[0]);
-                    }
+                        if (targetFactionScript.faction.ToString() == factionName1)
+                        {
+                            if (factionName2 == "Player")
+                            {
+                                targetFactionScript.vsPlayer = value;
+                            }
+                            else if (factionName2 == "Scientists")
+                            {
+                                targetFactionScript.vsScientists = value;
+                            }
+                            else if (factionName2 == "Geifers")
+                            {
+                                targetFactionScript.vsGeifers = value;
+                            }
+                            else if (factionName2 == "Annies")
+                            {
+                                targetFactionScript.vsAnnies = value;
+                            }
+                            else if (factionName2 == "Verbannte")
+                            {
+                                targetFactionScript.vsVerbannte = value;
+                            }
+                            else if (factionName2 == "Raiders")
+                            {
+                                targetFactionScript.vsRaiders = value;
+                            }
+                            else if (factionName2 == "Military")
+                            {
+                                targetFactionScript.vsMilitary = value;
+                            }
+                            else if (factionName2 == "Verteidiger")
+                            {
+                                targetFactionScript.vsVerteidiger = value;
+                            }
+                            else if (factionName2 == "Others")
+                            {
+                                targetFactionScript.vsOthers = value;
+                            }
 
-                    //annies vs others
-                    if (line.Contains("annies_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("annies_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep3v8 = int.Parse(numbers[0]);
-                    }
-
-                    //verbannte vs others
-                    if (line.Contains("verbannte_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verbannte_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep4v8 = int.Parse(numbers[0]);
-                    }
-
-                    //raiders vs others
-                    if (line.Contains("raiders_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("raiders_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep5v8 = int.Parse(numbers[0]);
-                    }
-
-                    //military vs others
-                    if (line.Contains("military_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("military_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep6v8 = int.Parse(numbers[0]);
-                    }
-
-                    //verteidiger vs others
-                    if (line.Contains("verteidiger_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("verteidiger_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep7v8 = int.Parse(numbers[0]);
-                    }
-
-                    //others vs others
-                    if (line.Contains("others_vs_scientists"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v1 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_geifers"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v2 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_annies"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v3 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_verbannte"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v4 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_raiders"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v5 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_military"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v6 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_verteidiger"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v7 = int.Parse(numbers[0]);
-                    }
-                    if (line.Contains("others_vs_others"))
-                    {
-                        par_Managers.GetComponent<Manager_FactionReputation>().rep8v8 = int.Parse(numbers[0]);
+                            break;
+                        }
                     }
 
                     par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFactionUI();
@@ -1151,7 +910,7 @@ public class Manager_GameSaving : MonoBehaviour
     {
         //using a text editor to write text to the game save file in the saved file path
         using StreamWriter saveFile = File.CreateText(savedFilePath);
-        saveFile.WriteLine("Save file for Lights Off Version " + par_Managers.GetComponent<GameManager>().str_GameVersion);
+        saveFile.WriteLine("Save file for Lights Off Version " + gameManagerScript.str_GameVersion);
         saveFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
         saveFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
         saveFile.WriteLine("");
@@ -1424,7 +1183,7 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("");
         //save exoskeleton if player picked it up
         bool hasExoskeleton = false;
-        
+
         if (par_Managers.GetComponent<UI_AbilityManager>().hasExoskeleton)
         {
             hasExoskeleton = true;
@@ -1435,7 +1194,7 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("");
         saveFile.WriteLine("--- THROWN GRENADES ---");
 
-        if (par_Managers.GetComponent<GameManager>().thrownGrenades.Count > 0)
+        if (gameManagerScript.thrownGrenades.Count > 0)
         {
             saveFile.WriteLine("");
             saveFile.WriteLine("(1-3)X,Y and Z positions of this grenade,");
@@ -1443,7 +1202,7 @@ public class Manager_GameSaving : MonoBehaviour
             saveFile.WriteLine("(7)time since start of grenade cook timer (timed grenades)");
 
             saveFile.WriteLine("");
-            foreach (GameObject grenade in par_Managers.GetComponent<GameManager>().thrownGrenades)
+            foreach (GameObject grenade in gameManagerScript.thrownGrenades)
             {
                 string finalOutput = "tg_" + grenade.name + " = ";
 
@@ -1466,7 +1225,7 @@ public class Manager_GameSaving : MonoBehaviour
                 saveFile.WriteLine(finalOutput);
             }
         }
-        else if (par_Managers.GetComponent<GameManager>().thrownGrenades.Count == 0)
+        else if (gameManagerScript.thrownGrenades.Count == 0)
         {
             saveFile.WriteLine("");
             saveFile.WriteLine("<<<NO THROWN GRENADES FOUND>>>");
@@ -1685,16 +1444,6 @@ public class Manager_GameSaving : MonoBehaviour
                                 y = angle.y - 360f;
                             }
 
-                            /*
-                            if (angle.z > 180)
-                            {
-                                z = angle.z - 360f;
-                            }
-
-                            Debug.Log(angle + " : " + Mathf.Round(x) + " , " + Mathf.Round(y) + " , " + Mathf.Round(z));
-                            */
-
-
                             //get AI position and rotation
                             float pos_AIX = target.transform.localPosition.x;
                             float pos_AIY = target.transform.localPosition.y;
@@ -1739,108 +1488,115 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("");
         //save all faction reputation values
         saveFile.WriteLine("--- FACTION REPUTATIONS ---");
-
         saveFile.WriteLine("");
-        saveFile.WriteLine("fr_playerFaction = " + par_Managers.GetComponent<Manager_FactionReputation>().playerFaction.ToString());
+        saveFile.WriteLine("fr_playerFaction = " + gameManagerScript.playerFaction.ToString());
 
         saveFile.WriteLine("");
         //player vs others
-        saveFile.WriteLine("fr_player_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().pv1);
-        saveFile.WriteLine("fr_player_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().pv2);
-        saveFile.WriteLine("fr_player_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().pv3);
-        saveFile.WriteLine("fr_player_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().pv4);
-        saveFile.WriteLine("fr_player_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().pv5);
-        saveFile.WriteLine("fr_player_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().pv6);
-        saveFile.WriteLine("fr_player_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().pv7);
-        saveFile.WriteLine("fr_player_vs_others = " + par_Managers.GetComponent<Manager_FactionReputation>().pv8);
+        saveFile.WriteLine("fr_player_vs_scientists = " + gameManagerScript.vsScientists);
+        saveFile.WriteLine("fr_player_vs_geifers = " + gameManagerScript.vsGeifers);
+        saveFile.WriteLine("fr_player_vs_annies = " + gameManagerScript.vsAnnies);
+        saveFile.WriteLine("fr_player_vs_verbannte = " + gameManagerScript.vsVerbannte);
+        saveFile.WriteLine("fr_player_vs_raiders = " + gameManagerScript.vsRaiders);
+        saveFile.WriteLine("fr_player_vs_military = " + gameManagerScript.vsMilitary);
+        saveFile.WriteLine("fr_player_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+        saveFile.WriteLine("fr_player_vs_others = " + gameManagerScript.vsOthers);
 
-        saveFile.WriteLine("");
-        //scientists vs others
-        saveFile.WriteLine("fr_scientists_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v1);
-        saveFile.WriteLine("fr_scientists_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v2);
-        saveFile.WriteLine("fr_scientists_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v3);
-        saveFile.WriteLine("fr_scientists_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v4);
-        saveFile.WriteLine("fr_scientists_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v5);
-        saveFile.WriteLine("fr_scientists_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v6);
-        saveFile.WriteLine("fr_scientists_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v7);
-        saveFile.WriteLine("fr_scientists_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep1v8);
+        foreach (GameObject faction in gameManagerScript.gameFactions)
+        {
+            Manager_FactionReputation factionScript = faction.GetComponent<Manager_FactionReputation>();
+            string factionName = factionScript.faction.ToString();
 
-        saveFile.WriteLine("");
-        //geifers vs others
-        saveFile.WriteLine("fr_geifers_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v1);
-        saveFile.WriteLine("fr_geifers_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v2);
-        saveFile.WriteLine("fr_geifers_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v3);
-        saveFile.WriteLine("fr_geifers_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v4);
-        saveFile.WriteLine("fr_geifers_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v5);
-        saveFile.WriteLine("fr_geifers_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v6);
-        saveFile.WriteLine("fr_geifers_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v7);
-        saveFile.WriteLine("fr_geifers_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep2v8);
-
-        saveFile.WriteLine("");
-        //annies vs others
-        saveFile.WriteLine("fr_annies_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v1);
-        saveFile.WriteLine("fr_annies_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v2);
-        saveFile.WriteLine("fr_annies_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v3);
-        saveFile.WriteLine("fr_annies_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v4);
-        saveFile.WriteLine("fr_annies_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v5);
-        saveFile.WriteLine("fr_annies_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v6);
-        saveFile.WriteLine("fr_annies_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v7);
-        saveFile.WriteLine("fr_annies_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep3v8);
-
-        saveFile.WriteLine("");
-        //verbannte vs others
-        saveFile.WriteLine("fr_verbannte_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v1);
-        saveFile.WriteLine("fr_verbannte_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v2);
-        saveFile.WriteLine("fr_verbannte_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v3);
-        saveFile.WriteLine("fr_verbannte_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v4);
-        saveFile.WriteLine("fr_verbannte_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v5);
-        saveFile.WriteLine("fr_verbannte_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v6);
-        saveFile.WriteLine("fr_verbannte_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v7);
-        saveFile.WriteLine("fr_verbannte_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep4v8);
-
-        saveFile.WriteLine("");
-        //raiders vs others
-        saveFile.WriteLine("fr_raiders_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v1);
-        saveFile.WriteLine("fr_raiders_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v2);
-        saveFile.WriteLine("fr_raiders_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v3);
-        saveFile.WriteLine("fr_raiders_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v4);
-        saveFile.WriteLine("fr_raiders_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v5);
-        saveFile.WriteLine("fr_raiders_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v6);
-        saveFile.WriteLine("fr_raiders_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v7);
-        saveFile.WriteLine("fr_raiders_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep5v8);
-
-        saveFile.WriteLine("");
-        //military vs others
-        saveFile.WriteLine("fr_military_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v1);
-        saveFile.WriteLine("fr_military_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v2);
-        saveFile.WriteLine("fr_military_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v3);
-        saveFile.WriteLine("fr_military_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v4);
-        saveFile.WriteLine("fr_military_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v5);
-        saveFile.WriteLine("fr_military_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v6);
-        saveFile.WriteLine("fr_military_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v7);
-        saveFile.WriteLine("fr_military_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep6v8);
-
-        saveFile.WriteLine("");
-        //verteidiger vs others
-        saveFile.WriteLine("fr_verteidiger_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v1);
-        saveFile.WriteLine("fr_verteidiger_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v2);
-        saveFile.WriteLine("fr_verteidiger_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v3);
-        saveFile.WriteLine("fr_verteidiger_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v4);
-        saveFile.WriteLine("fr_verteidiger_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v5);
-        saveFile.WriteLine("fr_verteidiger_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v6);
-        saveFile.WriteLine("fr_verteidiger_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v7);
-        saveFile.WriteLine("fr_verteidiger_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep7v8);
-
-        saveFile.WriteLine("");
-        //others vs others
-        saveFile.WriteLine("fr_other_vs_scientists = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v1);
-        saveFile.WriteLine("fr_other_vs_geifers = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v2);
-        saveFile.WriteLine("fr_other_vs_annies = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v3);
-        saveFile.WriteLine("fr_other_vs_verbannte = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v4);
-        saveFile.WriteLine("fr_other_vs_raiders = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v5);
-        saveFile.WriteLine("fr_other_vs_military = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v6);
-        saveFile.WriteLine("fr_other_vs_verteidiger = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v7);
-        saveFile.WriteLine("fr_other_vs_other = " + par_Managers.GetComponent<Manager_FactionReputation>().rep8v8);
+            saveFile.WriteLine("");
+            if (factionName == "Scientists")
+            {
+                saveFile.WriteLine("fr_scientists_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_scientists_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_scientists_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_scientists_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_scientists_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_scientists_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_scientists_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_scientists_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Geifers")
+            {
+                saveFile.WriteLine("fr_geifers_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_geifers_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_geifers_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_geifers_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_geifers_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_geifers_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_geifers_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_geifers_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Annies")
+            {
+                saveFile.WriteLine("fr_annies_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_annies_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_annies_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_annies_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_annies_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_annies_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_annies_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_annies_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Verbannte")
+            {
+                saveFile.WriteLine("fr_verbannte_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_verbannte_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_verbannte_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_verbannte_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_verbannte_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_verbannte_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_verbannte_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_verbannte_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Raiders")
+            {
+                saveFile.WriteLine("fr_raiders_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_raiders_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_raiders_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_raiders_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_raiders_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_raiders_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_raiders_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_raiders_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Military")
+            {
+                saveFile.WriteLine("fr_military_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_military_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_military_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_military_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_military_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_military_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_military_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_military_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Verteidiger")
+            {
+                saveFile.WriteLine("fr_verteidiger_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_verteidiger_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_verteidiger_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_verteidiger_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_verteidiger_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_verteidiger_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_verteidiger_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_verteidiger_vs_others = " + gameManagerScript.vsOthers);
+            }
+            else if (factionName == "Others")
+            {
+                saveFile.WriteLine("fr_others_vs_scientists = " + gameManagerScript.vsScientists);
+                saveFile.WriteLine("fr_others_vs_geifers = " + gameManagerScript.vsGeifers);
+                saveFile.WriteLine("fr_others_vs_annies = " + gameManagerScript.vsAnnies);
+                saveFile.WriteLine("fr_others_vs_verbannte = " + gameManagerScript.vsVerbannte);
+                saveFile.WriteLine("fr_others_vs_raiders = " + gameManagerScript.vsRaiders);
+                saveFile.WriteLine("fr_others_vs_military = " + gameManagerScript.vsMilitary);
+                saveFile.WriteLine("fr_others_vs_verteidiger = " + gameManagerScript.vsVerteidiger);
+                saveFile.WriteLine("fr_others_vs_others = " + gameManagerScript.vsOthers);
+            }
+        }
     }
 
     //get all player values
@@ -1878,16 +1634,6 @@ public class Manager_GameSaving : MonoBehaviour
         {
             y = angle.y - 360f;
         }
-
-        /*
-        if (angle.z > 180)
-        {
-            z = angle.z - 360f;
-        }
-
-        Debug.Log(angle + " : " + Mathf.Round(x) + " , " + Mathf.Round(y) + " , " + Mathf.Round(z));
-        */
-
 
         //get player position, player and player camera rotation
         float pos_playerX = player.transform.localPosition.x;

@@ -12,7 +12,7 @@ public class Env_Workbench : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool isWorkbenchRepairUIOpen;
-    [HideInInspector] public List<GameObject> buttons = new();
+    [HideInInspector] public List<GameObject> buttons;
 
     private void Update()
     {

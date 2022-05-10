@@ -10,6 +10,30 @@ public class GameManager : MonoBehaviour
     public string str_GameVersion;
     [SerializeField] private TMP_Text txt_GameVersion;
 
+    [Header("Factions")]
+    public PlayerFaction playerFaction;
+    public enum PlayerFaction
+    {
+        unassigned,
+        Scientists,
+        Geifers,
+        Annies,
+        Verbannte,
+        Raiders,
+        Military,
+        Verteidiger,
+        Others
+    }
+    public int vsScientists;
+    public int vsGeifers;
+    public int vsAnnies;
+    public int vsVerbannte;
+    public int vsRaiders;
+    public int vsMilitary;
+    public int vsVerteidiger;
+    public int vsOthers;
+    public List<GameObject> gameFactions;
+
     [Header("Framerate")]
     [SerializeField] private int maxFPS;
     [Range(0.01f, 1f)]
@@ -21,10 +45,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     [Header("Tip list")]
-    public List<string> tips = new();
+    public List<string> tips;
 
     //public but hidden variables
-    [HideInInspector] public List<GameObject> thrownGrenades = new();
+    [HideInInspector] public List<GameObject> thrownGrenades;
 
     //private variables
     private float fps;

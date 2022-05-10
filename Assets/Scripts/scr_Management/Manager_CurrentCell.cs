@@ -21,16 +21,16 @@ public class Manager_CurrentCell : MonoBehaviour
     [SerializeField] private int maxNPCSpawnCount;
     [SerializeField] private GameObject NPCTemplate;
     [SerializeField] private Transform par_CellNPCs;
-    [SerializeField] private List<Transform> spawnPositions = new(); 
+    [SerializeField] private List<Transform> spawnPositions; 
 
     [Header("Main cell lists")]
-    public List<GameObject> items = new();
-    public List<GameObject> containers = new();
-    public List<GameObject> workbenches = new();
-    public List<GameObject> waitables = new();
-    public List<GameObject> destroyableCrates = new();
-    public List<GameObject> doors = new();
-    public List<GameObject> AI = new();
+    public List<GameObject> items;
+    public List<GameObject> containers;
+    public List<GameObject> workbenches;
+    public List<GameObject> waitables;
+    public List<GameObject> destroyableCrates;
+    public List<GameObject> doors;
+    public List<GameObject> AI;
 
     //public but hidden variables
     [HideInInspector] public bool discoveredCell;
@@ -172,7 +172,7 @@ public class Manager_CurrentCell : MonoBehaviour
                 }
             }
 
-
+            Debug.Log("aaa");
         }
     }
     //resets all resettable containers
