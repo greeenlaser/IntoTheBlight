@@ -19,8 +19,8 @@ public class Manager_Console : MonoBehaviour
     [SerializeField] private TMP_Text txt_PlayerSpeed;
     [SerializeField] private TMP_Text txt_SelectedTargetName;
     [SerializeField] private TMP_InputField txt_ConsoleInputField;
-    public List<GameObject> allCells = new List<GameObject>();
-    public List<GameObject> spawnables = new List<GameObject>();
+    public List<GameObject> allCells = new();
+    public List<GameObject> spawnables = new();
 
     [Header("Scripts")]
     [SerializeField] private Player_Health PlayerHealthScript;
@@ -39,9 +39,9 @@ public class Manager_Console : MonoBehaviour
     [HideInInspector] public int originalSpeed;
     [HideInInspector] public int originalJumpHeight;
     [HideInInspector] public int originalMaxInvspace;
-    [HideInInspector] private readonly List<string> cellnames = new List<string>();
-    [HideInInspector] private readonly List<string> itemnames = new List<string>();
-    [HideInInspector] public List<string> playeritemnames = new List<string>();
+    [HideInInspector] private readonly List<string> cellnames = new();
+    [HideInInspector] private readonly List<string> itemnames = new();
+    [HideInInspector] public List<string> playeritemnames = new();
     [HideInInspector] public GameObject lockpickUI;
 
     //private variables
@@ -61,9 +61,9 @@ public class Manager_Console : MonoBehaviour
     private GameObject correctAmmo;
     private GameObject displayableItem;
     private GameObject duplicate;
-    private readonly List<string> separatedWords = new List<string>();
-    private readonly List<GameObject> createdTexts = new List<GameObject>();
-    private readonly List<string> insertedCommands = new List<string>();
+    private readonly List<string> separatedWords = new();
+    private readonly List<GameObject> createdTexts = new();
+    private readonly List<string> insertedCommands = new();
 
     //spawn and remove multiple items
     private GameObject spawnableItem;
@@ -75,8 +75,8 @@ public class Manager_Console : MonoBehaviour
     private string cameraAngle;
     private string playerSpeed;
     private Vector3 lastPos;
-    private readonly List<GameObject> removables = new List<GameObject>();
-    private readonly List<string> factionNames = new List<string>();
+    private readonly List<GameObject> removables = new();
+    private readonly List<string> factionNames = new();
 
     //unity log variables
     private bool startedWait;
@@ -896,7 +896,7 @@ public class Manager_Console : MonoBehaviour
         CreateNewConsoleLine();
 
         string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
-        DirectoryInfo di = new DirectoryInfo(path);
+        DirectoryInfo di = new(path);
 
         //deletes all files and folders
         //if the folder exists and there are any files in the folder
@@ -2317,7 +2317,7 @@ public class Manager_Console : MonoBehaviour
             else
             {
                 //set teleportPos;
-                Vector3 teleportPos = new Vector3(firstVec, secondVec, thirdVec);
+                Vector3 teleportPos = new(firstVec, secondVec, thirdVec);
 
                 consoleText = "--tp " + firstVec + " " + secondVec + " " + thirdVec + "--";
                 CreateNewConsoleLine();
@@ -2390,7 +2390,7 @@ public class Manager_Console : MonoBehaviour
             for (int i = 0; i < allCells.Count; i++)
             {
                 GameObject cell = allCells[i];
-                GameObject lastCell = allCells[allCells.Count - 1];
+                GameObject lastCell = allCells[^1];
                 if (cellName == cell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
                     consoleText = "Teleported to cell " + cellName + "!";

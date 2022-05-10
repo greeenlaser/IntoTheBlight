@@ -7,7 +7,7 @@ public class AI_Movement : MonoBehaviour
 {
     [SerializeField] private float waypointWaitTime;
     [SerializeField] private float targetSearchWaitTime;
-    [SerializeField] private List<Transform> wayPoints = new List<Transform>();
+    [SerializeField] private List<Transform> wayPoints = new();
 
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;

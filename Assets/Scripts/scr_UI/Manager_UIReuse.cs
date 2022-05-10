@@ -205,7 +205,7 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_7v5;
     public TMP_Text txt_7v6;
     public TMP_Text txt_7v7;
-    [SerializeField] private List<TMP_Text> texts = new List<TMP_Text>();
+    [SerializeField] private List<TMP_Text> texts = new();
     public Manager_FactionReputation FactionManagerScript;
 
     [Header("Player map")]
@@ -329,7 +329,7 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_NPCDialogue;
     public Button btn_dialogueTemplate;
     public GameObject par_DialoguePanel;
-    [HideInInspector] public List<Button> buttons = new List<Button>();
+    [HideInInspector] public List<Button> buttons = new();
 
     [Header("Time")]
     public GameObject par_TimeSlider;

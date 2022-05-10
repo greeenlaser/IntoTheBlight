@@ -16,7 +16,7 @@ public class Manager_WorldCalendar : MonoBehaviour
 
     //private variables
     private int monthLastDayNumber;
-    private readonly List<string> monthEndDayNumbers = new List<string>();
+    private readonly List<string> monthEndDayNumbers = new();
 
     private void Start()
     {

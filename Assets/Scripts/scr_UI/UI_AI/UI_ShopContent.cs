@@ -22,7 +22,7 @@ public class UI_ShopContent : MonoBehaviour
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private UI_AIContent AIScript;
     [SerializeField] private GameObject par_Managers;
-    public List<GameObject> inventory = new List<GameObject>();
+    public List<GameObject> inventory = new();
 
     //public but hidden variables
     [HideInInspector] public bool isShopOpen;
@@ -34,7 +34,7 @@ public class UI_ShopContent : MonoBehaviour
     [HideInInspector] public bool showingAllGear;
     [HideInInspector] public bool showingAllMisc;
     [HideInInspector] public string str_ShopName;
-    [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
+    [HideInInspector] public List<GameObject> buttons = new();
 
     private void Start()
     {

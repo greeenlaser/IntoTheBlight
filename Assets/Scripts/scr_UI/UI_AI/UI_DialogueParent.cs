@@ -11,7 +11,7 @@ public class UI_DialogueParent : MonoBehaviour
     public string str_IntroductionDialogue;
     [TextArea(2, 5)]
     [SerializeField] private string dialogueEndText;
-    public List<GameObject> dialogues = new List<GameObject>();
+    public List<GameObject> dialogues = new();
 
     [Header("Scripts")]
     public UI_AIContent AIContentScript;

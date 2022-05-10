@@ -17,8 +17,8 @@ public class UI_QuestContent : MonoBehaviour
     public string str_questEndPlayerResponse;
 
     [Header("Assignables")]
-    public List<GameObject> questStages = new List<GameObject>();
-    public List<GameObject> questRewards = new List<GameObject>();
+    public List<GameObject> questStages = new();
+    public List<GameObject> questRewards = new();
     [SerializeField] private UI_AIContent AIScript;
     [SerializeField] private GameObject par_Managers;
 

@@ -343,7 +343,7 @@ public class Player_Movement : MonoBehaviour
         {
             float y = Input.GetAxis("Vertical");
 
-            Vector3 move = new Vector3(0, y, 0);
+            Vector3 move = new(0, y, 0);
             move = Vector3.ClampMagnitude(move, 1);
 
             controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
@@ -352,7 +352,7 @@ public class Player_Movement : MonoBehaviour
         {
             float y = Input.GetAxis("VerticalFlipped");
 
-            Vector3 move = new Vector3(0, y, 0);
+            Vector3 move = new(0, y, 0);
             move = Vector3.ClampMagnitude(move, 1);
 
             controller.Move(currentSpeed * speedIncrease * Time.deltaTime * move);
@@ -555,7 +555,7 @@ public class Player_Movement : MonoBehaviour
             Rigidbody targetRigidbody = hit.collider.attachedRigidbody;
 
             //push the object to the side, never up or down
-            Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+            Vector3 pushDir = new(hit.moveDirection.x, 0, hit.moveDirection.z);
             //apply push strength to the object
             targetRigidbody.velocity = pushDir * currentSpeed / 3;
         }

@@ -24,8 +24,8 @@ public class AI_Combat : MonoBehaviour
     [HideInInspector] public bool dealtFirstDamage;
     [HideInInspector] public bool lostTarget;
     [HideInInspector] public GameObject confirmedTarget;
-    [HideInInspector] public List<GameObject> hostileTargets = new List<GameObject>();
-    public List<GameObject> collidingObjects = new List<GameObject>();
+    [HideInInspector] public List<GameObject> hostileTargets = new();
+    public List<GameObject> collidingObjects = new();
 
     //private variables
     private bool calledResetOnce;

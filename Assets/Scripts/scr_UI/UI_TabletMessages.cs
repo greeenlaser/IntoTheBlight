@@ -14,7 +14,7 @@ public class UI_TabletMessages : MonoBehaviour
     [SerializeField] private Transform par_SpawnedTabletMessages;
 
     //public but hidden variables
-    [HideInInspector] public List<GameObject> messages = new List<GameObject>();
+    [HideInInspector] public List<GameObject> messages = new();
 
     public void SendMessage(GameObject logo, string messageTime, string senderName, string messageContent)
     {

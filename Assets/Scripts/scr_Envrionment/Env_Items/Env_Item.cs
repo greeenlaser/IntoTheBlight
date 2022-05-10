@@ -2051,7 +2051,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 gameObject.transform.position = thePlayer.transform.position + dropPos;
 
@@ -2979,7 +2979,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 gameObject.transform.position = thePlayer.transform.position + dropPos;
 
@@ -3017,7 +3017,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 theItem.transform.position = thePlayer.transform.position + dropPos;
 

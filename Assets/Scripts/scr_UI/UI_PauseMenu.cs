@@ -30,7 +30,7 @@ public class UI_PauseMenu : MonoBehaviour
 
     //private variables
     private bool calledOnce;
-    private readonly List<AudioSource> pausedSFX = new List<AudioSource>();
+    private readonly List<AudioSource> pausedSFX = new();
 
     private void Awake()
     {

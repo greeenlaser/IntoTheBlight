@@ -21,7 +21,7 @@ public class UI_DialogueChoice : MonoBehaviour
     [SerializeField] private string returnText;
     [TextArea(5, 5)]
     [SerializeField] private string npcResponse;
-    public List<GameObject> dialogues = new List<GameObject>();
+    public List<GameObject> dialogues = new();
 
     [Header("Scripts")]
     [SerializeField] private UI_DialogueParent DialogueParentScript;

@@ -11,7 +11,7 @@ public class Player_RaycastSystem : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public GameObject heldObject;
     [HideInInspector] public bool isColliding;
-    [HideInInspector] public List<GameObject> targets = new List<GameObject>();
+    [HideInInspector] public List<GameObject> targets = new();
 
     //private variables
     private bool canInteract;

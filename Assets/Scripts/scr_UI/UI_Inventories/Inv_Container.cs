@@ -13,7 +13,7 @@ public class Inv_Container : MonoBehaviour
     public GameObject par_ContainerItems;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private GameObject par_Managers;
-    public List<GameObject> inventory = new List<GameObject>();
+    public List<GameObject> inventory = new();
 
     [Header("For containers")]
     public bool isProtected;
@@ -36,7 +36,7 @@ public class Inv_Container : MonoBehaviour
     [HideInInspector] public bool showingAllAmmo;
     [HideInInspector] public bool showingAllGear;
     [HideInInspector] public bool showingAllMisc;
-    [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
+    [HideInInspector] public List<GameObject> buttons = new();
 
     //private variables
     private bool destroySelf;
@@ -301,7 +301,7 @@ public class Inv_Container : MonoBehaviour
         //get random amount of items we want to spawn
         int selectedItemCount = Random.Range(3, 10);
         //create list for selected item indexes
-        List<int> selectedItems = new List<int>();
+        List<int> selectedItems = new();
         //pick selectedItemCount amount of random item indexes and assign to list
         for (int i = 0; i < selectedItemCount; i++)
         {

@@ -13,12 +13,12 @@ public class UI_RadioManager : MonoBehaviour
     public TMP_Text txt_radioConnection;
     [SerializeField] private Slider radioFrequencySlider;
     public AudioSource staticAudio;
-    public List<GameObject> radioStations = new List<GameObject>();
+    public List<GameObject> radioStations = new();
 
     //public but hidden variables
     [HideInInspector] public float currentRadioFrequency = 89f;
-    [HideInInspector] public List<string> radioStationNames = new List<string>();
-    [HideInInspector] public List<float> radioStationFrequencies = new List<float>();
+    [HideInInspector] public List<string> radioStationNames = new();
+    [HideInInspector] public List<float> radioStationFrequencies = new();
 
     //private variables
     private bool isRadioMuted;

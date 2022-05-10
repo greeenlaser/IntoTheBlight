@@ -21,10 +21,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     [Header("Tip list")]
-    public List<string> tips = new List<string>();
+    public List<string> tips = new();
 
     //public but hidden variables
-    [HideInInspector] public List<GameObject> thrownGrenades = new List<GameObject>();
+    [HideInInspector] public List<GameObject> thrownGrenades = new();
 
     //private variables
     private float fps;

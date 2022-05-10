@@ -14,7 +14,7 @@ public class Inv_Player : MonoBehaviour
     public GameObject par_PlayerItems;
     public Transform pos_EquippedItem;
     [SerializeField] private GameObject par_Managers;
-    public List<GameObject> inventory = new List<GameObject>();
+    public List<GameObject> inventory = new();
 
     //public but hidden variables
     [HideInInspector] public bool closedInventoryThroughContainer;
@@ -40,7 +40,7 @@ public class Inv_Player : MonoBehaviour
     [HideInInspector] public GameObject equippedGun;
     [HideInInspector] public GameObject equippedFlashlight;
     [HideInInspector] public GameObject heldObject;
-    [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
+    [HideInInspector] public List<GameObject> buttons = new();
 
     private void Awake()
     {

@@ -11,7 +11,7 @@ public class Env_Lift : MonoBehaviour
     [SerializeField] private Transform pos_Lift;
     [SerializeField] private Transform par_Lift;
     [SerializeField] private Env_Door LiftDoorScript;
-    [SerializeField] private List<Transform> floors = new List<Transform>();
+    [SerializeField] private List<Transform> floors = new();
 
     //public but hidden variables
     [HideInInspector] public bool liftIsMoving;
@@ -19,8 +19,8 @@ public class Env_Lift : MonoBehaviour
     //private variables
     private int chosenFloor;
     private float distanceToChosenFloor;
-    private readonly List<GameObject> liftUsers = new List<GameObject>();
-    private readonly List<Transform> liftUserParents = new List<Transform>();
+    private readonly List<GameObject> liftUsers = new();
+    private readonly List<Transform> liftUserParents = new();
 
     private void OnTriggerEnter(Collider other)
     {

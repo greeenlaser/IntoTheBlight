@@ -181,7 +181,7 @@ public class Manager_GameSaving : MonoBehaviour
             //remove unwanted separators and split line into separate strings
             string[] values = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             //list of confirmed numbers
-            List<string> numbers = new List<string>();
+            List<string> numbers = new();
             //add all numbers to new list
             foreach (string value in values)
             {
@@ -231,9 +231,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerPosition"))
                 {
                     //add all values to temporary playerPos value
-                    Vector3 playerPos = new Vector3(float.Parse(numbers[0]),
-                                                    float.Parse(numbers[1]),
-                                                    float.Parse(numbers[2]));
+                    Vector3 playerPos = new(float.Parse(numbers[0]),
+                                            float.Parse(numbers[1]),
+                                            float.Parse(numbers[2]));
                     //add all temporary playerPos values to real player position
                     player.transform.localPosition = playerPos;
                 }
@@ -241,9 +241,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerRotation"))
                 {
                     //add all values to temporary playerRot value
-                    Vector3 playerRot = new Vector3(float.Parse(numbers[0]),
-                                                    float.Parse(numbers[1]),
-                                                    float.Parse(numbers[2]));
+                    Vector3 playerRot = new(float.Parse(numbers[0]),
+                                            float.Parse(numbers[1]),
+                                            float.Parse(numbers[2]));
                     //add all temporary playerRot values to real player rotation
                     player.transform.eulerAngles = playerRot;
                 }
@@ -251,9 +251,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerCameraRotation"))
                 {
                     //add all values to temporary playerCameraRot value
-                    Vector3 playerCameraRot = new Vector3(float.Parse(numbers[0]),
-                                                    float.Parse(numbers[1]),
-                                                    float.Parse(numbers[2]));
+                    Vector3 playerCameraRot = new(float.Parse(numbers[0]),
+                                                  float.Parse(numbers[1]),
+                                                  float.Parse(numbers[2]));
                     //add all temporary playerCameraRot values to real player camera rotation
                     playerCamera.transform.eulerAngles = playerCameraRot;
                 }
@@ -494,13 +494,13 @@ public class Manager_GameSaving : MonoBehaviour
             else if (line.Contains("tg_"))
             {
                 //get grenade position
-                Vector3 position = new Vector3(float.Parse(numbers[0]),
-                                               float.Parse(numbers[1]),
-                                               float.Parse(numbers[2]));
+                Vector3 position = new(float.Parse(numbers[0]),
+                                       float.Parse(numbers[1]),
+                                       float.Parse(numbers[2]));
                 //get grenade velocity
-                Vector3 velocity = new Vector3(float.Parse(numbers[3]), 
-                                               float.Parse(numbers[4]), 
-                                               float.Parse(numbers[5]));
+                Vector3 velocity = new(float.Parse(numbers[3]), 
+                                       float.Parse(numbers[4]), 
+                                       float.Parse(numbers[5]));
                 //get grenade time until explosion if this grenade has a timer
                 float timeUntilExplosion = 0;
                 if (numbers.Count > 6)
@@ -704,14 +704,14 @@ public class Manager_GameSaving : MonoBehaviour
                             if (npcIndex == cell.GetComponent<Manager_CurrentCell>().AI.IndexOf(npc))
                             {
                                 //load npc position
-                                Vector3 AIPos = new Vector3(float.Parse(numbers[2]),
-                                                            float.Parse(numbers[3]),
-                                                            float.Parse(numbers[4]));
+                                Vector3 AIPos = new(float.Parse(numbers[2]),
+                                                    float.Parse(numbers[3]),
+                                                    float.Parse(numbers[4]));
                                 npc.transform.localPosition = AIPos;
                                 //load npc rotation
-                                Vector3 AIRot = new Vector3(float.Parse(numbers[5]),
-                                                            float.Parse(numbers[6]),
-                                                            float.Parse(numbers[7]));
+                                Vector3 AIRot = new(float.Parse(numbers[5]),
+                                                    float.Parse(numbers[6]),
+                                                    float.Parse(numbers[7]));
                                 npc.transform.eulerAngles = AIRot;
 
                                 if (npc.GetComponent<AI_Health>() != null)
@@ -1710,9 +1710,9 @@ public class Manager_GameSaving : MonoBehaviour
 
                             output += cellIndex.ToString() + "_" + targetIndex.ToString() + " = ";
 
-                            Vector3 pos_AI = new Vector3(pos_AIX, pos_AIY, pos_AIZ);
+                            Vector3 pos_AI = new(pos_AIX, pos_AIY, pos_AIZ);
                             output += pos_AI;
-                            Vector3 rot_AI = new Vector3(rot_AIX, rot_AIY, rot_AIZ);
+                            Vector3 rot_AI = new(rot_AIX, rot_AIY, rot_AIZ);
                             output += ", " + rot_AI;
                             if (target.GetComponent<AI_Health>() != null
                                 && target.GetComponent<AI_Health>().isKillable)

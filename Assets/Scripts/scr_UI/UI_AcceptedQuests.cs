@@ -9,9 +9,9 @@ public class UI_AcceptedQuests : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool isQuestsListOpen;
-    [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
-    [HideInInspector] public List<GameObject> acceptedQuests = new List<GameObject>();
-    [HideInInspector] public List<GameObject> finishedQuests = new List<GameObject>();
+    [HideInInspector] public List<GameObject> buttons = new();
+    [HideInInspector] public List<GameObject> acceptedQuests = new();
+    [HideInInspector] public List<GameObject> finishedQuests = new();
 
     public void OpenQuests()
     {

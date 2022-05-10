@@ -20,11 +20,11 @@ public class Player_Health : MonoBehaviour
     [HideInInspector] public float health;
     [HideInInspector] public float mentalState;
     [HideInInspector] public float radiation;
-    [HideInInspector] public List<GameObject> elementalDamageDealers = new List<GameObject>();
+    [HideInInspector] public List<GameObject> elementalDamageDealers = new();
 
     //private variables
     private Manager_UIReuse UIScript;
-    private readonly List<string> damageTypes = new List<string>();
+    private readonly List<string> damageTypes = new();
 
     //damage variables
     private bool enableTimer;

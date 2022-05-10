@@ -11,7 +11,7 @@ public class UI_RepairContent : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool isNPCRepairUIOpen;
-    [HideInInspector] public List<GameObject> buttons = new List<GameObject>();
+    [HideInInspector] public List<GameObject> buttons = new();
 
 
     private void Update()

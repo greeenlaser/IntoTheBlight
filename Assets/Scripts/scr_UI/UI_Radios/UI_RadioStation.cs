@@ -10,7 +10,7 @@ public class UI_RadioStation : MonoBehaviour
     public float radioFrequency;
     public AudioSource RadioSource;
     [SerializeField] private GameObject par_Managers;
-    [SerializeField] private List<AudioClip> songs = new List<AudioClip>();
+    [SerializeField] private List<AudioClip> songs = new();
 
     //public but hidden variables
     [HideInInspector] public bool isPlaying;
