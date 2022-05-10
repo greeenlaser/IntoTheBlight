@@ -102,9 +102,10 @@ public class AI_Movement : MonoBehaviour
                     }
 
                     Vector3 targetDir = (target.transform.position - gameObject.transform.position);
-                    if (Physics.Raycast(transform.position, 
-                                        targetDir, 
-                                        out RaycastHit hit, 
+
+                    if (Physics.Raycast(transform.position,
+                                        targetDir,
+                                        out RaycastHit hit,
                                         50))
                     {
                         if (hit.transform.gameObject == target)

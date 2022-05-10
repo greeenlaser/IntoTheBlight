@@ -24,7 +24,6 @@ public class Inv_Container : MonoBehaviour
 
     [Header("For lootable NPCs")]
     public GameObject discardableDeadNPC;
-    [SerializeField] private Manager_CurrentCell currentCellScript;
 
     //public but hidden variables
     [HideInInspector] public bool isContainerInventoryOpen;
@@ -279,10 +278,6 @@ public class Inv_Container : MonoBehaviour
 
         if (destroySelf)
         {
-            if (discardableDeadNPC.GetComponent<AI_Health>().isRespawnable)
-            {
-                currentCellScript.respawnableNPCCount++;
-            }
             Destroy(discardableDeadNPC);
         }
     }
@@ -292,7 +287,9 @@ public class Inv_Container : MonoBehaviour
     {
         par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = false;
         CloseContainerAndPlayerInventory();
+
         destroySelf = true;
+
         discardableDeadNPC.transform.position = new Vector3(0, -1000, 0);
     }
 

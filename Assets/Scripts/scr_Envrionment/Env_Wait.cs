@@ -46,7 +46,7 @@ public class Env_Wait : MonoBehaviour
 
         if (par_Managers.GetComponent<Manager_WorldClock>().hoursUntilCellReset <= 0)
         {
-            par_Managers.GetComponent<GameManager>().GlobalCellReset();
+            par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
 
             //removes more hours from the next full 72 hours
             //if this waitable waited past the 0 hours until global cell restart

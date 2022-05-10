@@ -69,7 +69,7 @@ public class Manager_GameSaving : MonoBehaviour
                      && !File.Exists(path + @"\Save0001.txt"))
             {
                 //initial global cell reset
-                par_Managers.GetComponent<GameManager>().GlobalCellReset();
+                par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
 
                 firstload = true;
                 OpenLoadingMenuUI();
@@ -575,13 +575,9 @@ public class Manager_GameSaving : MonoBehaviour
                     {
                         cell.GetComponent<Manager_CurrentCell>().discoveredCell = true;
                         cell.GetComponent<Manager_CurrentCell>().EnableCellTeleportButtonOnMap();
-
-                        if (cell.GetComponent<Manager_CurrentCell>().respawnPositions.Count > 0
-                            && int.Parse(numbers[0]) > 0)
-                        {
-                            par_Managers.GetComponent<GameManager>().RespawnNPCs(cell, int.Parse(numbers[0]));
-                        }
                     }
+
+                    cell.GetComponent<Manager_CurrentCell>().CellReset();
                 }
             }
 
@@ -718,12 +714,42 @@ public class Manager_GameSaving : MonoBehaviour
                                                             float.Parse(numbers[7]));
                                 npc.transform.eulerAngles = AIRot;
 
-                                if (numbers.Count > 8)
+                                if (npc.GetComponent<AI_Health>() != null)
                                 {
-                                    //load npc health
-                                    npc.transform.GetComponent<AI_Health>().currentHealth = int.Parse(numbers[8]);
-                                    //load npc max health
-                                    npc.transform.GetComponent<AI_Health>().maxHealth = int.Parse(numbers[9]);
+                                    //if the npc took any damage
+                                    //then health and max health are loaded
+                                    if (numbers.Count > 8)
+                                    {
+                                        AI_Health npcHealthScript = npc.GetComponent<AI_Health>();
+
+                                        //load npc health
+                                        float currentHealth = float.Parse(numbers[8]);
+                                        npcHealthScript.currentHealth = currentHealth;
+
+                                        //load npc max health
+                                        float maxHealth = float.Parse(numbers[9]);
+                                        npcHealthScript.currentHealth = currentHealth;
+
+                                        //if ai health is over 25% then it is colored green
+                                        if (currentHealth > maxHealth / 4)
+                                        {
+                                            npc.GetComponent<Renderer>().material.color = Color.green;
+                                        }
+                                        //if ai health is 25% or less then it is colored yellow
+                                        else if (currentHealth <= maxHealth / 4)
+                                        {
+                                            npc.GetComponent<Renderer>().material.color = Color.yellow;
+                                        }
+
+                                    }
+                                    //otherwise health is set to max health
+                                    else
+                                    {
+                                        float maxHealth = npc.transform.GetComponent<AI_Health>().maxHealth;
+                                        npc.transform.GetComponent<AI_Health>().currentHealth = maxHealth;
+
+                                        npc.GetComponent<Renderer>().material.color = Color.green;
+                                    }
                                 }
                             }
                         }
@@ -1450,9 +1476,6 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("--- DISCOVERED CELLS ---");
 
         saveFile.WriteLine("");
-        saveFile.WriteLine("(1)how many NPCs will respawn in this cell (if this cell supports NPC respawning)");
-
-        saveFile.WriteLine("");
         //save all cells that have been discovered
         foreach (GameObject cell in par_Managers.GetComponent<Manager_Console>().allCells)
         {
@@ -1460,11 +1483,6 @@ public class Manager_GameSaving : MonoBehaviour
             {
                 //add cell name
                 string output = "dc_" + cell.GetComponent<Manager_CurrentCell>().str_CellName;
-                //add respawnable npc count if this cell has any respawn positions
-                if (cell.GetComponent<Manager_CurrentCell>().respawnPositions.Count > 0)
-                {
-                    output += " = " + cell.GetComponent<Manager_CurrentCell>().respawnableNPCCount.ToString();
-                }
 
                 saveFile.WriteLine(output);
             }

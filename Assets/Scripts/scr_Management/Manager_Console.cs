@@ -949,14 +949,19 @@ public class Manager_Console : MonoBehaviour
         separatedWords.Clear();
     }
     //adds time in hours
-    private void Command_GlobalCellReset()
+    public void Command_GlobalCellReset()
     {
         insertedCommands.Add("gcr");
         currentSelectedInsertedCommand = insertedCommands.Count;
         consoleText = "--gcr--";
         CreateNewConsoleLine();
 
-        par_Managers.GetComponent<GameManager>().GlobalCellReset();
+        foreach (GameObject cell in allCells)
+        {
+            cell.GetComponent<Manager_CurrentCell>().CellReset();
+        }
+
+        Debug.Log("System: Global cell reset.");
 
         separatedWords.Clear();
     }

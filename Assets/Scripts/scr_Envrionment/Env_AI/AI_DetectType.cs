@@ -31,14 +31,14 @@ public class AI_DetectType : MonoBehaviour
     {
         if (visionCone != null)
         {
-            if (AIHealthScript.currentHealth > 0)
+            if (AIHealthScript.isAlive)
             {
                 Vector3 targetRotation = target.transform.eulerAngles;
                 gameObject.transform.eulerAngles = new Vector3(0, targetRotation.y + 90, 0);
 
                 gameObject.transform.position = target.position;
             }
-            else if (AIHealthScript.currentHealth <= 0)
+            else
             {
                 Destroy(gameObject);
             }
@@ -58,7 +58,10 @@ public class AI_DetectType : MonoBehaviour
                 && !AICombatScript.collidingObjects.Contains(other.gameObject))
             {
                 AICombatScript.collidingObjects.Add(other.gameObject);
-                //Debug.Log("Added the player to the AI spotted list.");
+            }
+            else
+            {
+                Debug.Log(other.name);
             }
         }
     }

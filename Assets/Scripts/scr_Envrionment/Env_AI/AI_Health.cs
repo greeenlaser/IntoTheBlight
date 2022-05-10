@@ -15,7 +15,7 @@ public class AI_Health : MonoBehaviour
 
     //public but hidden variables
     [HideInInspector] public bool isAlive;
-    [HideInInspector] public float currentHealth;
+    public float currentHealth;
 
     //private variables
     private float timer;
@@ -23,13 +23,10 @@ public class AI_Health : MonoBehaviour
     private void Start()
     {
         isAlive = true;
-        currentHealth = maxHealth;
 
         canBeHostile = true;
 
         par_deadAILoot.SetActive(false);
-
-        gameObject.GetComponent<Renderer>().material.color = Color.green;
     }
 
     private void Update()

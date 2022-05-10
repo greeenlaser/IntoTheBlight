@@ -35,7 +35,7 @@ public class Manager_WorldClock : MonoBehaviour
                 hoursUntilCellReset--;
                 if (hoursUntilCellReset <= 0)
                 {
-                    par_Managers.GetComponent<GameManager>().GlobalCellReset();
+                    par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
                     hoursUntilCellReset = 72;
                 }
 
