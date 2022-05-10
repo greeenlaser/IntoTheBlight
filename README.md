@@ -6,4 +6,4 @@ Note: WHEN GAME VERSION 0.5.0.2_2 IS FINISHED THEN BOTH MAIN AND INDEV WILL REQU
 
 Main branch - 2021.1.28f1
 
-Indev branch - 2021.3.1f1
+Indev branch - 2022.0.1f1
