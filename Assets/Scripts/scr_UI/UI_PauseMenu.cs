@@ -372,6 +372,9 @@ public class UI_PauseMenu : MonoBehaviour
             //Debug.Log("Found save file! Loading data...");
             savingScript.LoadGameData();
         }
+
+        thePlayer.GetComponent<Player_Health>().txt_PlayerDied.gameObject.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().HideExoskeletonUI();
     }
 
     public void OpenKeyCommands()

@@ -2158,6 +2158,11 @@ public class Manager_Console : MonoBehaviour
                         }
 
                         RebuildInventoryUI();
+                        if (duplicate.GetComponent<Item_Ammo>() != null
+                            || duplicate.GetComponent<Item_Grenade>() != null)
+                        {
+                            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = duplicate.GetComponent<Env_Item>().int_itemCount.ToString();
+                        }
 
                         CreateNewConsoleLine("Successfully added " + insertedValue + " " + selectedItem.name + "(s) to players inventory! Removed " + spawnableItemWeight * insertedValue + " space from players inventory.");
                     }
@@ -2181,8 +2186,9 @@ public class Manager_Console : MonoBehaviour
                         playeritemnames.Add(newDuplicate.GetComponent<Env_Item>().str_ItemName);
 
                         //assigns new ammo to currently equipped gun if ammo type is same as equipped gun
-                        if (newDuplicate.GetComponent<Item_Ammo>() != null
-                            && PlayerInventoryScript.equippedGun != null
+                        if (PlayerInventoryScript.equippedGun != null
+                            && PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>() != null
+                            && newDuplicate.GetComponent<Item_Ammo>() != null
                             && newDuplicate.GetComponent<Item_Ammo>().caseType.ToString()
                             == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
                         {
@@ -2190,6 +2196,11 @@ public class Manager_Console : MonoBehaviour
                         }
 
                         RebuildInventoryUI();
+                        if (newDuplicate.GetComponent<Item_Ammo>() != null
+                            || newDuplicate.GetComponent<Item_Grenade>() != null)
+                        {
+                            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = newDuplicate.GetComponent<Env_Item>().int_itemCount.ToString();
+                        }
 
                         newDuplicate.GetComponent<MeshRenderer>().enabled = false;
                         if (newDuplicate.GetComponent<Rigidbody>() != null)
@@ -2353,6 +2364,12 @@ public class Manager_Console : MonoBehaviour
                         PlayerInventoryScript.invSpace += selectedItem.GetComponent<Env_Item>().int_ItemWeight * insertedValue;
                         selectedItem.GetComponent<Env_Item>().int_itemCount -= insertedValue;
                         RebuildInventoryUI();
+
+                        if (selectedItem.GetComponent<Item_Ammo>() != null
+                            || selectedItem.GetComponent<Item_Grenade>() != null)
+                        {
+                            par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = selectedItem.GetComponent<Env_Item>().int_itemCount.ToString();
+                        }
 
                         int spawnableItemWeight = selectedItem.GetComponent<Env_Item>().int_ItemWeight;
                         CreateNewConsoleLine("Successfully removed " + insertedValue + " " + selectedItem.name + "(s) from players inventory! Added " + spawnableItemWeight * insertedValue + " space back to players inventory.");
@@ -2579,6 +2596,7 @@ public class Manager_Console : MonoBehaviour
     {
         //updates player equpped gun and removes ammo
         if (PlayerInventoryScript.equippedGun != null
+            && PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>() != null
             && selectedItem.GetComponent<Item_Ammo>().caseType.ToString()
             == PlayerInventoryScript.equippedGun.GetComponent<Item_Gun>().caseType.ToString())
         {

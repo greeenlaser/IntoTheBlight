@@ -101,7 +101,7 @@ public class Item_Grenade : MonoBehaviour
     {
         if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
             && !par_Managers.GetComponent<Manager_Console>().consoleOpen
-            && PlayerHealthScript.health > 0
+            && PlayerHealthScript.isPlayerAlive
             && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             if (hasEquippedGrenade
@@ -283,44 +283,105 @@ public class Item_Grenade : MonoBehaviour
                 {
                     foreach (Collider target in colliders)
                     {
+                        //get the direction of the target
+                        Vector3 destination = (target.transform.position - gameObject.transform.position);
+
                         //frag and plasma grenade effects
                         if (fragExplode
                             || plasmaExplode)
                         {
-                            //get distance between target and grenade
-                            float distance = Vector3.Distance(target.transform.position, transform.position);
-                            //get true grenade damage by distance
-                            float damageByDistance = Mathf.Floor(maxDamage / (distance / 2) * 10) / 10;
-
-                            //grenade damage can never be go below 10% max damage
-                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
-                            {
-                                damageByDistance = Mathf.Floor(maxDamage / 10);
-                            }
-
                             //if player was in explosion range
                             if (target.GetComponent<Player_Health>() != null
                                 && PlayerHealthScript.canTakeDamage
                                 && PlayerHealthScript.isPlayerAlive)
                             {
-                                target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), damageByDistance);
-                                //Debug.Log("Grenade distance from player was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
+                                foreach (GameObject item in PlayerRaycastScript.targets)
+                                {
+                                    if (item.name == name
+                                        && Physics.Raycast(transform.position,
+                                                           destination,
+                                                           out RaycastHit hit,
+                                                           explosionRange))
+                                    {
+                                        if (hit.transform.name == target.name)
+                                        {
+                                            //get distance between target and grenade
+                                            float distance = Vector3.Distance(target.transform.position, transform.position);
+                                            //get true grenade damage by distance
+                                            float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
+                                            
+                                            //grenade damage can never be go below 10% max damage
+                                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                            {
+                                                damageByDistance = Mathf.Floor(maxDamage / 10);
+                                            }
+
+                                            Debug.Log(damageByDistance);
+
+                                            target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), damageByDistance);
+
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             //if AI was in explosion range
                             else if (target.GetComponent<AI_Health>() != null
                                      && target.GetComponent<AI_Health>().isKillable
                                      && target.GetComponent<AI_Health>().isAlive)
                             {
-                                target.GetComponent<AI_Health>().DealDamage(damageByDistance);
-                                //Debug.Log("Grenade distance from " + target.GetComponent<UI_AIContent>().str_NPCName + " was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
+                                foreach (GameObject item in target.GetComponent<AI_Combat>().collidingObjects)
+                                {
+                                    if (item.name == name
+                                        && Physics.Raycast(transform.position,
+                                                           destination,
+                                                           out RaycastHit hit,
+                                                           explosionRange))
+                                    {
+                                        if (hit.transform.name == target.name)
+                                        {
+                                            //get distance between target and grenade
+                                            float distance = Vector3.Distance(target.transform.position, transform.position);
+                                            //get true grenade damage by distance
+                                            float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
+
+                                            //grenade damage can never be go below 10% max damage
+                                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                            {
+                                                damageByDistance = Mathf.Floor(maxDamage / 10);
+                                            }
+
+                                            target.GetComponent<AI_Health>().DealDamage(damageByDistance);
+
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             //if destroyable crate was in explosion range
                             else if (target.name == "completeCrate"
                                      && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
-                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0)
+                                     && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0
+                                     && Physics.Raycast(transform.position,
+                                                        destination,
+                                                        out RaycastHit hit,
+                                                        explosionRange))
                             {
-                                target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(damageByDistance);
-                                //Debug.Log("Grenade distance from destroyable crate was " + Mathf.Round(distance * 100f) / 100f + " and frag grenade dealt " + damage + " damage.");
+                                if (hit.transform.name == target.name)
+                                {
+                                    //get distance between target and grenade
+                                    float distance = Vector3.Distance(target.transform.position, transform.position);
+                                    //get true grenade damage by distance
+                                    float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
+
+                                    //grenade damage can never be go below 10% max damage
+                                    if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                    {
+                                        damageByDistance = Mathf.Floor(maxDamage / 10);
+                                    }
+
+                                    target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(damageByDistance);
+                                }
                             }
                         }
                         //stun grenade effects
@@ -328,23 +389,54 @@ public class Item_Grenade : MonoBehaviour
                         {
                             //player in stungrenade explosion range
                             //and if player doesnt have godmode enabled
-                            if (target.GetComponent<Player_Movement>() != null
+                            if (target.GetComponent<Player_Health>() != null
                                 && PlayerHealthScript.canTakeDamage
-                                && PlayerRaycastScript.targets.Contains(gameObject))
+                                && PlayerHealthScript.isPlayerAlive
+                                && !PlayerMovementScript.isStunned)
                             {
-                                //stuns the player
-                                target.GetComponent<Player_Movement>().Stun();
+                                foreach (GameObject item in PlayerRaycastScript.targets)
+                                {
+                                    if (item.name == name
+                                        && Physics.Raycast(transform.position,
+                                                           destination,
+                                                           out RaycastHit hit,
+                                                           explosionRange))
+                                    {
+                                        if (hit.transform.name == target.name)
+                                        {
+                                            //stuns the player
+                                            PlayerMovementScript.Stun();
+
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                             //killable AI in stungrenade explosion range
                             //and if this AI actually also saw this grenade
                             //and if this AI isn't already stunned
                             else if (target.GetComponent<AI_Health>() != null
-                                     && target.GetComponent<AI_Health>().currentHealth > 0
-                                     && target.GetComponent<AI_Combat>().collidingObjects.Contains(gameObject)
+                                     && target.GetComponent<AI_Health>().isKillable
+                                     && target.GetComponent<AI_Health>().isAlive
                                      && !target.GetComponent<AI_Movement>().isStunned)
                             {
-                                //stuns the AI
-                                target.GetComponent<AI_Movement>().isStunned = true;
+                                foreach (GameObject item in target.GetComponent<AI_Combat>().collidingObjects)
+                                {
+                                    if (item.name == name
+                                        && Physics.Raycast(transform.position,
+                                                           destination,
+                                                           out RaycastHit hit,
+                                                           explosionRange))
+                                    {
+                                        if (hit.transform.name == target.name)
+                                        {
+                                            //stuns the AI
+                                            target.GetComponent<AI_Movement>().isStunned = true;
+
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -560,6 +652,7 @@ public class Item_Grenade : MonoBehaviour
         {
             thrownGrenade.GetComponent<Rigidbody>().velocity = pos_HoldItem.forward * 100 / 25;
         }
+
         thrownGrenade = null;
 
         threwLowerHandGrenade = false;

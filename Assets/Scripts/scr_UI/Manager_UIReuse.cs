@@ -429,7 +429,7 @@ public class Manager_UIReuse : MonoBehaviour
         cursor.SetActive(true);
     }
 
-    private void HideExoskeletonUI()
+    public void HideExoskeletonUI()
     {
         par_PlayerMinimap.transform.localPosition += new Vector3(0, 500, 0);
         par_PlayerMainUIValues.transform.localPosition -= new Vector3(0, 750, 0);
@@ -1253,37 +1253,6 @@ public class Manager_UIReuse : MonoBehaviour
                 UpdateIndividualFactionUI(faction, newPos, right);
             }
         }
-        //updates each texts color according to its value
-        foreach (TMP_Text text in texts)
-        {
-            int value = int.Parse(text.text);
-
-            //under 500 - hates you
-            if (value <= -500)
-            {
-                text.color = Color.red;
-            }
-            //between -500 and -100 - doesnt like you
-            else if (value > -500 && value < -100)
-            {
-                text.color = new Color32(255, 255, 0, 255);
-            }
-            //between -100 and 100 - tolerates you
-            else if (value >= -100 && value < 100)
-            {
-                text.color = Color.white;
-            }
-            //between 100 and 500 - likes you
-            else if (value >= 100 && value < 500)
-            {
-                text.color = new Color32(0, 255, 100, 255);
-            }
-            //over 500 - idolizes you
-            else if (value >= 500)
-            {
-                text.color = Color.green;
-            }
-        }
     }
     private void UpdateIndividualFactionUI(GameObject faction, Vector3 pos, float right)
     {
@@ -1338,6 +1307,34 @@ public class Manager_UIReuse : MonoBehaviour
             else if (i == 8)
             {
                 text.text = factionscript.vsVerteidiger.ToString();
+            }
+
+            //updates each texts color according to its value
+            int value = int.Parse(text.text);
+            //under 500 - hates you
+            if (value <= -500)
+            {
+                text.color = Color.red;
+            }
+            //between -500 and -100 - doesnt like you
+            else if (value > -500 && value < -100)
+            {
+                text.color = Color.yellow;
+            }
+            //between -100 and 100 - tolerates you
+            else if (value >= -100 && value < 100)
+            {
+                text.color = Color.white;
+            }
+            //between 100 and 500 - likes you
+            else if (value >= 100 && value < 500)
+            {
+                text.color = new Color32(68, 168, 50, 255);
+            }
+            //over 500 - idolizes you
+            else if (value >= 500)
+            {
+                text.color = Color.green;
             }
 
             i++;

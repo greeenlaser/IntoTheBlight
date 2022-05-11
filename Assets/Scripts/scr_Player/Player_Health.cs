@@ -11,7 +11,7 @@ public class Player_Health : MonoBehaviour
 
     [Header("Assignables")]
     [SerializeField] private GameObject thePlayer;
-    [SerializeField] private TMP_Text txt_PlayerDied;
+    public TMP_Text txt_PlayerDied;
     [SerializeField] private GameObject par_Managers;
 
     //hidden but public variables
@@ -36,13 +36,13 @@ public class Player_Health : MonoBehaviour
 
     private void Awake()
     {
+        txt_PlayerDied.gameObject.SetActive(false);
+
         isPlayerAlive = true;
         canTakeDamage = true;
 
         health = maxHealth;
         mentalState = maxMentalState;
-        
-        txt_PlayerDied.gameObject.SetActive(false);
     }
 
     private void Start()
