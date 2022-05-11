@@ -307,18 +307,25 @@ public class Item_Grenade : MonoBehaviour
                                         {
                                             //get distance between target and grenade
                                             float distance = Vector3.Distance(target.transform.position, transform.position);
-                                            //get true grenade damage by distance
-                                            float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
-                                            
-                                            //grenade damage can never be go below 10% max damage
-                                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
+
+                                            //grenade always deals full damage if the target is less than 0.5m from it
+                                            if (distance <= 0.5f)
                                             {
-                                                damageByDistance = Mathf.Floor(maxDamage / 10);
+                                                target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), maxDamage);
                                             }
+                                            else
+                                            {
+                                                //get true grenade damage by distance
+                                                float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
 
-                                            Debug.Log(damageByDistance);
+                                                //grenade damage can never go below 10% max damage
+                                                if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                                {
+                                                    damageByDistance = Mathf.Floor(maxDamage / 10);
+                                                }
 
-                                            target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), damageByDistance);
+                                                target.GetComponent<Player_Health>().DealDamage(name, grenadeType.ToString(), damageByDistance);
+                                            }
 
                                             break;
                                         }
@@ -342,16 +349,25 @@ public class Item_Grenade : MonoBehaviour
                                         {
                                             //get distance between target and grenade
                                             float distance = Vector3.Distance(target.transform.position, transform.position);
-                                            //get true grenade damage by distance
-                                            float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
 
-                                            //grenade damage can never be go below 10% max damage
-                                            if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                            //grenade always deals full damage if the target is less than 0.5m from it
+                                            if (distance <= 0.5f)
                                             {
-                                                damageByDistance = Mathf.Floor(maxDamage / 10);
+                                                target.GetComponent<AI_Health>().DealDamage(maxDamage);
                                             }
+                                            else
+                                            {
+                                                //get true grenade damage by distance
+                                                float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
 
-                                            target.GetComponent<AI_Health>().DealDamage(damageByDistance);
+                                                //grenade damage can never go below 10% max damage
+                                                if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                                {
+                                                    damageByDistance = Mathf.Floor(maxDamage / 10);
+                                                }
+
+                                                target.GetComponent<AI_Health>().DealDamage(damageByDistance);
+                                            }
 
                                             break;
                                         }
@@ -371,16 +387,27 @@ public class Item_Grenade : MonoBehaviour
                                 {
                                     //get distance between target and grenade
                                     float distance = Vector3.Distance(target.transform.position, transform.position);
-                                    //get true grenade damage by distance
-                                    float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
 
-                                    //grenade damage can never be go below 10% max damage
-                                    if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                    //grenade always deals full damage if the target is less than 0.5m from it
+                                    if (distance <= 0.5f)
                                     {
-                                        damageByDistance = Mathf.Floor(maxDamage / 10);
+                                        target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(maxDamage);
+                                    }
+                                    else
+                                    {
+                                        //get true grenade damage by distance
+                                        float damageByDistance = Mathf.Floor(maxDamage / distance * 10) / 10;
+
+                                        //grenade damage can never go below 10% max damage
+                                        if (damageByDistance < Mathf.Floor(maxDamage / 10))
+                                        {
+                                            damageByDistance = Mathf.Floor(maxDamage / 10);
+                                        }
+
+                                        target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(damageByDistance);
                                     }
 
-                                    target.transform.parent.GetComponent<Env_DestroyableCrate>().DealDamage(damageByDistance);
+                                    break;
                                 }
                             }
                         }

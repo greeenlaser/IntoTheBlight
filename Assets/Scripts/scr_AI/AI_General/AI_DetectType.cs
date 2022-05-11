@@ -59,10 +59,6 @@ public class AI_DetectType : MonoBehaviour
             {
                 AICombatScript.collidingObjects.Add(other.gameObject);
             }
-            else
-            {
-                Debug.Log(other.name);
-            }
         }
     }
     private void OnTriggerExit(Collider other)
