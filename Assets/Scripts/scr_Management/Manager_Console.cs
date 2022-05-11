@@ -122,10 +122,6 @@ public class Manager_Console : MonoBehaviour
 
         //start recieving unity logs
         Application.logMessageReceived += HandleLog;
-
-        CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---");
-        CreateNewConsoleLine("");
-        CreateNewConsoleLine("---Type help to list all game commands---");
     }
 
     private void Update()
@@ -814,24 +810,18 @@ public class Manager_Console : MonoBehaviour
                         }
                         else if (target.GetComponent<AI_Health>() == null)
                         {
-                            CreateNewConsoleLine("canBeKilled = False\n" +
-                                                 "canBeHostile = False");
+                            CreateNewConsoleLine("canBeKilled = False");
+                            CreateNewConsoleLine("canBeHostile = False");
+
                         }
-                        CreateNewConsoleLine("factionName = " + target.GetComponent<UI_AIContent>().faction.ToString() + "\n" +
-                                             "--- target commands:");
+                        CreateNewConsoleLine("factionName = " + target.GetComponent<UI_AIContent>().faction.ToString() + "");
+                        CreateNewConsoleLine("--- target commands:");
 
                         if (target.GetComponent<AI_Health>() != null)
                         {
-                            CreateNewConsoleLine("target kill - kills the target if it is not protected.\n" +
-                                                 "target sethostilestate hostileStateValue -\n" +
-                                                 "sets target hostile state to either 0 or 1.\n" +
-                                                 "0 means target is no longer hostile towards anyone who attacks it,\n" +
-                                                 " 1 means targets original battle rules have been enabled\n\n" +
-
-                                                 "target setkillablestate killableStateValue -\n" +
-                                                 "sets target killable state to either 0 or 1. 0 means target is no longer killable,\n" +
-                                                 "1 means target is killable again. protected npc/monsters are permanently\n" +
-                                                 "unkillable and cannot be set to killable");
+                            CreateNewConsoleLine("target kill - kills the target if it is not protected.");
+                            CreateNewConsoleLine("target sethostilestate hostileStateValue - sets target hostile state to either 0 or 1");
+                            CreateNewConsoleLine("target setkillablestate killableStateValue - sets target killable state to either 0 or 1");
                         }
 
                         CreateNewConsoleLine("target setfaction factionName - changes targets faction to factionName");
@@ -848,35 +838,36 @@ public class Manager_Console : MonoBehaviour
                         //is item stackable
                         CreateNewConsoleLine("isStackable = " + itemScript.isStackable);
 
-                        CreateNewConsoleLine("itemCount = " + itemScript.int_itemCount + "\n" +
-                                             "itemValue = " + itemScript.int_ItemValue + " (" + itemScript.int_ItemValue * itemScript.int_itemCount + ")\n" +
-                                             "itemWeight = " + itemScript.int_ItemWeight + " (" + itemScript.int_ItemWeight * itemScript.int_itemCount + ")");
+                        CreateNewConsoleLine("itemCount = " + itemScript.int_itemCount + "");
+                        CreateNewConsoleLine("itemValue = " + itemScript.int_ItemValue + " (" + itemScript.int_ItemValue * itemScript.int_itemCount + ")");
+                        CreateNewConsoleLine("itemWeight = " + itemScript.int_ItemWeight + " (" + itemScript.int_ItemWeight * itemScript.int_itemCount + ")");
+
                         if (target.GetComponent<Item_Gun>() != null)
                         {
-                            CreateNewConsoleLine("currentDurability = " + target.GetComponent<Item_Gun>().durability + "\n" +
-                                                 "maxDurability = " + target.GetComponent<Item_Gun>().maxDurability);
+                            CreateNewConsoleLine("currentDurability = " + target.GetComponent<Item_Gun>().durability + "");
+                            CreateNewConsoleLine("maxDurability = " + target.GetComponent<Item_Gun>().maxDurability);
                         }
                         else if (target.GetComponent<Item_Melee>() != null)
                         {
-                            CreateNewConsoleLine("currentdurability = " + target.GetComponent<Item_Melee>().durability + "\n" +
-                                                 "maxdurability = " + target.GetComponent<Item_Melee>().maxDurability);
+                            CreateNewConsoleLine("currentdurability = " + target.GetComponent<Item_Melee>().durability + "");
+                            CreateNewConsoleLine("maxdurability = " + target.GetComponent<Item_Melee>().maxDurability);
                         }
 
-                        CreateNewConsoleLine("--- target commands:\n" +
+                        CreateNewConsoleLine("--- target commands:");
 
-                                             //default modifiable variables for all gameobjects
-                                             "target disable - disables gameobject if it isn't protected\n" +
-                                             "target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed\n" +
+                        //default modifiable variables for all gameobjects
+                        CreateNewConsoleLine("target disable - disables gameobject if it isn't protected");
+                        CreateNewConsoleLine("target enable - enables gameobject if new gameobject hasn't been yet selected or console hasn't been yet closed");
 
-                                             "target setcount countValue - changes the item count to countValue if it is stackable\n" +
-                                             "target setvalue valueValue - changes individual item value to valueValue\n" +
-                                             "target setweight weightValue - changes individual item weight to weightValue");
+                        CreateNewConsoleLine("target setcount countValue - changes the item count to countValue if it is stackable");
+                        CreateNewConsoleLine("target setvalue valueValue - changes individual item value to valueValue");
+                        CreateNewConsoleLine("target setweight weightValue - changes individual item weight to weightValue");
 
                         if (target.GetComponent<Item_Gun>() != null
                             || target.GetComponent<Item_Melee>() != null)
                         {
-                            CreateNewConsoleLine("target setdurability durabilityValue - changes individual item durability to durabilityValue\n" +
-                                                 "target setmaxdurability maxDurabilityValue - changes individual item max durability to maxDurabilityValue");
+                            CreateNewConsoleLine("target setdurability durabilityValue - changes individual item durability to durabilityValue");
+                            CreateNewConsoleLine("target setmaxdurability maxDurabilityValue - changes individual item max durability to maxDurabilityValue");
                         }
                     }
                     //door/container states and commands
@@ -908,18 +899,18 @@ public class Manager_Console : MonoBehaviour
                         //is door locked and protected or not
                         if (door.GetComponent<Env_Door>() != null)
                         {
-                            CreateNewConsoleLine("isprotected = " + door.GetComponent<Env_Door>().isProtected + "\n" +
-                                                 "islocked = " + door.GetComponent<Env_Door>().isLocked);
+                            CreateNewConsoleLine("isprotected = " + door.GetComponent<Env_Door>().isProtected + "");
+                            CreateNewConsoleLine("islocked = " + door.GetComponent<Env_Door>().isLocked);
                         }
                         //is container locked and protected or not
                         else if (container.GetComponent<Inv_Container>() != null)
                         {
-                            CreateNewConsoleLine("isprotected = " + container.GetComponent<Inv_Container>().isProtected + "\n" +
-                                                 "islocked = " + container.GetComponent<Inv_Container>().isLocked);
+                            CreateNewConsoleLine("isprotected = " + container.GetComponent<Inv_Container>().isProtected + "");
+                            CreateNewConsoleLine("islocked = " + container.GetComponent<Inv_Container>().isLocked);
                         }
 
-                        CreateNewConsoleLine("--- target commands:\n" +
-                                             "target unlock - unlocks the door/container if it isn't protected");
+                        CreateNewConsoleLine("--- target commands:");
+                        CreateNewConsoleLine("target unlock - unlocks the door/container if it isn't protected");
                     }
                     else
                     {
@@ -1445,8 +1436,8 @@ public class Manager_Console : MonoBehaviour
                 //set teleportPos;
                 Vector3 teleportPos = new(firstVec, secondVec, thirdVec);
 
-                CreateNewConsoleLine("--tp " + firstVec + " " + secondVec + " " + thirdVec + "--\n" +
-                                     "Success: Teleported player to " + teleportPos + "!");
+                CreateNewConsoleLine("--tp " + firstVec + " " + secondVec + " " + thirdVec + "--");
+                CreateNewConsoleLine("Success: Teleported player to " + teleportPos + "!");
 
                 thePlayer.transform.position = teleportPos;
                 ToggleConsole();

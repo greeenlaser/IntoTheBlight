@@ -77,6 +77,11 @@ public class GameManager : MonoBehaviour
             //show debug menu in game scene
             else if (sceneIndex == 1)
             {
+                Manager_Console ConsoleScipt = par_Managers.GetComponent<Manager_Console>();
+                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---");
+                ConsoleScipt.CreateNewConsoleLine("");
+                ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---");
+
                 par_Managers.GetComponent<Manager_Console>().Command_ToggleDebugMenu();
             }
         }

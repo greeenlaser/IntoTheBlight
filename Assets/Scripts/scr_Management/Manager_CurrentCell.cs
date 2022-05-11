@@ -171,8 +171,6 @@ public class Manager_CurrentCell : MonoBehaviour
                     break;
                 }
             }
-
-            Debug.Log("aaa");
         }
     }
     //resets all resettable containers
