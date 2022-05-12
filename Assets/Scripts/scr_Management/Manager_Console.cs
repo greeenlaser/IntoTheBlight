@@ -1609,6 +1609,15 @@ public class Manager_Console : MonoBehaviour
         //get player current money
         int money = thePlayer.GetComponent<Inv_Player>().money;
         CreateNewConsoleLine("money: " + money);
+        //get player flashlight battery if player has equipped flashlight with battery
+        if (thePlayer.GetComponent<Inv_Player>().equippedFlashlight != null
+            && thePlayer.GetComponent<Inv_Player>().equippedFlashlight.GetComponent<Item_Flashlight>().battery != null)
+        {
+            GameObject equippedFlashlight = thePlayer.GetComponent<Inv_Player>().equippedFlashlight;
+            GameObject flashlightBattery = equippedFlashlight.GetComponent<Item_Flashlight>().battery;
+
+            CreateNewConsoleLine("flashlight battery: " + flashlightBattery.GetComponent<Item_Battery>().currentBattery.ToString());
+        }
     }
     private void Command_ResetPlayerStats()
     {
@@ -1627,8 +1636,6 @@ public class Manager_Console : MonoBehaviour
         }
         else
         {
-            CreateNewConsoleLine("All modifiable player stats were reset to their original values.");
-
             thePlayer.GetComponent<Player_Health>().health = originalMaxHealth;
             thePlayer.GetComponent<Player_Health>().maxHealth = originalMaxHealth;
             thePlayer.GetComponent<Player_Movement>().currentStamina = originalMaxStamina;
@@ -1641,6 +1648,22 @@ public class Manager_Console : MonoBehaviour
             thePlayer.GetComponent<Player_Movement>().speedIncrease = originalSpeed;
             thePlayer.GetComponent<Player_Movement>().jumpHeight = originalJumpHeight + 0.75f; //increasing the jump height to the real original jump height
             thePlayer.GetComponent<Inv_Player>().maxInvSpace = originalMaxInvspace;
+
+            //fill flashlight battery
+            if (thePlayer.GetComponent<Inv_Player>().equippedFlashlight != null
+                && thePlayer.GetComponent<Inv_Player>().equippedFlashlight.GetComponent<Item_Flashlight>().battery != null)
+            {
+                GameObject equippedFlashlight = thePlayer.GetComponent<Inv_Player>().equippedFlashlight;
+                GameObject flashlightBattery = equippedFlashlight.GetComponent<Item_Flashlight>().battery;
+
+                float maxBattery = flashlightBattery.GetComponent<Item_Battery>().maxBattery;
+                flashlightBattery.GetComponent<Item_Battery>().currentBattery = maxBattery;
+
+                par_Managers.GetComponent<Manager_UIReuse>().flashlightBattery = maxBattery;
+                par_Managers.GetComponent<Manager_UIReuse>().flashlightMaxBattery = maxBattery;
+                par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerFlashlight();
+            }
+
             par_Managers.GetComponent<UI_PlayerMenuStats>().GetStats();
 
             par_Managers.GetComponent<Manager_UIReuse>().health = originalMaxHealth;
@@ -1658,6 +1681,8 @@ public class Manager_Console : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().mentalState = originalMaxMentalState;
             par_Managers.GetComponent<Manager_UIReuse>().maxMentalState = originalMaxMentalState;
             par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerMentalState();
+
+            CreateNewConsoleLine("All modifiable player stats were reset to their original values.");
         }
     }
     //set a player stat
