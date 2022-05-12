@@ -462,18 +462,30 @@ public class Env_Item : MonoBehaviour
                 }
             }
 
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = false;
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.onClick.AddListener(Destroy);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.gameObject.SetActive(true);
+
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.onClick.AddListener(Drop);
             }
-            else if (isProtected
-                     || (gameObject.GetComponent<Item_Battery>() != null
-                     && gameObject.GetComponent<Item_Battery>().isInUse))
+            else
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+            }
+            //in use flashlights with batteries and batteries cant be dropped and destroyed
+            if ((gameObject.GetComponent<Item_Flashlight>() != null
+                && gameObject.GetComponent<Item_Flashlight>().battery != null)
+                || (gameObject.GetComponent<Item_Battery>() != null
+                && gameObject.GetComponent<Item_Battery>().isInUse))
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = false;
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = false;
             }
 
             if (!isStackable)
@@ -494,9 +506,6 @@ public class Env_Item : MonoBehaviour
 
             par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(
                 PlayerInventoryScript.CloseContainer);
-
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.onClick.AddListener(Take);
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
             {
@@ -562,28 +571,21 @@ public class Env_Item : MonoBehaviour
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
-            if (int_ItemWeight > PlayerInventoryScript.invSpace)
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = false;
+            if (int_ItemWeight <= PlayerInventoryScript.invSpace)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = false;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = true;
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.onClick.AddListener(Take);
+
+                if (isProtected)
+                {
+                    par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                }
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(false);
-            }
-
-            if (!isProtected)
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
-            }
-            else if (isProtected
-                     || (gameObject.GetComponent<Item_Battery>() != null
-                     && gameObject.GetComponent<Item_Battery>().isInUse))
-            {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(true);
             }
 
             if (!isStackable)
@@ -668,17 +670,24 @@ public class Env_Item : MonoBehaviour
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
             }
-            else if (isProtected
-                     || (gameObject.GetComponent<Item_Battery>() != null
-                     && gameObject.GetComponent<Item_Battery>().isInUse))
+            else
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+            }
+            //in use flashlights with batteries and batteries cant be placed into containers
+            if ((gameObject.GetComponent<Item_Flashlight>() != null
+                && gameObject.GetComponent<Item_Flashlight>().battery != null)
+                || (gameObject.GetComponent<Item_Battery>() != null
+                && gameObject.GetComponent<Item_Battery>().isInUse))
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = false;
             }
 
             if (!isStackable)
@@ -761,13 +770,14 @@ public class Env_Item : MonoBehaviour
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
+            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.interactable = false;
             if (PlayerInventoryScript.money >= int_ItemValue)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.onClick.AddListener(Buy);
             }
-            else if (PlayerInventoryScript.money < int_ItemValue)
+            else
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_tooExpensive.gameObject.SetActive(true);
             }
@@ -854,17 +864,24 @@ public class Env_Item : MonoBehaviour
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
+            par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.gameObject.SetActive(true);
                 par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = true;
                 par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.onClick.AddListener(Sell);
             }
-            else if (isProtected
-                     || (gameObject.GetComponent<Item_Battery>() != null
-                     && gameObject.GetComponent<Item_Battery>().isInUse))
+            else
             {
                 par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+            }
+            //in use flashlights with batteries and batteries cant be sold
+            if ((gameObject.GetComponent<Item_Flashlight>() != null
+                && gameObject.GetComponent<Item_Flashlight>().battery != null)
+                || (gameObject.GetComponent<Item_Battery>() != null
+                && gameObject.GetComponent<Item_Battery>().isInUse))
+            {
+                par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = false;
             }
 
             if (!isStackable)

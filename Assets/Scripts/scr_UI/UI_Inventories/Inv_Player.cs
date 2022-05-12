@@ -884,6 +884,7 @@ public class Inv_Player : MonoBehaviour
                 }
 
                 btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
+                btn_New.onClick.AddListener(ShowUnequippedBatteries);
                 buttons.Add(btn_New.gameObject);
 
                 item.GetComponent<Env_Item>().isInPlayerInventory = true;

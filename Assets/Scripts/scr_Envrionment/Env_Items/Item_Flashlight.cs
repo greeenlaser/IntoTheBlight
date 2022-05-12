@@ -30,14 +30,11 @@ public class Item_Flashlight : MonoBehaviour
     [HideInInspector] public GameObject battery;
 
     //private variables
-    private bool firstBatteryUse;
     private float timer;
     private Manager_UIReuse UIReuseScript;
 
     private void Awake()
     {
-        firstBatteryUse = true;
-
         UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
     }
 
@@ -49,42 +46,17 @@ public class Item_Flashlight : MonoBehaviour
             && PlayerHealthScript.isPlayerAlive
             && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
-            if (Input.GetKeyDown(KeyCode.F))
+            if (Input.GetKeyDown(KeyCode.F)
+                && battery != null
+                && battery.GetComponent<Item_Battery>().currentBattery > 0)
             {
-                if (battery != null)
-                {
-                    if (battery.GetComponent<Item_Battery>().currentBattery > 0)
-                    {
-                        isFlashlightEnabled = !isFlashlightEnabled;
+                isFlashlightEnabled = !isFlashlightEnabled;
 
-                        CheckForFlashlight();
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Error: Cannot use this Flashlight - battery remainder is too low!");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("Error: Cannot use this Flashlight - no battery found!");
-                }
+                CheckForFlashlight();
             }
 
             if (isFlashlightEnabled)
             {
-                if (firstBatteryUse)
-                {
-                    battery.GetComponent<Item_Battery>().currentBattery -= flashlightBatteryUsage;
-                    UpdateBatteryRemainder();
-
-                    flashlight.intensity = flashlightIntensity;
-                    flashlight.range = flashlightRange;
-                    flashlight.spotAngle = flashlightOuterAngle;
-                    flashlight.innerSpotAngle = flashlightInnerAngle;
-
-                    firstBatteryUse = false;
-                }
-
                 timer += Time.deltaTime;
                 if (timer > 0.5f)
                 {
@@ -126,7 +98,6 @@ public class Item_Flashlight : MonoBehaviour
     public void RemoveBattery()
     {
         isFlashlightEnabled = false;
-        firstBatteryUse = false;
         battery.GetComponent<Item_Battery>().isInUse = false;
         battery = null;
 
@@ -201,8 +172,6 @@ public class Item_Flashlight : MonoBehaviour
         PlayerInventoryScript.equippedFlashlight = null;
         isFlashlightEquipped = false;
         isFlashlightEnabled = false;
-
-        firstBatteryUse = true;
 
         flashlight.gameObject.SetActive(false);
 

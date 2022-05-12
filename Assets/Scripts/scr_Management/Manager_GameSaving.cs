@@ -171,6 +171,10 @@ public class Manager_GameSaving : MonoBehaviour
 
         par_LoadingMenu.SetActive(false);
         isLoading = false;
+
+        //initial inventory opening and closing
+        //to make sure we wont have any duplicate items in any inventories
+        par_Managers.GetComponent<UI_PlayerMenu>().StartCoroutine(par_Managers.GetComponent<UI_PlayerMenu>().OpenAndClose());
     }
 
     //assign saved data to gameobjects

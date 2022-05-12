@@ -2371,6 +2371,13 @@ public class Manager_Console : MonoBehaviour
                         PlayerInventoryScript.invSpace += selectedItem.GetComponent<Env_Item>().int_ItemWeight * insertedValue;
                         selectedItem.GetComponent<Env_Item>().isInPlayerInventory = false;
 
+                        if (selectedItem.GetComponent<Item_Battery>() != null
+                            && PlayerInventoryScript.equippedFlashlight != null
+                            && PlayerInventoryScript.equippedFlashlight.GetComponent<Item_Flashlight>().battery == selectedItem)
+                        {
+                            PlayerInventoryScript.equippedFlashlight.GetComponent<Item_Flashlight>().RemoveBattery();
+                        }
+
                         ResetAmmoAndGun();
 
                         RebuildInventoryUI();
@@ -2409,6 +2416,13 @@ public class Manager_Console : MonoBehaviour
                         {
                             if (removable.name == removableItem.name && removableCount > 0)
                             {
+                                if (removableItem.GetComponent<Item_Battery>() != null
+                                    && PlayerInventoryScript.equippedFlashlight != null
+                                    && PlayerInventoryScript.equippedFlashlight.GetComponent<Item_Flashlight>().battery == removableItem)
+                                {
+                                    PlayerInventoryScript.equippedFlashlight.GetComponent<Item_Flashlight>().RemoveBattery();
+                                }
+
                                 removables.Add(removable);
                                 removableCount--;
                             }

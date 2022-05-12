@@ -477,4 +477,14 @@ public class UI_PlayerMenu : MonoBehaviour
 
         UIReuseScript.par_PlayerMenu.SetActive(false);
     }
+
+    public IEnumerator OpenAndClose()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        openedInventoryUI = true;
+        OpenPlayerMenuUI();
+        OpenInventory();
+        ClosePlayerMenuUI();
+    }
 }
