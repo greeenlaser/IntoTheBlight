@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,7 +54,6 @@ public class GameManager : MonoBehaviour
 
     //private variables
     private float fps;
-    private int scrCount;
 
     private void Awake()
     {
@@ -114,8 +115,14 @@ public class GameManager : MonoBehaviour
     //press F12 for screenshot
     private void Screenshot()
     {
-        scrCount++;
-        ScreenCapture.CaptureScreenshot("GameScreenshot_" + scrCount + ".png");
-        Debug.Log("Screenshot " + scrCount + " was taken!");
+        string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\Screenshots";
+
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        var screenshotName = "Screenshot_" + System.DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss") + ".png";
+        ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(folderPath, screenshotName), 4);
     }
 }
