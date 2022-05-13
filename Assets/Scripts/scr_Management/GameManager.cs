@@ -37,9 +37,6 @@ public class GameManager : MonoBehaviour
     public List<GameObject> gameFactions;
 
     [Header("Framerate")]
-    [SerializeField] private int maxFPS;
-    [Range(0.01f, 1f)]
-    [SerializeField] private float fpsUpdateSpeed;
     [SerializeField] private TMP_Text txt_fpsValue;
 
     [Header("Message send test")]
@@ -53,17 +50,14 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<GameObject> thrownGrenades;
 
     //private variables
-    private float fps;
+    private float deltaTime;
 
     private void Awake()
     {
         txt_GameVersion.text = str_GameVersion;
 
-        //EXCLUSIVE WINDOW AND WINDOWED MODE WILL BREAK THE GAME UI!
-        //MAXIMIZED WINDOW IS NOT SUPPORTED IN WINDOWS!
-        Screen.SetResolution(1920, 1080, true, maxFPS);
-
-        InvokeRepeating(nameof(GetFPS), 1, fpsUpdateSpeed);
+        Screen.SetResolution(1920, 1080, FullScreenMode.ExclusiveFullScreen);
+        QualitySettings.vSyncCount = 0;
 
         //get current scene index
         int sceneIndex = SceneManager.GetActiveScene().buildIndex;
@@ -90,6 +84,12 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+        float msec = Mathf.FloorToInt(deltaTime * 1000.0f);
+        float fps = Mathf.FloorToInt(1.0f / deltaTime);
+
+        txt_fpsValue.text = fps + " (" + msec + ")";
+
         if (Input.GetKeyDown(KeyCode.F12))
         {
             Screenshot();
@@ -104,12 +104,6 @@ public class GameManager : MonoBehaviour
             string messageContent = "this shit is crazy, how are they even surviving after that crazy rad-storm, a regular human wouldve died in 5 seconds but it looks like this rad storm only made them stronger! ive never seen anythng like that...";
             par_Managers.GetComponent<UI_TabletMessages>().SendMessage(logo, messageTime, senderName, messageContent);
         }
-    }
-
-    private void GetFPS()
-    {
-        fps = Mathf.FloorToInt(1 / Time.deltaTime);
-        txt_fpsValue.text = fps.ToString();
     }
 
     //press F12 for screenshot
