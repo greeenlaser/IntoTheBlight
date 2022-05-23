@@ -153,21 +153,7 @@ public class Inv_Container : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = str_ContainerName + " inventory";
             PlayerInventoryScript.UpdatePlayerInventoryStats();
 
-            showingAllItems = true;
-            showingAllWeapons = false;
-            showingAllArmor = false;
-            showingAllConsumables = false;
-            showingAllAmmo = false;
-            showingAllGear = false;
-            showingAllMisc = false;
-
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
+            ShowAll();
 
             par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.gameObject.SetActive(true);
             par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.GetComponent<Button>().interactable = false;
@@ -185,7 +171,6 @@ public class Inv_Container : MonoBehaviour
                 par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.onClick.AddListener(DiscardDeadBody);
             }
 
-            RebuildInventory();
             par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
 
             par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
@@ -405,107 +390,29 @@ public class Inv_Container : MonoBehaviour
         }
     }
 
-    private void RebuildInventory()
+    public void ShowAll()
     {
+        HideAll();
+
+        showingAllItems = true;
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
+
+        PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
         {
             if (item != null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                PlayerInventoryScript.Container.GetComponent<Inv_Container>().buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-
-        //adds discardable dead npc button to dead npc loot
-        if (discardableDeadNPC != null)
-        {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.onClick.RemoveAllListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.onClick.AddListener(DiscardDeadBody);
-        }
-    }
-    public void ShowAll()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = true;
-        showingAllWeapons = false;
-        showingAllArmor = false;
-        showingAllConsumables = false;
-        showingAllAmmo = false;
-        showingAllGear = false;
-        showingAllMisc = false;
-
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
-
-        PlayerInventoryScript.UpdatePlayerInventoryStats();
-        RebuildInventory();
-        //Debug.Log("Showing all trader inventory items.");
     }
     public void ShowWeapons()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = true;
-        showingAllArmor = false;
-        showingAllConsumables = false;
-        showingAllAmmo = false;
-        showingAllGear = false;
-        showingAllMisc = false;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        showingAllWeapons = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -515,70 +422,16 @@ public class Inv_Container : MonoBehaviour
                 || item.GetComponent<Item_Grenade>() != null
                 || item.GetComponent<Item_Melee>() != null))
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container weapons.");
     }
     public void ShowArmor()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = false;
-        showingAllArmor = true;
-        showingAllConsumables = false;
-        showingAllAmmo = false;
-        showingAllGear = false;
-        showingAllMisc = false;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        showingAllArmor = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -586,210 +439,50 @@ public class Inv_Container : MonoBehaviour
             if (item != null
                 && item.GetComponent<Item_Armor>() != null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container armor.");
     }
     public void ShowConsumables()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = false;
-        showingAllArmor = false;
-        showingAllConsumables = true;
-        showingAllAmmo = false;
-        showingAllGear = false;
-        showingAllMisc = false;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        showingAllConsumables = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
         {
-            if (item != null && item.GetComponent<Item_Consumable>() != null)
+            if (item != null 
+                && item.GetComponent<Item_Consumable>() != null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container consumables.");
     }
     public void ShowAmmo()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = false;
-        showingAllArmor = false;
-        showingAllConsumables = false;
-        showingAllAmmo = true;
-        showingAllGear = false;
-        showingAllMisc = false;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        showingAllAmmo = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
         {
-            if (item != null && item.GetComponent<Item_Ammo>() != null)
+            if (item != null 
+                && item.GetComponent<Item_Ammo>() != null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container ammo.");
     }
     public void ShowGear()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = false;
-        showingAllArmor = false;
-        showingAllConsumables = false;
-        showingAllAmmo = false;
-        showingAllGear = true;
-        showingAllMisc = false;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        showingAllGear = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = false;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
         foreach (GameObject item in inventory)
@@ -797,69 +490,15 @@ public class Inv_Container : MonoBehaviour
             if (item != null
                 && item.GetComponent<Item_Gear>() != null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container gear.");
     }
     public void ShowMisc()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
-        showingAllItems = false;
-        showingAllWeapons = false;
-        showingAllArmor = false;
-        showingAllConsumables = false;
-        showingAllAmmo = false;
-        showingAllGear = false;
-        showingAllMisc = true;
+        HideAll();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        showingAllMisc = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = false;
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
@@ -874,49 +513,82 @@ public class Inv_Container : MonoBehaviour
                 && item.GetComponent<Item_Ammo>() == null
                 && item.GetComponent<Item_Gear>() == null)
             {
-                Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
-                btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
-
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
-                {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
-                }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                    }
-                    else
-                    {
-                        string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                        btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                    }
-                    else
-                    {
-                        btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                    }
-                }
-
-                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
-                buttons.Add(btn_New.gameObject);
-
-                item.GetComponent<Env_Item>().isInContainer = true;
-                item.GetComponent<Env_Item>().isTaking = true;
+                RebuildInventory(item);
             }
         }
-        //Debug.Log("Showing container misc items.");
+    }
+
+    private void HideAll()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
+        par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+        showingAllItems = false;
+        showingAllWeapons = false;
+        showingAllArmor = false;
+        showingAllConsumables = false;
+        showingAllAmmo = false;
+        showingAllGear = false;
+        showingAllMisc = false;
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowArmor.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowConsumables.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAmmo.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowGear.interactable = true;
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ShowMisc.interactable = true;
+
+        //adds discardable dead npc button to dead npc loot
+        if (discardableDeadNPC != null)
+        {
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.onClick.RemoveAllListeners();
+            par_Managers.GetComponent<Manager_UIReuse>().btn_DiscardDeadBody.onClick.AddListener(DiscardDeadBody);
+        }
+    }
+
+    private void RebuildInventory(GameObject item)
+    {
+        Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
+        btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
+
+        for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+        {
+            if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
+            {
+                item.GetComponent<Env_Item>().hasUnderscore = true;
+                break;
+            }
+        }
+        if (item.GetComponent<Env_Item>().hasUnderscore)
+        {
+            if (item.GetComponent<Env_Item>().int_itemCount == 1)
+            {
+                string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
+                btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
+            }
+            else
+            {
+                string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
+                btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+            }
+        }
+        else if (!item.GetComponent<Env_Item>().hasUnderscore)
+        {
+            if (item.GetComponent<Env_Item>().int_itemCount == 1)
+            {
+                btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
+            }
+            else
+            {
+                btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+            }
+        }
+
+        btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
+        PlayerInventoryScript.Container.GetComponent<Inv_Container>().buttons.Add(btn_New.gameObject);
+
+        item.GetComponent<Env_Item>().isInContainer = true;
+        item.GetComponent<Env_Item>().isTaking = true;
     }
 }

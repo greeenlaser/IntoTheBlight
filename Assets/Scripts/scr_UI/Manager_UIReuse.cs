@@ -448,7 +448,6 @@ public class Manager_UIReuse : MonoBehaviour
 
     public void RebuildPlayerInventory()
     {
-        //Debug.Log("Rebuilding player inventory...");
         if (PlayerInventoryScript.showingAllItems)
         {
             PlayerInventoryScript.ShowAll();
@@ -480,9 +479,8 @@ public class Manager_UIReuse : MonoBehaviour
     }
     public void RebuildContainerInventory()
     {
-        var containerScript = PlayerInventoryScript.Container.GetComponent<Inv_Container>();
+        Inv_Container containerScript = PlayerInventoryScript.Container.GetComponent<Inv_Container>();
 
-        //Debug.Log("Rebuilding container inventory...");
         if (containerScript.showingAllItems)
         {
             containerScript.ShowAll();
@@ -514,9 +512,8 @@ public class Manager_UIReuse : MonoBehaviour
     }
     public void RebuildShopInventory()
     {
-        var shopScript = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>();
+        UI_ShopContent shopScript = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>();
 
-        //Debug.Log("Rebuilding trader inventory...");
         if (shopScript.showingAllItems)
         {
             shopScript.ShowAll();

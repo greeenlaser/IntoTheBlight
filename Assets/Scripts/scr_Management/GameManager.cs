@@ -50,6 +50,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public List<GameObject> thrownGrenades;
 
     //private variables
+    private float timer;
     private float deltaTime;
 
     private void Awake()
@@ -88,7 +89,12 @@ public class GameManager : MonoBehaviour
         float msec = Mathf.FloorToInt(deltaTime * 1000.0f);
         float fps = Mathf.FloorToInt(1.0f / deltaTime);
 
-        txt_fpsValue.text = fps + " (" + msec + ")";
+        timer += Time.unscaledDeltaTime;
+        if (timer > 0.1f)
+        {
+            txt_fpsValue.text = fps + " (" + msec + ")";
+            timer = 0;
+        }
 
         if (Input.GetKeyDown(KeyCode.F12))
         {
