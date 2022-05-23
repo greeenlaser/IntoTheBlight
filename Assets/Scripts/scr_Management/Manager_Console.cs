@@ -560,14 +560,6 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine("Error: No command was inserted! Type help to list all commands.");
         }
 
-        else
-        {
-            insertedCommands.Add(input);
-            currentSelectedInsertedCommand = insertedCommands.Count - 1;
-
-            CreateNewConsoleLine("Error: Unknown or incorrect command!");
-        }
-
         separatedWords.Clear();
 
         input = "";
