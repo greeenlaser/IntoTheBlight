@@ -55,6 +55,8 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_ShowAmmo;
     public Button btn_ShowGear;
     public Button btn_ShowMisc;
+    public Button btn_ShowRepair;
+    public Button btn_ShowUpgrades;
     public Button btn_DiscardDeadBody;
     public Button btn_AddBattery;
     public Button btn_RemoveBattery;

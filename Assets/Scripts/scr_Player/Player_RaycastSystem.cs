@@ -289,7 +289,7 @@ public class Player_RaycastSystem : MonoBehaviour
                     //hit workbench
                     else if (target.GetComponent<Env_Workbench>() != null)
                     {
-                        target.GetComponent<Env_Workbench>().OpenRepairUI();
+                        target.GetComponent<Env_Workbench>().OpenWorkbenchUI();
                     }
                     //hit waitable
                     else if (target.GetComponent<Env_Wait>() != null)
