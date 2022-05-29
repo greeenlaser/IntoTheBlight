@@ -11,11 +11,10 @@ public class Env_Workbench : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public bool isWorkbenchRepairUIOpen;
-    [HideInInspector] public bool isWorkbenchUpgradeUIOpen;
     [HideInInspector] public List<GameObject> buttons;
 
     //private variables
+    private bool isWorkbenchUIOpen;
     private Manager_UIReuse UIReuseScript;
 
     private void Awake()
@@ -29,7 +28,7 @@ public class Env_Workbench : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab)
-            && isWorkbenchRepairUIOpen
+            && isWorkbenchUIOpen
             && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen)
         {
             par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = false;
@@ -39,6 +38,8 @@ public class Env_Workbench : MonoBehaviour
 
     public void OpenWorkbenchUI()
     {
+        isWorkbenchUIOpen = true;
+
         PlayerInventoryScript.Workbench = gameObject;
 
         UIReuseScript.btn_CloseUI.gameObject.SetActive(true);
@@ -55,15 +56,18 @@ public class Env_Workbench : MonoBehaviour
         UIReuseScript.btn_ShowUpgrades.onClick.RemoveAllListeners();
         UIReuseScript.btn_ShowUpgrades.onClick.AddListener(OpenUpgradeUI);
 
+        PlayerInventoryScript.CloseInventory();
+        PlayerInventoryScript.isPlayerAndWorkbenchOpen = true;
+        UIReuseScript.par_Inventory.SetActive(true);
+        UIReuseScript.par_Stats.SetActive(true);
+
         OpenRepairUI();
 
+        par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = true;
         par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
     }
     public void OpenRepairUI()
     {
-        isWorkbenchUpgradeUIOpen = false;
-        isWorkbenchRepairUIOpen = true;
-
         RebuildUI();
         UIReuseScript.RebuildRepairMenu();
 
@@ -72,11 +76,8 @@ public class Env_Workbench : MonoBehaviour
     }
     public void OpenUpgradeUI()
     {
-        isWorkbenchRepairUIOpen = false;
-        isWorkbenchUpgradeUIOpen = true;
-
         RebuildUI();
-        UIReuseScript.RebuildRepairMenu();
+        UIReuseScript.RebuildUpgradeUI();
 
         UIReuseScript.btn_ShowUpgrades.interactable = false;
         UIReuseScript.btn_ShowRepair.interactable = true;
@@ -87,14 +88,8 @@ public class Env_Workbench : MonoBehaviour
         UIReuseScript.ClearStatsUI();
         UIReuseScript.ClearInventoryUI();
 
-        PlayerInventoryScript.CloseInventory();
-        PlayerInventoryScript.isPlayerAndRepairOpen = true;
-        UIReuseScript.par_Inventory.SetActive(true);
-        UIReuseScript.par_Stats.SetActive(true);
         UIReuseScript.txt_InventoryName.text = str_workbenchName.ToString();
         PlayerInventoryScript.UpdatePlayerInventoryStats();
-
-        par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen = true;
     }
 
     public void CloseWorkbenchUI()
@@ -111,7 +106,7 @@ public class Env_Workbench : MonoBehaviour
         UIReuseScript.btn_ShowRepair.gameObject.SetActive(false);
         UIReuseScript.btn_ShowUpgrades.gameObject.SetActive(false);
 
-        isWorkbenchRepairUIOpen = false;
+        isWorkbenchUIOpen = false;
 
         par_Managers.GetComponent<UI_PlayerMenu>().ClosePlayerMenuUI();
         StartCoroutine(Wait());

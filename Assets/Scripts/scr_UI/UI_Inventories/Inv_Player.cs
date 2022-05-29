@@ -23,7 +23,7 @@ public class Inv_Player : MonoBehaviour
     [HideInInspector] public bool canOpenPlayerInventory;
     [HideInInspector] public bool isPlayerAndContainerOpen;
     [HideInInspector] public bool isPlayerAndTraderOpen;
-    [HideInInspector] public bool isPlayerAndRepairOpen;
+    [HideInInspector] public bool isPlayerAndWorkbenchOpen;
     [HideInInspector] public bool hasOpenedInventoryOnce;
     [HideInInspector] public bool showingAllItems;
     [HideInInspector] public bool showingAllWeapons;
@@ -157,6 +157,7 @@ public class Inv_Player : MonoBehaviour
                 item.GetComponent<Env_Item>().isInContainer = false;
                 item.GetComponent<Env_Item>().isInTraderShop = false;
                 item.GetComponent<Env_Item>().isInRepairMenu = false;
+                item.GetComponent<Env_Item>().isInUpgradeMenu = false;
                 item.GetComponent<Env_Item>().isBuying = false;
                 item.GetComponent<Env_Item>().isTaking = false;
             }
@@ -170,7 +171,9 @@ public class Inv_Player : MonoBehaviour
             }
 
             par_Managers.GetComponent<UI_PauseMenu>().PauseGameAndCloseUIAndResetBools();
-            if (!isPlayerAndContainerOpen && !isPlayerAndTraderOpen && !isPlayerAndRepairOpen)
+            if (!isPlayerAndContainerOpen 
+                && !isPlayerAndTraderOpen 
+                && !isPlayerAndWorkbenchOpen)
             {
                 par_Managers.GetComponent<UI_PlayerMenu>().OpenPlayerMenuUI();
                 isPlayerInventoryOpen = true;
@@ -197,7 +200,8 @@ public class Inv_Player : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
             par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
 
-            if (!par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI && !par_Managers.GetComponent<UI_PlayerMenu>().isPlayerMenuOpen)
+            if (!par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI 
+                && !par_Managers.GetComponent<UI_PlayerMenu>().isPlayerMenuOpen)
             {
                 par_Managers.GetComponent<UI_PauseMenu>().callPMCloseOnce = false;
                 par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();
@@ -214,7 +218,7 @@ public class Inv_Player : MonoBehaviour
             {
                 isPlayerAndContainerOpen = false;
                 isPlayerAndTraderOpen = false;
-                isPlayerAndRepairOpen = false;
+                isPlayerAndWorkbenchOpen = false;
                 canOpenPlayerInventory = true;
                 closedInventoryThroughContainer = false;
             }

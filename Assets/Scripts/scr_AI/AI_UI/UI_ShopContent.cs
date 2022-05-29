@@ -122,6 +122,7 @@ public class UI_ShopContent : MonoBehaviour
             item.GetComponent<Env_Item>().isInContainer = false;
             item.GetComponent<Env_Item>().isInTraderShop = true;
             item.GetComponent<Env_Item>().isInRepairMenu = false;
+            item.GetComponent<Env_Item>().isInUpgradeMenu = false;
             item.GetComponent<Env_Item>().isBuying = true;
             item.GetComponent<Env_Item>().isTaking = false;
         }

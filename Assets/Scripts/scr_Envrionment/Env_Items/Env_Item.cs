@@ -63,6 +63,7 @@ public class Env_Item : MonoBehaviour
     [HideInInspector] public bool isInContainer;
     [HideInInspector] public bool isInTraderShop;
     [HideInInspector] public bool isInRepairMenu;
+    [HideInInspector] public bool isInUpgradeMenu;
     [HideInInspector] public bool isBuying;
     [HideInInspector] public bool isTaking;
     [HideInInspector] public bool hasUnderscore;
@@ -92,6 +93,7 @@ public class Env_Item : MonoBehaviour
     private GameObject selectedGun;
     private GameObject correctAmmo;
     private GameObject duplicate;
+    private Manager_UIReuse UIReuseScript;
     //buy, sell, space
     private int int_finalSpace;
     private int int_totalSpace;
@@ -100,6 +102,11 @@ public class Env_Item : MonoBehaviour
     private string str_itemName;
     private string str_containerName;
     private string str_traderName;
+
+    private void Awake()
+    {
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+    }
 
     private void Start()
     {
@@ -157,9 +164,9 @@ public class Env_Item : MonoBehaviour
     public void ShowStats()
     {
         RemoveListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
+        UIReuseScript.ClearAllInventories();
+        UIReuseScript.ClearInventoryUI();
+        UIReuseScript.ClearStatsUI();
 
         PlayerInventoryScript.UpdatePlayerInventoryStats();
 
@@ -175,13 +182,13 @@ public class Env_Item : MonoBehaviour
         isTakingMultipleItems = false;
         isBuyingMultipleItems = false;
         isSellingMultipleItems = false;
-        par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+        UIReuseScript.ClearCountSliderUI();
 
-        par_Managers.GetComponent<Manager_UIReuse>().txt_AmmoCount.text = "";
-        par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().txt_tooExpensive.gameObject.SetActive(false);
+        UIReuseScript.txt_AmmoCount.text = "";
+        UIReuseScript.txt_protected.gameObject.SetActive(false);
+        UIReuseScript.txt_notStackable.gameObject.SetActive(false);
+        UIReuseScript.txt_tooHeavy.gameObject.SetActive(false);
+        UIReuseScript.txt_tooExpensive.gameObject.SetActive(false);
 
         //replacing underscores with space
         for (int i = 0; i < str_ItemName.Length - 1; i++)
@@ -195,14 +202,14 @@ public class Env_Item : MonoBehaviour
         if (hasUnderscore)
         {
             string str_fakeName = str_ItemName.Replace("_", " ");
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemName.text = str_fakeName;
+            UIReuseScript.txt_ItemName.text = str_fakeName;
         }
         else if (!hasUnderscore)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemName.text = str_ItemName;
+            UIReuseScript.txt_ItemName.text = str_ItemName;
         }
         //item description
-        par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDescription.text = str_ItemDescription;
+        UIReuseScript.txt_ItemDescription.text = str_ItemDescription;
 
         if (gameObject.GetComponent<Item_Gun>() != null)
         {
@@ -228,25 +235,25 @@ public class Env_Item : MonoBehaviour
         //single or multiple item value and weight
         if (int_itemCount == 1)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemValue.text = int_ItemValue.ToString();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemWeight.text = int_ItemWeight.ToString();
+            UIReuseScript.txt_ItemValue.text = int_ItemValue.ToString();
+            UIReuseScript.txt_ItemWeight.text = int_ItemWeight.ToString();
         }
         else if (int_itemCount > 1)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemValue.text = int_ItemValue.ToString() + " (" + int_ItemValue * int_itemCount + ")";
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemWeight.text = int_ItemWeight.ToString() + " (" + int_ItemWeight * int_itemCount + ")";
+            UIReuseScript.txt_ItemValue.text = int_ItemValue.ToString() + " (" + int_ItemValue * int_itemCount + ")";
+            UIReuseScript.txt_ItemWeight.text = int_ItemWeight.ToString() + " (" + int_ItemWeight * int_itemCount + ")";
         }
 
         //weapon damage
         if (gameObject.GetComponent<Item_Melee>() != null)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Melee>().damage.ToString();
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Melee>().damage.ToString();
         }
         //gun ammo count
         if (gameObject.GetComponent<Item_Gun>() != null)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + (Mathf.Floor(gameObject.GetComponent<Item_Gun>().damage * 10) / 10).ToString();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_AmmoCount.text = "Ammo: " + gameObject.GetComponent<Item_Gun>().currentClipSize.ToString();
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + (Mathf.Floor(gameObject.GetComponent<Item_Gun>().damage * 10) / 10).ToString();
+            UIReuseScript.txt_AmmoCount.text = "Ammo: " + gameObject.GetComponent<Item_Gun>().currentClipSize.ToString();
         }
         if (gameObject.GetComponent<Item_Grenade>() != null
             && (gameObject.GetComponent<Item_Grenade>().grenadeType
@@ -254,22 +261,23 @@ public class Env_Item : MonoBehaviour
             || gameObject.GetComponent<Item_Grenade>().grenadeType
             == Item_Grenade.GrenadeType.plasma))
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Grenade>().maxDamage.ToString();
+            UIReuseScript.txt_WeaponDamage.text = "Damage: " + gameObject.GetComponent<Item_Grenade>().maxDamage.ToString();
         }
 
-        if (!isInRepairMenu)
+        if (!isInRepairMenu
+            && !isInUpgradeMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
 
         //if is in own inventory
         if (isInPlayerInventory
             && !PlayerInventoryScript.isPlayerAndContainerOpen
             && !PlayerInventoryScript.isPlayerAndTraderOpen
-            && !PlayerInventoryScript.isPlayerAndRepairOpen)
+            && !PlayerInventoryScript.isPlayerAndWorkbenchOpen)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            UIReuseScript.RebuildPlayerInventory();
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
             {
@@ -277,7 +285,7 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else if (gameObject.GetComponent<Item_Consumable>().consumableType 
@@ -287,19 +295,19 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.gameObject.SetActive(true);
+                    UIReuseScript.btn_Consume.gameObject.SetActive(true);
                     if (PlayerHealthScript.health < PlayerHealthScript.maxHealth)
                     {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.interactable = true;
+                        UIReuseScript.btn_Consume.interactable = true;
                     }
                     else if (PlayerHealthScript.health == PlayerHealthScript.maxHealth)
                     {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.interactable = false;
+                        UIReuseScript.btn_Consume.interactable = false;
                     }
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.onClick.AddListener(gameObject.GetComponent<Item_Consumable>().Consume);
+                    UIReuseScript.btn_Consume.onClick.AddListener(gameObject.GetComponent<Item_Consumable>().Consume);
                 }
             }
             else if (gameObject.GetComponent<Item_Lockpick>() != null
@@ -308,7 +316,7 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -318,18 +326,18 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
                 if (!gameObject.GetComponent<Item_Gun>().hasEquippedGun)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Gun>().EquipGun);
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Gun>().EquipGun);
                 }
                 else if (gameObject.GetComponent<Item_Gun>().hasEquippedGun)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Gun>().UnequipGun);
+                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Gun>().UnequipGun);
                 }
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
@@ -338,31 +346,31 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
                 if (!gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().EquipMeleeWeapon);
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().EquipMeleeWeapon);
                 }
                 else if (gameObject.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().UnequipMeleeWeapon);
+                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Melee>().UnequipMeleeWeapon);
                 }
             }
             else if (gameObject.GetComponent<Item_Grenade>() != null)
             {
                 if (!gameObject.GetComponent<Item_Grenade>().hasEquippedGrenade)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Grenade>().EquipGrenade);
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Grenade>().EquipGrenade);
                 }
                 else if (gameObject.GetComponent<Item_Grenade>().hasEquippedGrenade)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Grenade>().UnequipGrenade);
+                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Grenade>().UnequipGrenade);
                 }
             }
             else if (gameObject.GetComponent<Item_Flashlight>() != null)
@@ -373,23 +381,23 @@ public class Env_Item : MonoBehaviour
 
                     float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
                             / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                             + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: 0%";
                 }
 
                 if (!gameObject.GetComponent<Item_Flashlight>().isFlashlightEquipped)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().EquipFlashlight);
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().EquipFlashlight);
                 }
                 else if (gameObject.GetComponent<Item_Flashlight>().isFlashlightEquipped)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.gameObject.SetActive(true);
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().UnequipFlashlight);
+                    UIReuseScript.btn_Unequip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Unequip.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().UnequipFlashlight);
                 }
 
                 foreach (GameObject fl in PlayerInventoryScript.inventory)
@@ -413,34 +421,34 @@ public class Env_Item : MonoBehaviour
                     }
                 }
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.gameObject.SetActive(true);
+                UIReuseScript.btn_AddBattery.gameObject.SetActive(true);
                 if (hasBatteriesInInv
                     && gameObject.GetComponent<Item_Flashlight>().battery == null)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.interactable = true;
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.onClick.AddListener(PlayerInventoryScript.ShowUnequippedBatteries);
+                    UIReuseScript.btn_AddBattery.interactable = true;
+                    UIReuseScript.btn_AddBattery.onClick.AddListener(PlayerInventoryScript.ShowUnequippedBatteries);
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.interactable = false;
+                    UIReuseScript.btn_AddBattery.interactable = false;
                 }
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.gameObject.SetActive(true);
+                UIReuseScript.btn_RemoveBattery.gameObject.SetActive(true);
                 if (gameObject.GetComponent<Item_Flashlight>().battery != null)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.interactable = true;
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().RemoveBattery);
+                    UIReuseScript.btn_RemoveBattery.interactable = true;
+                    UIReuseScript.btn_RemoveBattery.onClick.AddListener(gameObject.GetComponent<Item_Flashlight>().RemoveBattery);
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.interactable = false;
+                    UIReuseScript.btn_RemoveBattery.interactable = false;
                 }
             }
             else if (gameObject.GetComponent<Item_Battery>() != null)
             {
                 float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
                         / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
 
                 if (PlayerInventoryScript.showingAllUnusedBatteries)
@@ -455,28 +463,28 @@ public class Env_Item : MonoBehaviour
 
                     gameObject.GetComponent<Item_Battery>().isBeingAssigned = true;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.gameObject.SetActive(true);
+                    UIReuseScript.btn_Equip.gameObject.SetActive(true);
                     GameObject target = gameObject.GetComponent<Item_Battery>().target;
                     Item_Flashlight flashlight = target.GetComponent<Item_Flashlight>();
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.AddListener(flashlight.AssignBattery);
+                    UIReuseScript.btn_Equip.onClick.AddListener(flashlight.AssignBattery);
                 }
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = false;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = false;
+            UIReuseScript.btn_Destroy.gameObject.SetActive(true);
+            UIReuseScript.btn_Destroy.interactable = false;
+            UIReuseScript.btn_Drop.gameObject.SetActive(true);
+            UIReuseScript.btn_Drop.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.onClick.AddListener(Destroy);
+                UIReuseScript.btn_Destroy.interactable = true;
+                UIReuseScript.btn_Destroy.onClick.AddListener(Destroy);
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.onClick.AddListener(Drop);
+                UIReuseScript.btn_Drop.interactable = true;
+                UIReuseScript.btn_Drop.onClick.AddListener(Drop);
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                UIReuseScript.txt_protected.gameObject.SetActive(true);
             }
             //in use flashlights with batteries and batteries cant be dropped and destroyed
             if ((gameObject.GetComponent<Item_Flashlight>() != null
@@ -484,13 +492,13 @@ public class Env_Item : MonoBehaviour
                 || (gameObject.GetComponent<Item_Battery>() != null
                 && gameObject.GetComponent<Item_Battery>().isInUse))
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.interactable = false;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.interactable = false;
+                UIReuseScript.btn_Destroy.interactable = false;
+                UIReuseScript.btn_Drop.interactable = false;
             }
 
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
         }
 
@@ -499,12 +507,12 @@ public class Env_Item : MonoBehaviour
                 && isInContainer
                 && isTaking)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = 
+            UIReuseScript.txt_InventoryName.text = 
                 PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+            UIReuseScript.RebuildContainerInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(
+            UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(
                 PlayerInventoryScript.CloseContainer);
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
@@ -516,7 +524,7 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
             else if (gameObject.GetComponent<Item_Lockpick>() != null
@@ -525,7 +533,7 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
             else if (gameObject.GetComponent<Item_Gun>() != null)
@@ -534,7 +542,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
+                UIReuseScript.txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
@@ -543,7 +551,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
+                UIReuseScript.txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -555,42 +563,42 @@ public class Env_Item : MonoBehaviour
 
                     float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
                             / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                             + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: 0%";
                 }
             }
             else if (gameObject.GetComponent<Item_Battery>() != null)
             {
                 float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
                         / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = false;
+            UIReuseScript.btn_Take.gameObject.SetActive(true);
+            UIReuseScript.btn_Take.interactable = false;
             if (int_ItemWeight <= PlayerInventoryScript.invSpace)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Take.onClick.AddListener(Take);
+                UIReuseScript.btn_Take.interactable = true;
+                UIReuseScript.btn_Take.onClick.AddListener(Take);
 
                 if (isProtected)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                    UIReuseScript.txt_protected.gameObject.SetActive(true);
                 }
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_tooHeavy.gameObject.SetActive(true);
+                UIReuseScript.txt_tooHeavy.gameObject.SetActive(true);
             }
 
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
             //Debug.Log("Looting from " + PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + "!");
         }
@@ -599,10 +607,10 @@ public class Env_Item : MonoBehaviour
                 && isInPlayerInventory
                 && !isTaking)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            UIReuseScript.RebuildPlayerInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(
+            UIReuseScript.btn_TakeFromContainer.onClick.AddListener(
                 PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
@@ -614,7 +622,7 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
@@ -624,7 +632,7 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Gun>() != null)
@@ -633,7 +641,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
@@ -642,7 +650,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -654,32 +662,32 @@ public class Env_Item : MonoBehaviour
 
                     float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
                             / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                             + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: 0%";
                 }
             }
             else if (gameObject.GetComponent<Item_Battery>() != null)
             {
                 float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
                         / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Place.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = false;
+            UIReuseScript.btn_Place.gameObject.SetActive(true);
+            UIReuseScript.btn_Place.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.AddListener(Place);
+                UIReuseScript.btn_Place.interactable = true;
+                UIReuseScript.btn_Place.onClick.AddListener(Place);
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                UIReuseScript.txt_protected.gameObject.SetActive(true);
             }
             //in use flashlights with batteries and batteries cant be placed into containers
             if ((gameObject.GetComponent<Item_Flashlight>() != null
@@ -687,12 +695,12 @@ public class Env_Item : MonoBehaviour
                 || (gameObject.GetComponent<Item_Battery>() != null
                 && gameObject.GetComponent<Item_Battery>().isInUse))
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_Place.interactable = false;
+                UIReuseScript.btn_Place.interactable = false;
             }
 
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
             //Debug.Log("Placing into " + PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + "!");
         }
@@ -701,10 +709,10 @@ public class Env_Item : MonoBehaviour
                 && isInTraderShop
                 && isBuying)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
+            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+            UIReuseScript.RebuildShopInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+            UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
             {
@@ -713,7 +721,7 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
@@ -723,7 +731,7 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -733,7 +741,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
+                UIReuseScript.txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
@@ -742,7 +750,7 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -754,37 +762,37 @@ public class Env_Item : MonoBehaviour
 
                     float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
                             / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                             + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: 0%";
                 }
             }
             else if (gameObject.GetComponent<Item_Battery>() != null)
             {
                 float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
                         / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.interactable = false;
+            UIReuseScript.btn_BuyItem.gameObject.SetActive(true);
+            UIReuseScript.btn_BuyItem.interactable = false;
             if (PlayerInventoryScript.money >= int_ItemValue)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.onClick.AddListener(Buy);
+                UIReuseScript.btn_BuyItem.interactable = true;
+                UIReuseScript.btn_BuyItem.onClick.AddListener(Buy);
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_tooExpensive.gameObject.SetActive(true);
+                UIReuseScript.txt_tooExpensive.gameObject.SetActive(true);
             }
 
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
             //Debug.Log("Buying from str_traderName!");
         }
@@ -793,13 +801,13 @@ public class Env_Item : MonoBehaviour
                 && isInPlayerInventory
                 && !isBuying)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
+            UIReuseScript.RebuildPlayerInventory();
 
             int_finalPrice /= 2;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_ItemValue.text = int_finalPrice.ToString();
+            UIReuseScript.txt_ItemValue.text = int_finalPrice.ToString();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(
+            UIReuseScript.btn_BuyFromTrader.onClick.AddListener(
                 PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
             if (gameObject.GetComponent<Item_Consumable>() != null)
@@ -811,7 +819,7 @@ public class Env_Item : MonoBehaviour
                 {
                     float finalPercentage = gameObject.GetComponent<Item_Consumable>().currentConsumableAmount
                                             / gameObject.GetComponent<Item_Consumable>().maxConsumableAmount * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
             }
@@ -821,7 +829,7 @@ public class Env_Item : MonoBehaviour
             {
                 float finalPercentage = gameObject.GetComponent<Item_Lockpick>().lockpickDurability
                                         / gameObject.GetComponent<Item_Lockpick>().maxLockpickDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: " 
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
@@ -829,14 +837,14 @@ public class Env_Item : MonoBehaviour
             {
                 float durability = gameObject.GetComponent<Item_Gun>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
             }
             else if (gameObject.GetComponent<Item_Melee>() != null)
             {
                 float durability = gameObject.GetComponent<Item_Melee>().durability;
                 float maxDurability = gameObject.GetComponent<Item_Melee>().maxDurability;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: "
+                UIReuseScript.txt_ItemDurability.text = "Durability: "
                     + Mathf.FloorToInt(durability / maxDurability * 100).ToString() + "%";
             }
 
@@ -848,32 +856,32 @@ public class Env_Item : MonoBehaviour
 
                     float finalPercentage = theBattery.GetComponent<Item_Battery>().currentBattery
                             / theBattery.GetComponent<Item_Battery>().maxBattery * 100;
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                             + Mathf.FloorToInt(finalPercentage).ToString() + "%";
                 }
                 else
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: 0%";
+                    UIReuseScript.txt_ItemRemainder.text = "Remainder: 0%";
                 }
             }
             else if (gameObject.GetComponent<Item_Battery>() != null)
             {
                 float finalPercentage = gameObject.GetComponent<Item_Battery>().currentBattery
                         / gameObject.GetComponent<Item_Battery>().maxBattery * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemRemainder.text = "Remainder: "
+                UIReuseScript.txt_ItemRemainder.text = "Remainder: "
                         + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.gameObject.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = false;
+            UIReuseScript.btn_SellItem.gameObject.SetActive(true);
+            UIReuseScript.btn_SellItem.interactable = false;
             if (!isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = true;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.onClick.AddListener(Sell);
+                UIReuseScript.btn_SellItem.interactable = true;
+                UIReuseScript.btn_SellItem.onClick.AddListener(Sell);
             }
             else
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                UIReuseScript.txt_protected.gameObject.SetActive(true);
             }
             //in use flashlights with batteries and batteries cant be sold
             if ((gameObject.GetComponent<Item_Flashlight>() != null
@@ -881,29 +889,30 @@ public class Env_Item : MonoBehaviour
                 || (gameObject.GetComponent<Item_Battery>() != null
                 && gameObject.GetComponent<Item_Battery>().isInUse))
             {
-                par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.interactable = false;
+                UIReuseScript.btn_SellItem.interactable = false;
             }
 
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
             //Debug.Log("Selling to str_traderName!");
         }
-        //if is in repair menu
-        if (PlayerInventoryScript.isPlayerAndRepairOpen
-            && isInRepairMenu)
+        //if is in trader repair or workbench repair/upgrade menu
+        else if (PlayerInventoryScript.isPlayerAndWorkbenchOpen
+                 && (isInRepairMenu
+                 || isInUpgradeMenu))
         {
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-
             //trader repairs with money
             if (PlayerInventoryScript.Trader != null
                 && PlayerInventoryScript.Workbench == null)
             {
+                UIReuseScript.RebuildRepairMenu();
+
                 float maxRepairPrice = gameObject.GetComponent<Item_Gun>().maxRepairPrice;
                 float priceToRepairOnePercent = Mathf.FloorToInt(maxRepairPrice / 100);
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = 
+                UIReuseScript.txt_InventoryName.text = 
                     PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
                 if (gameObject.GetComponent<Item_Gun>() != null
@@ -915,13 +924,13 @@ public class Env_Item : MonoBehaviour
                     //has enough money to repair 1% or more of this item
                     if (PlayerInventoryScript.money >= priceToRepairOnePercent)
                     {
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.gameObject.SetActive(true);
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.interactable = true;
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.onClick.AddListener(RepairWithMoney);
+                        UIReuseScript.btn_Repair.gameObject.SetActive(true);
+                        UIReuseScript.btn_Repair.interactable = true;
+                        UIReuseScript.btn_Repair.onClick.AddListener(RepairWithMoney);
                     }
                     else
                     {
-                        par_Managers.GetComponent<Manager_UIReuse>().txt_tooExpensive.gameObject.SetActive(true);
+                        UIReuseScript.txt_tooExpensive.gameObject.SetActive(true);
                     }
                 }
             }
@@ -929,30 +938,44 @@ public class Env_Item : MonoBehaviour
             else if (PlayerInventoryScript.Trader == null
                      && PlayerInventoryScript.Workbench != null)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = 
+                UIReuseScript.txt_InventoryName.text =
                     PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
 
-                if (gameObject.GetComponent<Item_Gun>() != null
-                    && gameObject.GetComponent<Item_Gun>().durability
-                     < gameObject.GetComponent<Item_Gun>().maxDurability)
+                if (isInRepairMenu)
                 {
-                    //looks for repair kits in player inv and only enables repair button
-                    //in workbench repair menu if player actually the correct repair kit
-                    foreach (GameObject item in PlayerInventoryScript.inventory)
+                    UIReuseScript.RebuildRepairMenu();
+
+                    UIReuseScript.btn_Repair.gameObject.SetActive(true);
+                    UIReuseScript.btn_Repair.interactable = false;
+
+                    if (gameObject.GetComponent<Item_Gun>() != null
+                        && gameObject.GetComponent<Item_Gun>().durability
+                         < gameObject.GetComponent<Item_Gun>().maxDurability)
                     {
-                        if (item.GetComponent<Item_Consumable>() != null
-                            && item.GetComponent<Item_Consumable>().consumableType
-                            == Item_Consumable.ConsumableType.Repairkit
-                            && item.GetComponent<Item_Consumable>().repairKitType.ToString()
-                            == gameObject.GetComponent<Env_Item>().repairKitRequired.ToString())
+                        //looks for repair kits in player inv and only enables repair button
+                        //in workbench repair menu if player actually has the correct repair kit
+                        foreach (GameObject item in PlayerInventoryScript.inventory)
                         {
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.gameObject.SetActive(true);
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.interactable = true;
-                            item.GetComponent<Item_Consumable>().item = gameObject;
-                            par_Managers.GetComponent<Manager_UIReuse>().btn_Repair.onClick.AddListener(item.GetComponent<Item_Consumable>().Consume);
-                            break;
+                            if (item.GetComponent<Item_Consumable>() != null
+                                && item.GetComponent<Item_Consumable>().consumableType
+                                == Item_Consumable.ConsumableType.Repairkit
+                                && item.GetComponent<Item_Consumable>().repairKitType.ToString()
+                                == gameObject.GetComponent<Env_Item>().repairKitRequired.ToString())
+                            {
+                                UIReuseScript.btn_Repair.interactable = true;
+                                item.GetComponent<Item_Consumable>().item = gameObject;
+                                UIReuseScript.btn_Repair.onClick.AddListener(item.GetComponent<Item_Consumable>().Consume);
+                                break;
+                            }
                         }
                     }
+                }
+                else if (isInUpgradeMenu)
+                {
+                    UIReuseScript.RebuildUpgradeUI();
+
+                    UIReuseScript.btn_Upgrade.gameObject.SetActive(true);
+                    UIReuseScript.btn_Upgrade.interactable = true;
                 }
             }
 
@@ -962,16 +985,16 @@ public class Env_Item : MonoBehaviour
                 float maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
 
                 float finalPercentage = durability / maxDurability * 100;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_ItemDurability.text = "Durability: " 
+                UIReuseScript.txt_ItemDurability.text = "Durability: " 
                     + Mathf.FloorToInt(finalPercentage).ToString() + "%";
             }
             if (!isStackable)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_notStackable.gameObject.SetActive(true);
+                UIReuseScript.txt_notStackable.gameObject.SetActive(true);
             }
             if (isProtected)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_protected.gameObject.SetActive(true);
+                UIReuseScript.txt_protected.gameObject.SetActive(true);
             }
         }
     }
@@ -994,17 +1017,17 @@ public class Env_Item : MonoBehaviour
 
             PlayerInventoryScript.money -= Mathf.FloorToInt(priceToFullyRepair);
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = 
+            UIReuseScript.RebuildRepairMenu();
+            UIReuseScript.txt_InventoryName.text = 
                 PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
             PlayerInventoryScript.UpdatePlayerInventoryStats();
-            par_Managers.GetComponent<Manager_UIReuse>().durability = gameObject.GetComponent<Item_Gun>().maxDurability;
-            par_Managers.GetComponent<Manager_UIReuse>().maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
-            par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+            UIReuseScript.durability = gameObject.GetComponent<Item_Gun>().maxDurability;
+            UIReuseScript.maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
+            UIReuseScript.UpdateWeaponQuality();
 
             //Debug.Log("Fully repaired " + str_ItemName + " and removed " + priceToFullyRepair + " money from players inventory!");
         }
@@ -1034,17 +1057,17 @@ public class Env_Item : MonoBehaviour
             //int moneyRemoved = PlayerInventoryScript.money - currentPlayerMoney;
             PlayerInventoryScript.money = currentPlayerMoney;
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = 
+            UIReuseScript.RebuildRepairMenu();
+            UIReuseScript.txt_InventoryName.text = 
                 PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "(s) repair shop";
 
             PlayerInventoryScript.UpdatePlayerInventoryStats();
-            par_Managers.GetComponent<Manager_UIReuse>().durability = gameObject.GetComponent<Item_Gun>().durability;
-            par_Managers.GetComponent<Manager_UIReuse>().maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
-            par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+            UIReuseScript.durability = gameObject.GetComponent<Item_Gun>().durability;
+            UIReuseScript.maxDurability = gameObject.GetComponent<Item_Gun>().maxDurability;
+            UIReuseScript.UpdateWeaponQuality();
 
             //float newDurabilityPercent = Mathf.FloorToInt(increasedDurability / maxDurability * 100);
             //Debug.Log("Repaired " + str_ItemName + " for " + durabilityIncreasePercent + "% and removed " + moneyRemoved + " money from players inventory!");
@@ -1080,12 +1103,12 @@ public class Env_Item : MonoBehaviour
                     duplicate.GetComponent<Env_Item>().int_itemCount += int_itemCount;
                     PlayerInventoryScript.invSpace -= int_ItemWeight;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    UIReuseScript.RebuildPlayerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                    UIReuseScript.InteractUIDisabled();
 
                     //this is only called if queststage was assigned
                     //aka when this item is used in a quest
@@ -1109,7 +1132,7 @@ public class Env_Item : MonoBehaviour
                 {
                     theItem = gameObject;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                    UIReuseScript.InteractUIDisabled();
 
                     PlayerInventoryScript.inventory.Add(gameObject);
                     PlayerInventoryScript.invSpace -= int_ItemWeight;
@@ -1170,22 +1193,22 @@ public class Env_Item : MonoBehaviour
         {
             isPickingUpMultipleItems = true;
 
-            par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+            UIReuseScript.InteractUIDisabled();
 
             if (!par_Managers.GetComponent<UI_PauseMenu>().isGamePaused)
             {
                 par_Managers.GetComponent<UI_PauseMenu>().PauseGame();
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+            UIReuseScript.par_ItemCount.SetActive(true);
+            UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Picking up " + str_ItemName + "(s) ...";
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+            UIReuseScript.txt_CountInfo.text = "Picking up " + str_ItemName + "(s) ...";
+            UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+            UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+            UIReuseScript.txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight;
+            UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+            UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
         }
         else if (!isStackable)
         {
@@ -1193,7 +1216,7 @@ public class Env_Item : MonoBehaviour
             {
                 theItem = gameObject;
 
-                par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                UIReuseScript.InteractUIDisabled();
 
                 PlayerInventoryScript.inventory.Add(gameObject);
                 PlayerInventoryScript.invSpace -= int_ItemWeight;
@@ -1228,12 +1251,12 @@ public class Env_Item : MonoBehaviour
                 if (str_ItemName == "Exoskeleton")
                 {
                     par_Managers.GetComponent<UI_AbilityManager>().hasExoskeleton = true;
-                    par_Managers.GetComponent<Manager_UIReuse>().ShowExoskeletonUI();
+                    UIReuseScript.ShowExoskeletonUI();
                 }
 
                 PlayerInventoryScript.UpdatePlayerInventoryStats();
 
-                par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                UIReuseScript.InteractUIDisabled();
                 //Debug.Log("Picked up one non-stackable " + str_ItemName + " from the ground! Removed " + int_ItemWeight.ToString() + " space from players inventory.");
 
                 DeactivateItem();
@@ -1282,14 +1305,14 @@ public class Env_Item : MonoBehaviour
                     PlayerInventoryScript.invSpace -= int_ItemWeight;
                     PlayerInventoryScript.money -= int_ItemValue;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
+                    UIReuseScript.RebuildShopInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+                    UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
 
                     //Debug.Log("Bought one " + str_ItemName + " from " + str_traderName + " for " + int_ItemValue.ToString() + "! Removed " + int_ItemWeight.ToString() + " space from players inventory.");
 
@@ -1322,14 +1345,14 @@ public class Env_Item : MonoBehaviour
 
                     gameObject.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
+                    UIReuseScript.RebuildShopInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+                    UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
 
                     foundDuplicate = false;
                     duplicate = null;
@@ -1363,16 +1386,16 @@ public class Env_Item : MonoBehaviour
         {
             isBuyingMultipleItems = true;
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+            UIReuseScript.par_ItemCount.SetActive(true);
+            UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
             str_traderName = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Buying " + str_ItemName + "(s) from " + str_traderName + "...";
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight + " Total money removed: " + int_ItemValue;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+            UIReuseScript.txt_CountInfo.text = "Buying " + str_ItemName + "(s) from " + str_traderName + "...";
+            UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+            UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+            UIReuseScript.txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight + " Total money removed: " + int_ItemValue;
+            UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+            UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
         }
         else if (!isStackable)
         {
@@ -1394,14 +1417,14 @@ public class Env_Item : MonoBehaviour
 
             gameObject.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
+            UIReuseScript.RebuildShopInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+            UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
 
             foundDuplicate = false;
             duplicate = null;
@@ -1414,7 +1437,7 @@ public class Env_Item : MonoBehaviour
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
@@ -1499,16 +1522,16 @@ public class Env_Item : MonoBehaviour
 
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    UIReuseScript.RebuildPlayerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+                    UIReuseScript.btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
-                    par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                    UIReuseScript.InteractUIDisabled();
 
                     //Debug.Log("Sold one duplicate " + str_ItemName + " to " + str_traderName + " for " + int_singlePrice.ToString() + "! Added " + int_ItemWeight.ToString() + " space back to players inventory.");
 
@@ -1537,14 +1560,14 @@ public class Env_Item : MonoBehaviour
                     isInPlayerInventory = false;
                     isInTraderShop = true;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    UIReuseScript.RebuildPlayerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+                    UIReuseScript.btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                     foundDuplicate = false;
                     duplicate = null;
@@ -1563,16 +1586,16 @@ public class Env_Item : MonoBehaviour
             {
                 isSellingMultipleItems = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+                UIReuseScript.par_ItemCount.SetActive(true);
+                UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
                 str_traderName = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Selling " + str_ItemName + "(s) to " + str_traderName + "...";
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight added: " + int_ItemWeight + " Total money added: " + int_singlePrice;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+                UIReuseScript.txt_CountInfo.text = "Selling " + str_ItemName + "(s) to " + str_traderName + "...";
+                UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+                UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+                UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight + " Total money added: " + int_singlePrice;
+                UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+                UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
             }
             else if (!isStackable)
             {
@@ -1595,14 +1618,14 @@ public class Env_Item : MonoBehaviour
                 isInPlayerInventory = false;
                 isInTraderShop = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                UIReuseScript.RebuildPlayerInventory();
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+                UIReuseScript.btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 foundDuplicate = false;
                 duplicate = null;
@@ -1616,7 +1639,7 @@ public class Env_Item : MonoBehaviour
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
@@ -1642,12 +1665,12 @@ public class Env_Item : MonoBehaviour
             PlayerInventoryScript.Container.GetComponent<Inv_Container>().inventory.Remove(gameObject);
             isInContainer = false;
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+            UIReuseScript.RebuildContainerInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
             PlayerInventoryScript.money += int_itemCount;
             PlayerInventoryScript.UpdatePlayerInventoryStats();
@@ -1669,16 +1692,16 @@ public class Env_Item : MonoBehaviour
                     duplicate.GetComponent<Env_Item>().int_itemCount += int_itemCount;
                     PlayerInventoryScript.invSpace -= int_ItemWeight;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+                    UIReuseScript.RebuildContainerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+                    UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
-                    par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                    UIReuseScript.InteractUIDisabled();
 
                     str_containerName = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName;
                     //Debug.Log("Took one duplicate " + str_ItemName + " from " + str_containerName + "! Removed " + int_ItemWeight.ToString() + " space from players inventory.");
@@ -1711,14 +1734,14 @@ public class Env_Item : MonoBehaviour
 
                     gameObject.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+                    UIReuseScript.RebuildContainerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+                    UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
                     foundDuplicate = false;
                     duplicate = null;
@@ -1739,16 +1762,16 @@ public class Env_Item : MonoBehaviour
         {
             isTakingMultipleItems = true;
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+            UIReuseScript.par_ItemCount.SetActive(true);
+            UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
             str_containerName = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Taking " + str_ItemName + "(s) from " + str_containerName + "...";
-            par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-            par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+            UIReuseScript.txt_CountInfo.text = "Taking " + str_ItemName + "(s) from " + str_containerName + "...";
+            UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+            UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+            UIReuseScript.txt_SliderInfo.text = "Total weight removed: " + int_ItemWeight;
+            UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+            UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
         }
         else if (!isStackable)
         {
@@ -1769,14 +1792,14 @@ public class Env_Item : MonoBehaviour
 
             gameObject.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
+            UIReuseScript.RebuildContainerInventory();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+            UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+            UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
             foundDuplicate = false;
             duplicate = null;
@@ -1789,7 +1812,7 @@ public class Env_Item : MonoBehaviour
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
@@ -1856,7 +1879,7 @@ public class Env_Item : MonoBehaviour
 
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
         }
 
@@ -1873,16 +1896,16 @@ public class Env_Item : MonoBehaviour
 
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    UIReuseScript.RebuildPlayerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+                    UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
-                    par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                    UIReuseScript.InteractUIDisabled();
 
                     str_containerName = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName;
                     //Debug.Log("Placed one duplicate " + str_ItemName + " to " + str_containerName + "! Added " + int_ItemWeight.ToString() + " space back to players inventory.");
@@ -1911,14 +1934,14 @@ public class Env_Item : MonoBehaviour
                     isInPlayerInventory = false;
                     isInContainer = true;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                    UIReuseScript.RebuildPlayerInventory();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+                    UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                     foundDuplicate = false;
                     duplicate = null;
@@ -1938,16 +1961,16 @@ public class Env_Item : MonoBehaviour
             {
                 isPlacingMultipleItems = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+                UIReuseScript.par_ItemCount.SetActive(true);
+                UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
                 str_containerName = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Placing " + str_ItemName + "(s) to " + str_containerName + "...";
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+                UIReuseScript.txt_CountInfo.text = "Placing " + str_ItemName + "(s) to " + str_containerName + "...";
+                UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+                UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+                UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
+                UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+                UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
             }
             else if (!isStackable)
             {
@@ -1969,14 +1992,14 @@ public class Env_Item : MonoBehaviour
                 isInPlayerInventory = false;
                 isInContainer = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                UIReuseScript.RebuildPlayerInventory();
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+                UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 foundDuplicate = false;
                 duplicate = null;
@@ -1991,7 +2014,7 @@ public class Env_Item : MonoBehaviour
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
@@ -2045,7 +2068,7 @@ public class Env_Item : MonoBehaviour
 
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
         }
 
@@ -2088,12 +2111,12 @@ public class Env_Item : MonoBehaviour
 
                 isInPlayerInventory = false;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                UIReuseScript.RebuildPlayerInventory();
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 foundDuplicate = false;
                 duplicate = null;
@@ -2113,15 +2136,15 @@ public class Env_Item : MonoBehaviour
             {
                 isDroppingMultipleItems = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+                UIReuseScript.par_ItemCount.SetActive(true);
+                UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Dropping " + str_ItemName + "(s) from players inventory...";
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+                UIReuseScript.txt_CountInfo.text = "Dropping " + str_ItemName + "(s) from players inventory...";
+                UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+                UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+                UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
+                UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+                UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
 
                 foundDuplicate = false;
                 duplicate = null;
@@ -2131,7 +2154,7 @@ public class Env_Item : MonoBehaviour
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
@@ -2200,12 +2223,12 @@ public class Env_Item : MonoBehaviour
 
                 isInPlayerInventory = false;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
+                UIReuseScript.RebuildPlayerInventory();
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 PlayerInventoryScript.UpdatePlayerInventoryStats();
 
@@ -2222,29 +2245,29 @@ public class Env_Item : MonoBehaviour
             {
                 isDestroyingMultipleItems = true;
 
-                par_Managers.GetComponent<Manager_UIReuse>().par_ItemCount.SetActive(true);
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.maxValue = int_itemCount;
+                UIReuseScript.par_ItemCount.SetActive(true);
+                UIReuseScript.itemCountSlider.maxValue = int_itemCount;
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountInfo.text = "Destroying " + str_ItemName + "(s) from players inventory...";
-                par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.onValueChanged.AddListener(SliderValue);
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: 1/" + int_itemCount;
-                par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.AddListener(ConfirmCount);
-                par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.AddListener(CancelCount);
+                UIReuseScript.txt_CountInfo.text = "Destroying " + str_ItemName + "(s) from players inventory...";
+                UIReuseScript.itemCountSlider.onValueChanged.AddListener(SliderValue);
+                UIReuseScript.txt_CountValue.text = "Selected count: 1/" + int_itemCount;
+                UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_ItemWeight;
+                UIReuseScript.btn_ConfirmCount.onClick.AddListener(ConfirmCount);
+                UIReuseScript.btn_CancelCount.onClick.AddListener(CancelCount);
             }
         }
         canContinue = true;
 
         if (!isInRepairMenu)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+            UIReuseScript.EnableInventorySortButtons();
         }
     }
 
     public void SliderValue(float value)
     {
         int_selectedCount = Mathf.FloorToInt(value);
-        par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.text = "Selected count: " + int_selectedCount.ToString() + "/" + int_itemCount;
+        UIReuseScript.txt_CountValue.text = "Selected count: " + int_selectedCount.ToString() + "/" + int_itemCount;
 
         if (isPickingUpMultipleItems
             || isTakingMultipleItems
@@ -2258,27 +2281,27 @@ public class Env_Item : MonoBehaviour
             || isTakingMultipleItems
             || isBuyingMultipleItems)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight removed: " + int_totalSpace;
+            UIReuseScript.txt_SliderInfo.text = "Total weight removed: " + int_totalSpace;
         }
         if (isPlacingMultipleItems
             || isDroppingMultipleItems
             || isDestroyingMultipleItems
             || isSellingMultipleItems)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = "Total weight added: " + int_totalSpace;
+            UIReuseScript.txt_SliderInfo.text = "Total weight added: " + int_totalSpace;
         }
         if (isBuyingMultipleItems)
         {
             int_totalSpace = int_ItemWeight * int_selectedCount;
             int_finalPrice = int_ItemValue * int_selectedCount;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text + " Total money taken: " + int_finalPrice;
+            UIReuseScript.txt_SliderInfo.text = UIReuseScript.txt_SliderInfo.text + " Total money taken: " + int_finalPrice;
         }
         if (isSellingMultipleItems)
         {
             int_totalSpace = int_ItemWeight * int_selectedCount;
             int_singlePrice = int_finalPrice * 2;
             int_finalPrice = int_singlePrice * int_selectedCount;
-            par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text = par_Managers.GetComponent<Manager_UIReuse>().txt_SliderInfo.text + " Total money added: " + int_finalPrice;
+            UIReuseScript.txt_SliderInfo.text = UIReuseScript.txt_SliderInfo.text + " Total money added: " + int_finalPrice;
         }
         //Debug.Log(int_selectedCount);
 
@@ -2286,13 +2309,13 @@ public class Env_Item : MonoBehaviour
         {
             if (int_selectedCount * int_ItemWeight <= PlayerInventoryScript.invSpace)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.color = Color.white;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.interactable = true;
+                UIReuseScript.txt_CountValue.color = Color.white;
+                UIReuseScript.btn_ConfirmCount.interactable = true;
             }
             else if (int_selectedCount * int_ItemWeight > PlayerInventoryScript.invSpace)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.color = Color.red;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.interactable = false;
+                UIReuseScript.txt_CountValue.color = Color.red;
+                UIReuseScript.btn_ConfirmCount.interactable = false;
                 //Debug.Log("Slider not interactable...");
             }
         }
@@ -2300,26 +2323,26 @@ public class Env_Item : MonoBehaviour
         {
             if (int_selectedCount * int_ItemValue <= PlayerInventoryScript.money)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.color = Color.white;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.interactable = true;
+                UIReuseScript.txt_CountValue.color = Color.white;
+                UIReuseScript.btn_ConfirmCount.interactable = true;
             }
             else if (int_selectedCount * int_ItemValue > PlayerInventoryScript.money)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.color = Color.red;
-                par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.interactable = false;
+                UIReuseScript.txt_CountValue.color = Color.red;
+                UIReuseScript.btn_ConfirmCount.interactable = false;
                 //Debug.Log("Slider not interactable...");
             }
         }
         else
         {
-            par_Managers.GetComponent<Manager_UIReuse>().txt_CountValue.color = Color.white;
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.interactable = true;
+            UIReuseScript.txt_CountValue.color = Color.white;
+            UIReuseScript.btn_ConfirmCount.interactable = true;
         }
     }
 
     public void ConfirmCount()
     {
-        int_confirmedCount = Mathf.FloorToInt(par_Managers.GetComponent<Manager_UIReuse>().itemCountSlider.value);
+        int_confirmedCount = Mathf.FloorToInt(UIReuseScript.itemCountSlider.value);
         //Debug.Log("Selected " + int_confirmedCount + " " + str_ItemName + ".");
 
         if (isBuyingMultipleItems)
@@ -2344,15 +2367,15 @@ public class Env_Item : MonoBehaviour
                     {
                         PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().inventory.Remove(gameObject);
 
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        UIReuseScript.ClearStatsUI();
+                        UIReuseScript.ClearInventoryUI();
                         RemoveListeners();
-                        par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                        UIReuseScript.RebuildShopInventory();
+                        UIReuseScript.ClearCountSliderUI();
 
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+                        UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+                        UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
 
                         par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
@@ -2414,12 +2437,12 @@ public class Env_Item : MonoBehaviour
                     }
                 }
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearAllInventories();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                UIReuseScript.RebuildShopInventory();
+                UIReuseScript.ClearCountSliderUI();
 
                 int_finalPrice = int_ItemValue * int_confirmedCount;
                 str_traderName = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName;
@@ -2427,9 +2450,9 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.money -= int_finalPrice;
                 PlayerInventoryScript.invSpace -= int_totalSpace;
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
+                UIReuseScript.btn_SellToTrader.onClick.AddListener(PlayerInventoryScript.CloseShop);
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+                UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
 
                 PlayerInventoryScript.UpdatePlayerInventoryStats();
 
@@ -2448,7 +2471,7 @@ public class Env_Item : MonoBehaviour
 
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
 
             foundDuplicate = false;
@@ -2475,15 +2498,15 @@ public class Env_Item : MonoBehaviour
                     PlayerInventoryScript.inventory.Remove(gameObject);
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                    UIReuseScript.RebuildPlayerInventory();
+                    UIReuseScript.ClearCountSliderUI();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+                    UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                     if (gameObject.GetComponent<Item_Ammo>() != null)
                     {
@@ -2543,11 +2566,11 @@ public class Env_Item : MonoBehaviour
                 }
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+            UIReuseScript.RebuildPlayerInventory();
+            UIReuseScript.ClearCountSliderUI();
 
             int_singlePrice = int_finalPrice * 2;
             int_finalPrice = int_singlePrice * int_confirmedCount;
@@ -2555,9 +2578,9 @@ public class Env_Item : MonoBehaviour
             int_totalSpace = int_ItemWeight * int_confirmedCount;
             PlayerInventoryScript.money += int_finalPrice;
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
+            UIReuseScript.btn_BuyFromTrader.onClick.AddListener(PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().OpenShopUI);
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
 
             foundDuplicate = false;
             duplicate = null;
@@ -2565,7 +2588,7 @@ public class Env_Item : MonoBehaviour
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
 
             //Debug.Log("Sold " + int_confirmedCount + " " + str_ItemName + "(s) to " + str_traderName + " for " + int_singlePrice.ToString() + " each(" + int_finalPrice + " total)! Added " + int_totalSpace.ToString() + " space back to players inventory.");
@@ -2583,11 +2606,11 @@ public class Env_Item : MonoBehaviour
                     duplicate.GetComponent<Env_Item>().int_itemCount += int_confirmedCount;
                     PlayerInventoryScript.invSpace -= int_ItemWeight * int_confirmedCount;
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                    UIReuseScript.RebuildPlayerInventory();
+                    UIReuseScript.ClearCountSliderUI();
 
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
@@ -2624,7 +2647,7 @@ public class Env_Item : MonoBehaviour
                             }
                         }
 
-                        par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+                        UIReuseScript.InteractUIDisabled();
                         Destroy(gameObject);
                     }
                 }
@@ -2700,11 +2723,11 @@ public class Env_Item : MonoBehaviour
                         theItem.GetComponent<Env_Item>().DeactivateItem();
                     }
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                    UIReuseScript.RebuildPlayerInventory();
+                    UIReuseScript.ClearCountSliderUI();
 
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
@@ -2733,7 +2756,7 @@ public class Env_Item : MonoBehaviour
 
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
         }
 
@@ -2759,15 +2782,15 @@ public class Env_Item : MonoBehaviour
                     {
                         PlayerInventoryScript.Container.GetComponent<Inv_Container>().inventory.Remove(gameObject);
 
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                        UIReuseScript.ClearStatsUI();
+                        UIReuseScript.ClearInventoryUI();
                         RemoveListeners();
-                        par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
-                        par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                        UIReuseScript.RebuildContainerInventory();
+                        UIReuseScript.ClearCountSliderUI();
 
-                        par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+                        UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
 
-                        par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+                        UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
                         par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(str_ItemName);
 
@@ -2829,15 +2852,15 @@ public class Env_Item : MonoBehaviour
                     }
                 }
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                UIReuseScript.RebuildContainerInventory();
+                UIReuseScript.ClearCountSliderUI();
 
-                par_Managers.GetComponent<Manager_UIReuse>().btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
+                UIReuseScript.btn_PlaceIntoContainer.onClick.AddListener(PlayerInventoryScript.CloseContainer);
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+                UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
 
                 foundDuplicate = false;
                 duplicate = null;
@@ -2860,7 +2883,7 @@ public class Env_Item : MonoBehaviour
 
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
         }
 
@@ -2884,15 +2907,15 @@ public class Env_Item : MonoBehaviour
                     PlayerInventoryScript.inventory.Remove(gameObject);
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_ItemName);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
                     RemoveListeners();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                    UIReuseScript.RebuildPlayerInventory();
+                    UIReuseScript.ClearCountSliderUI();
 
-                    par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+                    UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                     if (gameObject.GetComponent<Item_Ammo>() != null)
                     {
@@ -2953,15 +2976,15 @@ public class Env_Item : MonoBehaviour
                 }
             }
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+            UIReuseScript.RebuildPlayerInventory();
+            UIReuseScript.ClearCountSliderUI();
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
+            UIReuseScript.btn_TakeFromContainer.onClick.AddListener(PlayerInventoryScript.Container.GetComponent<Inv_Container>().CheckIfLocked);
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
 
             foundDuplicate = false;
             duplicate = null;
@@ -2969,7 +2992,7 @@ public class Env_Item : MonoBehaviour
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
 
             str_containerName = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName;
@@ -3064,13 +3087,13 @@ public class Env_Item : MonoBehaviour
 
             droppedObject = true;
 
-            par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+            UIReuseScript.ClearStatsUI();
+            UIReuseScript.ClearInventoryUI();
             RemoveListeners();
-            par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-            par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+            UIReuseScript.RebuildPlayerInventory();
+            UIReuseScript.ClearCountSliderUI();
 
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+            UIReuseScript.txt_InventoryName.text = "Player inventory";
 
             foundDuplicate = false;
             duplicate = null;
@@ -3078,7 +3101,7 @@ public class Env_Item : MonoBehaviour
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
 
             int_totalSpace = int_ItemWeight * int_confirmedCount;
@@ -3093,13 +3116,13 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.invSpace += int_ItemWeight * int_confirmedCount;
                 isInPlayerInventory = false;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                UIReuseScript.RebuildPlayerInventory();
+                UIReuseScript.ClearCountSliderUI();
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 if (gameObject.GetComponent<Item_Ammo>() != null)
                 {
@@ -3119,13 +3142,13 @@ public class Env_Item : MonoBehaviour
                 PlayerInventoryScript.invSpace += int_ItemWeight * int_confirmedCount;
                 int_itemCount -= int_confirmedCount;
 
-                par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
+                UIReuseScript.ClearStatsUI();
+                UIReuseScript.ClearInventoryUI();
                 RemoveListeners();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+                UIReuseScript.RebuildPlayerInventory();
+                UIReuseScript.ClearCountSliderUI();
 
-                par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                UIReuseScript.txt_InventoryName.text = "Player inventory";
 
                 if (gameObject.GetComponent<Item_Ammo>() != null)
                 {
@@ -3142,7 +3165,7 @@ public class Env_Item : MonoBehaviour
             PlayerInventoryScript.UpdatePlayerInventoryStats();
             if (!isInRepairMenu)
             {
-                par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+                UIReuseScript.EnableInventorySortButtons();
             }
         }
     }
@@ -3182,11 +3205,11 @@ public class Env_Item : MonoBehaviour
             }
         }
 
-        par_Managers.GetComponent<Manager_UIReuse>().txt_ammoForGun.text = "0";
+        UIReuseScript.txt_ammoForGun.text = "0";
     }
     private void UnequipAndUnloadGun()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
+        UIReuseScript.ClearWeaponUI();
         //unequips this item if it is a gun
         if (gameObject.GetComponent<Item_Gun>().hasEquippedGun)
         {
@@ -3239,38 +3262,38 @@ public class Env_Item : MonoBehaviour
 
                 if (PlayerInventoryScript.isPlayerInventoryOpen)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
+                    UIReuseScript.RebuildPlayerInventory();
+                    UIReuseScript.txt_InventoryName.text = "Player inventory";
                 }
                 else if (PlayerInventoryScript.Container != null && PlayerInventoryScript.Container.GetComponent<Inv_Container>().isContainerInventoryOpen)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildContainerInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
+                    UIReuseScript.RebuildContainerInventory();
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Container.GetComponent<Inv_Container>().str_ContainerName + " inventory";
                 }
                 else if (PlayerInventoryScript.Trader != null && PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().isShopOpen)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildShopInventory();
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
+                    UIReuseScript.RebuildShopInventory();
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().str_ShopName;
                 }
                 else if (PlayerInventoryScript.Trader != null && PlayerInventoryScript.Trader.GetComponent<UI_RepairContent>().isNPCRepairUIOpen)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
+                    UIReuseScript.RebuildRepairMenu();
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
                 }
                 else if (PlayerInventoryScript.Workbench != null)
                 {
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                    par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-                    par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<Env_Workbench>().str_workbenchName;
+                    UIReuseScript.ClearStatsUI();
+                    UIReuseScript.ClearInventoryUI();
+                    UIReuseScript.RebuildRepairMenu();
+                    UIReuseScript.txt_InventoryName.text = PlayerInventoryScript.GetComponent<Env_Workbench>().str_workbenchName;
                 }
                 //Debug.Log("Unloaded this gun and added " + removedAmmo + " ammo to new ammo clip in players inventory.");
             }
@@ -3310,7 +3333,7 @@ public class Env_Item : MonoBehaviour
                 break;
             }
         }
-        par_Managers.GetComponent<Manager_UIReuse>().InteractUIDisabled();
+        UIReuseScript.InteractUIDisabled();
         Destroy(gameObject);
     }
 
@@ -3341,24 +3364,26 @@ public class Env_Item : MonoBehaviour
         isTakingMultipleItems = false;
         isPlacingMultipleItems = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().ClearCountSliderUI();
+        UIReuseScript.ClearCountSliderUI();
     }
 
     public void RemoveListeners()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().btn_BuyItem.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_SellItem.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Take.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Place.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Drop.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Destroy.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ConfirmCount.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_CancelCount.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Equip.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Unequip.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_Consume.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_AddBattery.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_RemoveBattery.onClick.RemoveAllListeners();
+        UIReuseScript.btn_BuyItem.onClick.RemoveAllListeners();
+        UIReuseScript.btn_SellItem.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Take.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Place.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Drop.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Destroy.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Repair.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Upgrade.onClick.RemoveAllListeners();
+        UIReuseScript.btn_ConfirmCount.onClick.RemoveAllListeners();
+        UIReuseScript.btn_CancelCount.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Equip.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Unequip.onClick.RemoveAllListeners();
+        UIReuseScript.btn_Consume.onClick.RemoveAllListeners();
+        UIReuseScript.btn_AddBattery.onClick.RemoveAllListeners();
+        UIReuseScript.btn_RemoveBattery.onClick.RemoveAllListeners();
     }
 
     //if this item collided with world border

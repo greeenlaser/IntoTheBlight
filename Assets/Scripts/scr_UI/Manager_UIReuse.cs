@@ -48,6 +48,7 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_Unequip;
     public Button btn_Consume;
     public Button btn_Repair;
+    public Button btn_Upgrade;
     public Button btn_ShowAll;
     public Button btn_ShowWeapons;
     public Button btn_ShowArmor;
@@ -547,10 +548,10 @@ public class Manager_UIReuse : MonoBehaviour
     }
     public void RebuildRepairMenu()
     {
-        ClearAllInventories();
         foreach (GameObject item in PlayerInventoryScript.inventory)
         {
-            if (item != null && item.GetComponent<Item_Gun>() != null)
+            if (item != null 
+                && item.GetComponent<Item_Gun>() != null)
             {
                 Button btn_New = Instantiate(btn_Template);
                 btn_New.transform.SetParent(par_Panel.transform, false);
@@ -584,7 +585,45 @@ public class Manager_UIReuse : MonoBehaviour
                     PlayerInventoryScript.Trader.GetComponent<UI_RepairContent>().buttons.Add(btn_New.gameObject);
                 }
 
+                item.GetComponent<Env_Item>().isInUpgradeMenu = false;
                 item.GetComponent<Env_Item>().isInRepairMenu = true;
+            }
+        }
+    }
+    public void RebuildUpgradeUI()
+    {
+        foreach (GameObject item in PlayerInventoryScript.inventory)
+        {
+            if (item != null 
+                && item.GetComponent<Item_Gun>() != null)
+            {
+                Button btn_New = Instantiate(btn_Template);
+                btn_New.transform.SetParent(par_Panel.transform, false);
+
+                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+                {
+                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
+                    {
+                        item.GetComponent<Env_Item>().hasUnderscore = true;
+                        break;
+                    }
+                }
+                if (item.GetComponent<Env_Item>().hasUnderscore)
+                {
+                    string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
+                    btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+                }
+                else if (!item.GetComponent<Env_Item>().hasUnderscore)
+                {
+                    btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
+                }
+
+                btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
+
+                PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().buttons.Add(btn_New.gameObject);
+
+                item.GetComponent<Env_Item>().isInRepairMenu = false;
+                item.GetComponent<Env_Item>().isInUpgradeMenu = true;
             }
         }
     }
@@ -619,6 +658,7 @@ public class Manager_UIReuse : MonoBehaviour
         btn_Unequip.gameObject.SetActive(false);
         btn_Consume.gameObject.SetActive(false);
         btn_Repair.gameObject.SetActive(false);
+        btn_Upgrade.gameObject.SetActive(false);
         btn_ShowAll.gameObject.SetActive(false);
         btn_ShowWeapons.gameObject.SetActive(false);
         btn_ShowArmor.gameObject.SetActive(false);
@@ -686,7 +726,7 @@ public class Manager_UIReuse : MonoBehaviour
         }
         //clear trader shop buttons
         if (PlayerInventoryScript.Trader != null
-            && !PlayerInventoryScript.isPlayerAndRepairOpen)
+            && !PlayerInventoryScript.isPlayerAndWorkbenchOpen)
         {
             foreach (GameObject button in PlayerInventoryScript.Trader.GetComponent<UI_ShopContent>().buttons)
             {
@@ -696,7 +736,7 @@ public class Manager_UIReuse : MonoBehaviour
         }
         //clear trader repair menu buttons
         if (PlayerInventoryScript.Trader != null
-            && PlayerInventoryScript.isPlayerAndRepairOpen)
+            && PlayerInventoryScript.isPlayerAndWorkbenchOpen)
         {
             foreach (GameObject button in PlayerInventoryScript.Trader.GetComponent<UI_RepairContent>().buttons)
             {

@@ -189,6 +189,7 @@ public class Inv_Container : MonoBehaviour
                 item.GetComponent<Env_Item>().isInContainer = true;
                 item.GetComponent<Env_Item>().isInTraderShop = false;
                 item.GetComponent<Env_Item>().isInRepairMenu = false;
+                item.GetComponent<Env_Item>().isInUpgradeMenu = false;
                 item.GetComponent<Env_Item>().isBuying = false;
                 item.GetComponent<Env_Item>().isTaking = true;
             }

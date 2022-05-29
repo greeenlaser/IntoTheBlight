@@ -31,7 +31,7 @@ public class UI_RepairContent : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.AddListener(CloseRepairAndPlayerInventory);
 
         PlayerInventoryScript.CloseInventory();
-        PlayerInventoryScript.isPlayerAndRepairOpen = true;
+        PlayerInventoryScript.isPlayerAndWorkbenchOpen = true;
         par_Managers.GetComponent<Manager_UIReuse>().par_Inventory.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().par_Stats.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = gameObject.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
