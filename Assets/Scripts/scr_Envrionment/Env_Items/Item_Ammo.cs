@@ -16,8 +16,7 @@ public class Item_Ammo : MonoBehaviour
         _5_56x45_ammo,
         _308_ammo,
         _12ga_ammo,
-        _50BMG_ammo,
-        godbullet
+        _50BMG_ammo
     }
     public AmmoType ammoType;
     public enum AmmoType

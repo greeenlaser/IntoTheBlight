@@ -94,6 +94,8 @@ public class Env_Workbench : MonoBehaviour
 
     public void CloseWorkbenchUI()
     {
+        UIReuseScript.HideItemUpgradeUI();
+
         PlayerInventoryScript.canOpenPlayerInventory = false;
         PlayerInventoryScript.closedInventoryThroughContainer = true;
 

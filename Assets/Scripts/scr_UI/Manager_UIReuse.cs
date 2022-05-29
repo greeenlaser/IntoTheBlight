@@ -90,6 +90,12 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_ConfirmCount;
     public Button btn_CancelCount;
 
+    [Header("Item upgrades")]
+    public GameObject par_ItemUpgrades;
+    public TMP_Text txt_ItemUpgrade;
+    public List<RawImage> upgradeBackgrounds;
+    public List<Button> upgradeButtons;
+
     [Header("Quests")]
     //hover quest parts
     public TMP_Text txt_QuestHoverTitle;
@@ -346,6 +352,8 @@ public class Manager_UIReuse : MonoBehaviour
         btn_BuyFromTrader.gameObject.SetActive(false);
         btn_PlaceIntoContainer.gameObject.SetActive(false);
         btn_SellToTrader.gameObject.SetActive(false);
+
+        HideItemUpgradeUI();
 
         minorRadiationDamage.gameObject.SetActive(false);
         moderateRadiationDamage.gameObject.SetActive(false);
@@ -752,6 +760,91 @@ public class Manager_UIReuse : MonoBehaviour
                 Destroy(button);
             }
             PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().buttons.Clear();
+        }
+    }
+
+    public void HideItemUpgradeUI()
+    {
+        foreach (RawImage bgr in upgradeBackgrounds)
+        {
+            bgr.gameObject.SetActive(false);
+        }
+
+        foreach (Button btn in upgradeButtons)
+        {
+            btn.transform.position = new Vector3(-2000, 0, 0);
+            btn.GetComponentInChildren<TMP_Text>().text = "";
+            btn.interactable = false;
+            btn.onClick.RemoveAllListeners();
+            btn.gameObject.SetActive(false);
+        }
+
+        txt_ItemUpgrade.text = "";
+        par_ItemUpgrades.SetActive(false);
+    }
+    public void DisableItemUpgradeButtons()
+    {
+        foreach (Button btn in upgradeButtons)
+        {
+            btn.interactable = false;
+            btn.onClick.RemoveAllListeners();
+        }
+    }
+    public void ShowUpgradeUI(string itemTypeName, RawImage bgr, 
+                              Vector3 pos_btn1, string name1,
+                              Vector3 pos_btn2, string name2,
+                              Vector3 pos_btn3, string name3,
+                              Vector3 pos_btn4, string name4,
+                              Vector3 pos_btn5, string name5,
+                              Vector3 pos_btn6, string name6)
+    {
+        par_ItemUpgrades.SetActive(true);
+        txt_ItemUpgrade.text = itemTypeName;
+
+        foreach (RawImage background in upgradeBackgrounds)
+        {
+            if (bgr == background)
+            {
+                background.gameObject.SetActive(true);
+                break;
+            }
+        }
+
+        if (pos_btn1 != Vector3.zero)
+        {
+            upgradeButtons[0].gameObject.SetActive(true);
+            upgradeButtons[0].transform.localPosition = pos_btn1;
+            upgradeButtons[0].GetComponentInChildren<TMP_Text>().text = name1;
+        }
+        if (pos_btn2 != Vector3.zero)
+        {
+            upgradeButtons[1].gameObject.SetActive(true);
+            upgradeButtons[1].transform.localPosition = pos_btn2;
+            upgradeButtons[1].GetComponentInChildren<TMP_Text>().text = name2;
+        }
+        if (pos_btn3 != Vector3.zero)
+        {
+            upgradeButtons[2].gameObject.SetActive(true);
+            upgradeButtons[2].transform.localPosition = pos_btn3;
+            upgradeButtons[2].GetComponentInChildren<TMP_Text>().text = name3;
+        }
+        if (pos_btn4 != Vector3.zero)
+        {
+            upgradeButtons[3].gameObject.SetActive(true);
+            upgradeButtons[3].transform.localPosition = pos_btn4;
+            upgradeButtons[3].GetComponentInChildren<TMP_Text>().text = name4;
+        }
+        if (pos_btn5 != Vector3.zero)
+        {
+            upgradeButtons[4].gameObject.SetActive(true);
+            upgradeButtons[4].transform.localPosition = pos_btn5;
+            upgradeButtons[4].GetComponentInChildren<TMP_Text>().text = name5;
+        }
+        if (pos_btn6 != Vector3.zero)
+        {
+            upgradeButtons[5].gameObject.SetActive(true);
+            upgradeButtons[5].transform.localPosition = pos_btn6;
+            upgradeButtons[5].GetComponentInChildren<TMP_Text>().text = name6;
         }
     }
 

@@ -976,6 +976,7 @@ public class Env_Item : MonoBehaviour
 
                     UIReuseScript.btn_Upgrade.gameObject.SetActive(true);
                     UIReuseScript.btn_Upgrade.interactable = true;
+                    UIReuseScript.btn_Upgrade.onClick.AddListener(gameObject.GetComponent<Manager_ItemUpgrades>().ShowUpgradeButtons);
                 }
             }
 

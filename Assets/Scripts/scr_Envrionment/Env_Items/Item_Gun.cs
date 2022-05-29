@@ -10,12 +10,12 @@ public class Item_Gun : MonoBehaviour
     [Tooltip("How far can this gun shoot?")]
     public float maxRange;
     [Tooltip("Does this gun fire one bullet per lmb click or does it fire bullets while lmb is held down?")]
-    [SerializeField] private bool isSingleShot;
+    public bool isSingleShot;
     [Range(10, 100)]
     [Tooltip("How many bullets can you reload to the gun?")]
-    [SerializeField] private int maxClipSize;
+    public int maxClipSize;
     [Tooltip("How many bullets per second can this gun fire if its not single shot?")]
-    [SerializeField] private float fireRate;
+    public float fireRate;
     [Tooltip("How many units per shot does this gun wear out?")]
     [SerializeField] private int singleShotDegrade;
     [Tooltip("How many units per second does this gun wear out while being used?")]
@@ -39,8 +39,7 @@ public class Item_Gun : MonoBehaviour
         _5_56x45_ammo,
         _308_ammo,
         _12ga_ammo,
-        _50BMG_ammo,
-        godbullet
+        _50BMG_ammo
     }
     public RepairKitTypeRequired repairKitTypeRequired;
     public enum RepairKitTypeRequired
