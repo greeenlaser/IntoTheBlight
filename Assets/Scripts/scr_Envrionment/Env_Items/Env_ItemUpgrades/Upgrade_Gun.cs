@@ -224,9 +224,9 @@ public class Upgrade_Gun : MonoBehaviour
 
         tooltipText += "\n\n" + str_UpgradeDescription;
 
-        tooltipText += "\n" + upgradeTier;
+        tooltipText += "\n\nTier: " + upgradeTier;
 
-        tooltipText += "Requirements:";
+        tooltipText += "\n\nRequirements:";
 
         foreach (string requirement in upgradeRequirements)
         {
@@ -247,7 +247,7 @@ public class Upgrade_Gun : MonoBehaviour
                 {
                     theRequiredItem = item;
 
-                    tooltipText += requiredItemName + "<color=green> " + requiredItemQuantity + "</color>";
+                    tooltipText += "\n" + requiredItemName + " x <color=green>" + requiredItemQuantity + "</color>";
 
                     break;
                 }
@@ -255,8 +255,10 @@ public class Upgrade_Gun : MonoBehaviour
 
             if (theRequiredItem == null)
             {
-                tooltipText += requiredItemName + "<color=red> " + requiredItemQuantity + "</color>";
+                tooltipText += "\n" + requiredItemName + " x <color=red>" + requiredItemQuantity + "</color>";
             }
         }
+
+        TooltipScript.SetText(tooltipText);
     }
 }

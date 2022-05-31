@@ -105,6 +105,7 @@ public class Manager_ItemUpgrades : MonoBehaviour
                     && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade))
                 {
                     btn.GetComponent<UI_UpgradeButtonTooltip>().target = script.gameObject;
+
                     btn.interactable = true;
                     btn.onClick.AddListener(script.GetComponent<Upgrade_Gun>().UpgradeGun);
                     break;
