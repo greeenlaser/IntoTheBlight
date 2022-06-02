@@ -107,6 +107,12 @@ public class Manager_ItemUpgrades : MonoBehaviour
                     btn.GetComponent<UI_UpgradeButtonTooltip>().target = script.gameObject;
 
                     btn.interactable = true;
+
+                    if (PlayerInventoryScript.equippedGun != script.parent.gameObject)
+                    {
+                        script.parent.gameObject.SetActive(true);
+                    }
+
                     btn.onClick.AddListener(script.GetComponent<Upgrade_Gun>().UpgradeGun);
                     break;
                 }

@@ -236,6 +236,13 @@ public class Upgrade_Gun : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.05f);
 
         ShowTooltipText();
+
+        yield return new WaitForSeconds(0.05f);
+
+        if (PlayerInventoryScript.equippedGun != transform.parent.gameObject)
+        {
+            transform.parent.gameObject.SetActive(false);
+        }
     }
 
     public void ShowTooltipText()
