@@ -2611,14 +2611,14 @@ public class Manager_Console : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
             par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
             par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Trader.GetComponent<UI_AIContent>().str_NPCName + "'s repair shop";
         }
         else if (PlayerInventoryScript.Workbench != null)
         {
             par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
             par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
             par_Managers.GetComponent<Manager_UIReuse>().RebuildRepairMenu();
-            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.GetComponent<Env_Workbench>().str_workbenchName;
+            par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = PlayerInventoryScript.Workbench.GetComponent<Env_Workbench>().str_workbenchName;
         }
         par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
     }

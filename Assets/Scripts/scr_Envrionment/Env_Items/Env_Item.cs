@@ -943,6 +943,7 @@ public class Env_Item : MonoBehaviour
 
                 if (isInRepairMenu)
                 {
+                    UIReuseScript.ClearAllInventories();
                     UIReuseScript.RebuildRepairMenu();
 
                     UIReuseScript.btn_Repair.gameObject.SetActive(true);

@@ -76,6 +76,8 @@ public class Upgrade_Gun : MonoBehaviour
                     }
                     requiredItems.Clear();
 
+                    missingRequirements = true;
+
                     Debug.LogWarning("Error: Player is missing required resources to upgrade " + str_UpgradeName + "!");
 
                     break;
@@ -105,17 +107,37 @@ public class Upgrade_Gun : MonoBehaviour
                     //not yet functional
                 }
                 //upgrade gun bullet drop
-                else if (upgradeType == UpgradeType.accuracy)
+                else if (upgradeType == UpgradeType.bulletDrop)
                 {
                     //not yet functional
                 }
                 //upgrade gun clip size
-                else if (upgradeType == UpgradeType.accuracy)
+                else if (upgradeType == UpgradeType.clipSize)
                 {
                     gunScript.maxClipSize = int.Parse(upgradeValue);
+
+                    GameObject ammo = null;
+                    if (gunScript.ammoClip != null)
+                    {
+                        ammo = gunScript.ammoClip;
+
+                        foreach (GameObject item in PlayerInventoryScript.inventory)
+                        {
+                            if (item == ammo)
+                            {
+                                int removedAmount = gunScript.currentClipSize;
+                                gunScript.currentClipSize = 0;
+                                item.GetComponent<Env_Item>().int_itemCount += removedAmount;
+
+                                par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
+
+                                break;
+                            }
+                        }
+                    }
                 }
                 //upgrade gun ammo type
-                else if (upgradeType == UpgradeType.accuracy)
+                else if (upgradeType == UpgradeType.ammoType)
                 {
                     _ = (Item_Gun.CaseType)Enum.Parse(typeof(Item_Gun.CaseType), upgradeValue);
                     gunScript.AssignAmmoType();

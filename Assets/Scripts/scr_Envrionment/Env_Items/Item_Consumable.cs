@@ -94,6 +94,7 @@ public class Item_Consumable : MonoBehaviour
                 PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
                 par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_healthKitName);
 
+                par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                 par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                 par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                 gameObject.GetComponent<Env_Item>().RemoveListeners();
@@ -118,6 +119,7 @@ public class Item_Consumable : MonoBehaviour
                     PlayerHealthScript.health = playerMaxHealth;
                     currentConsumableAmount -= remainderToMax;
 
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
@@ -139,6 +141,7 @@ public class Item_Consumable : MonoBehaviour
                     PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_healthKitName);
 
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
@@ -170,6 +173,7 @@ public class Item_Consumable : MonoBehaviour
                 PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
                 par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_repairKitName);
 
+                par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                 par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                 par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                 gameObject.GetComponent<Env_Item>().RemoveListeners();
@@ -194,6 +198,7 @@ public class Item_Consumable : MonoBehaviour
                     item.GetComponent<Item_Gun>().durability = maxDurability;
                     currentConsumableAmount -= remainderToMax;
 
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
@@ -215,6 +220,7 @@ public class Item_Consumable : MonoBehaviour
                     PlayerInventoryScript.invSpace -= gameObject.GetComponent<Env_Item>().int_ItemWeight;
                     par_Managers.GetComponent<Manager_Console>().playeritemnames.Remove(str_repairKitName);
 
+                    par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                     par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
                     gameObject.GetComponent<Env_Item>().RemoveListeners();
