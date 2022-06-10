@@ -1,10 +1,10 @@
 #REQUIRED UNITY VERSION
 
-2022.1.1f1
+[2022.1.1f1](https://unity3d.com/get-unity/download/archive)
 
 #REQUIRED GAME FILES
 
-Google drive required files folder: https://drive.google.com/drive/folders/1Fmk51no5zMM1RoDwmtN9M_cGrVx9BoQL?usp=sharing
+[Google drive required files folder](https://drive.google.com/drive/folders/1Fmk51no5zMM1RoDwmtN9M_cGrVx9BoQL?usp=sharing)
 
 Please download and unpack the rar file inside ARCHIVE/yourgameversion which includes both the Art and Audio folders. Place them inside the Assets folder in the branch of the repo you have pulled from the github repository.
 
