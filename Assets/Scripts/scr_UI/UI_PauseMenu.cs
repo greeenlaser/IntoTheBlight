@@ -144,7 +144,6 @@ public class UI_PauseMenu : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(true);
             par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
             par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
-            par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
 
             var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
@@ -382,15 +381,9 @@ public class UI_PauseMenu : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
     }
-    public void OpenConsoleCommands()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-    }
     public void CloseKeyAndConsoleCommands()
     {
         par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_ConsoleCommandsContent.SetActive(false);
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);

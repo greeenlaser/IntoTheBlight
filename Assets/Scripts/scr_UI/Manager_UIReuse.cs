@@ -304,7 +304,6 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_PauseMenu;
     public GameObject par_PauseMenuContent;
     public GameObject par_KeyCommandsContent;
-    public GameObject par_ConsoleCommandsContent;
     public Button btn_ReturnToGame;
     public Button btn_ReturnToPauseMenu;
 
@@ -413,7 +412,6 @@ public class Manager_UIReuse : MonoBehaviour
         par_PauseMenu.SetActive(false);
         par_PauseMenuContent.SetActive(false);
         par_KeyCommandsContent.SetActive(false);
-        par_ConsoleCommandsContent.SetActive(false);
 
         par_Inventory.SetActive(false);
         par_Stats.SetActive(false);
