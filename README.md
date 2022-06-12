@@ -1,8 +1,8 @@
-REQUIRED UNITY VERSION
+# REQUIRED UNITY VERSION
 
 [2022.1.1f1](https://unity3d.com/get-unity/download/archive)
 
-REQUIRED GAME FILES
+# REQUIRED GAME FILES
 
 [Google drive required files folder](https://drive.google.com/drive/folders/1Fmk51no5zMM1RoDwmtN9M_cGrVx9BoQL?usp=sharing)
 
