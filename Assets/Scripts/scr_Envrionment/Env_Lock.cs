@@ -42,7 +42,6 @@ public class Env_Lock : MonoBehaviour
             if (gameObject.GetComponent<Env_Door>().isLocked)
             {
                 transform.localScale = DoorScript.trigger_Unlock;
-
             }
             else if (!gameObject.GetComponent<Env_Door>().isLocked)
             {
@@ -116,9 +115,9 @@ public class Env_Lock : MonoBehaviour
                     lockZRot += 1.5f;
                     //assign new rotation to lock rotation
                     par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
-                    = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
-                                  par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
-                                  lockZRot);
+                        = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                      par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
+                                      lockZRot);
 
                     //lockpick durability degrades over time
                     timer += 0.1f;
@@ -146,9 +145,9 @@ public class Env_Lock : MonoBehaviour
                     lockZRot -= 1.5f;
                     //assign new rotation to lock rotation
                     par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
-                    = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
-                                  par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
-                                  lockZRot);
+                        = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                      par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
+                                      lockZRot);
 
                     //lockpick durability degrades over time
                     timer += 0.1f;
@@ -188,7 +187,7 @@ public class Env_Lock : MonoBehaviour
                         {
                             lockZRot = 0;
                             par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
-                            = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
                             par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                             0);
                         }
@@ -206,7 +205,7 @@ public class Env_Lock : MonoBehaviour
                         {
                             lockZRot = 0;
                             par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
-                            = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+                                = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
                             par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
                             0);
                         }

@@ -111,13 +111,6 @@ public class Env_Workbench : MonoBehaviour
         isWorkbenchUIOpen = false;
 
         par_Managers.GetComponent<UI_PlayerMenu>().ClosePlayerMenuUI();
-        StartCoroutine(Wait());
-    }
-
-    private IEnumerator Wait()
-    {
-        PlayerInventoryScript.canOpenPlayerInventory = false;
-        yield return new WaitForSeconds(0.2f);
-        PlayerInventoryScript.canOpenPlayerInventory = true;
+        UIReuseScript.StartCoroutine("Wait");
     }
 }

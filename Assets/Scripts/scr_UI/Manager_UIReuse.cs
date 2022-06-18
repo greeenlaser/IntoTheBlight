@@ -294,6 +294,18 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_RemainingLockpicks;
     public Button btn_CancelLockpicking;
 
+    [Header("Computer")]
+    [SerializeField] private GameObject par_ComputerMainUI;
+    [SerializeField] private GameObject par_PasswordUI;
+    [SerializeField] private GameObject par_ComputerUI;
+    public TMP_Text txt_ComputerTitle;
+    public TMP_Text txt_PageTitle;
+    public TMP_Text txt_PageDescription;
+    public TMP_InputField Input_ComputerPassword;
+    public GameObject par_ComputerPagesPanel;
+    public Button btn_PageButtonTemplate;
+    private readonly List<Button> computerPages = new List<Button>();
+
     [Header("Console")]
     public GameObject par_Console;
     public GameObject par_Content;
@@ -401,6 +413,10 @@ public class Manager_UIReuse : MonoBehaviour
         par_RealQuestUI.SetActive(false);
 
         CloseAllDialogueUI();
+
+        par_ComputerMainUI.SetActive(false);
+        par_ComputerUI.SetActive(false);
+        par_PasswordUI.SetActive(false);
 
         par_TeleportCheck.SetActive(false);
 
@@ -612,6 +628,87 @@ public class Manager_UIReuse : MonoBehaviour
                 item.GetComponent<Env_Item>().isInUpgradeMenu = true;
             }
         }
+    }
+
+    public void RebuildComputerPageList(GameObject computer)
+    {
+        if (computerPages.Count > 0)
+        {
+            foreach (Button btn in computerPages)
+            {
+                Destroy(btn.gameObject);
+            }
+        }
+        computerPages.Clear();
+
+        txt_PageTitle.text = computer.GetComponent<Env_ComputerPage>().str_PageTitle;
+        txt_PageDescription.text = computer.GetComponent<Env_ComputerPage>().str_PageDescription;
+
+        foreach (GameObject page in computer.GetComponent<Env_ComputerPage>().pages)
+        {
+            Button btn_New = Instantiate(btn_PageButtonTemplate);
+            btn_New.transform.SetParent(par_ComputerPagesPanel.transform, false);
+
+            string result = page.GetComponent<Env_ComputerPage>().str_PageTitle.Replace('_', ' ');
+            btn_New.GetComponentInChildren<TMP_Text>().text = result;
+
+            btn_New.onClick.AddListener(page.GetComponent<Env_ComputerPage>().LoadPageContent);
+
+            computerPages.Add(btn_New);
+        }
+
+        if (computer.GetComponent<Env_ComputerManager>() == null)
+        {
+            Button btn_New = Instantiate(btn_PageButtonTemplate);
+            btn_New.transform.SetParent(par_ComputerPagesPanel.transform, false);
+
+            btn_New.GetComponentInChildren<TMP_Text>().text = "Return";
+
+            GameObject parentScript = computer.GetComponent<Env_ComputerPage>().ComputerManagerScript.gameObject;
+            btn_New.onClick.AddListener(delegate { OpenPasswordUI(parentScript); });
+            computerPages.Add(btn_New);
+        }
+    }
+    public void OpenPasswordUI(GameObject computer)
+    {
+        gameObject.GetComponent<UI_PauseMenu>().isComputerOpen = true;
+
+        PlayerInventoryScript.canOpenPlayerInventory = false;
+
+        gameObject.GetComponent<UI_PauseMenu>().PauseGame();
+        par_ComputerMainUI.SetActive(true);
+
+        btn_ReturnToGame.gameObject.SetActive(true);
+        btn_ReturnToGame.onClick.RemoveAllListeners();
+        btn_ReturnToGame.onClick.AddListener(CloseComputerUI);
+
+        if (!computer.GetComponent<Env_ComputerManager>().isLocked)
+        {
+            par_PasswordUI.SetActive(false);
+            par_ComputerUI.SetActive(true);
+
+            RebuildComputerPageList(computer);
+        }
+        else
+        {
+            par_ComputerUI.SetActive(false);
+            par_PasswordUI.SetActive(true);
+            Input_ComputerPassword.ActivateInputField();
+        }
+    }
+    public void CloseComputerUI()
+    {
+        gameObject.GetComponent<UI_PauseMenu>().isComputerOpen = false;
+
+        btn_ReturnToGame.onClick.RemoveAllListeners();
+        btn_ReturnToGame.gameObject.SetActive(false);
+
+        par_ComputerUI.SetActive(false);
+        par_PasswordUI.SetActive(false);
+        par_ComputerMainUI.SetActive(false);
+        gameObject.GetComponent<UI_PauseMenu>().UnpauseGame();
+
+        StartCoroutine(Wait());
     }
 
     public void ClearStatsUI()
@@ -1449,5 +1546,12 @@ public class Manager_UIReuse : MonoBehaviour
 
             i++;
         }
+    }
+
+    public IEnumerator Wait()
+    {
+        PlayerInventoryScript.canOpenPlayerInventory = false;
+        yield return new WaitForSeconds(0.2f);
+        PlayerInventoryScript.canOpenPlayerInventory = true;
     }
 }

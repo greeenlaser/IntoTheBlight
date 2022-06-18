@@ -25,6 +25,7 @@ public class UI_PauseMenu : MonoBehaviour
     [HideInInspector] public bool isInventoryOpen;
     [HideInInspector] public bool isWaitableUIOpen;
     [HideInInspector] public bool isTalkingToAI;
+    [HideInInspector] public bool isComputerOpen;
     [HideInInspector] public bool callPMOpenOnce;
     [HideInInspector] public bool callPMCloseOnce;
 
@@ -52,39 +53,43 @@ public class UI_PauseMenu : MonoBehaviour
 
             //closes console but keeps game paused
             else if (isGamePaused
-                && par_Managers.GetComponent<Manager_Console>().consoleOpen
-                && (isInventoryOpen || isTalkingToAI))
+                     && par_Managers.GetComponent<Manager_Console>().consoleOpen
+                     && (isInventoryOpen 
+                     || isTalkingToAI))
             {
                 PauseGameAndCloseUIAndResetBools();
             }
 
             //unpauses game
             else if (isGamePaused
-                && !par_Managers.GetComponent<Manager_Console>().consoleOpen
-                && !thePlayer.GetComponent<Inv_Player>().isPlayerInventoryOpen
-                && !thePlayer.GetComponent<Inv_Player>().isPlayerAndContainerOpen
-                && !isWaitableUIOpen
-                && !isInventoryOpen
-                && !isTalkingToAI
-                && isUIOpen)
+                     && !par_Managers.GetComponent<Manager_Console>().consoleOpen
+                     && !thePlayer.GetComponent<Inv_Player>().isPlayerInventoryOpen
+                     && !thePlayer.GetComponent<Inv_Player>().isPlayerAndContainerOpen
+                     && !isWaitableUIOpen
+                     && !isInventoryOpen
+                     && !isTalkingToAI
+                     && !isComputerOpen
+                     && isUIOpen)
             {
                 UnpauseGame();
             }
 
-            //opens pause menu UI if player inv or container UI is open
+            //opens pause menu UI but doesn't pause the game again
             else if (isGamePaused
-                && !isUIOpen
-                && (isInventoryOpen
-                || isTalkingToAI))
+                     && !isUIOpen
+                     && (isInventoryOpen
+                     || isTalkingToAI
+                     || isComputerOpen))
             {
                 OpenUI();
             }
 
             //closes pause menu but keeps game paused
             else if (isGamePaused
-                && isUIOpen
-                && (isInventoryOpen
-                || isTalkingToAI))
+                     && isUIOpen
+                     && (isInventoryOpen
+                     || isTalkingToAI
+                     || isComputerOpen))
             {
                 CloseUI();
             }

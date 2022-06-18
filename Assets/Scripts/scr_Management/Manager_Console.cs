@@ -268,6 +268,7 @@ public class Manager_Console : MonoBehaviour
             if (!par_Managers.GetComponent<UI_PauseMenu>().isInventoryOpen 
                 && !par_Managers.GetComponent<UI_PauseMenu>().isUIOpen 
                 && !par_Managers.GetComponent<UI_PauseMenu>().isTalkingToAI
+                && !par_Managers.GetComponent<UI_PauseMenu>().isComputerOpen
                 && lockpickUI == null)
             {
                 par_Managers.GetComponent<UI_PauseMenu>().UnpauseGame();

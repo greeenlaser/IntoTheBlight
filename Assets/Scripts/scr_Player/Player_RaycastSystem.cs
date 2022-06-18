@@ -226,6 +226,23 @@ public class Player_RaycastSystem : MonoBehaviour
                         timer = 0;
                         canInteract = true;
                     }
+
+                    //if the target is a computer
+                    else if (hitTarget.transform.GetComponent<Env_ComputerManager>() != null)
+                    {
+                        if (target != hitTarget.transform.gameObject)
+                        {
+                            target = hitTarget.transform.gameObject;
+                            //Debug.Log(target.name);
+                        }
+
+
+                        par_Managers.GetComponent<Manager_UIReuse>().txt_HoverItemCount.text = "";
+                        par_Managers.GetComponent<Manager_UIReuse>().bgr_HoverItemCountBackground.gameObject.SetActive(false);
+
+                        timer = 0;
+                        canInteract = true;
+                    }
                 }
             }
         }
@@ -306,6 +323,11 @@ public class Player_RaycastSystem : MonoBehaviour
                     else if (target.GetComponent<Env_LiftButton>() != null)
                     {
                         target.GetComponent<Env_LiftButton>().GoToTargetFloor();
+                    }
+                    //computer
+                    else if (target.GetComponent<Env_ComputerManager>() != null)
+                    {
+                        par_Managers.GetComponent<Manager_UIReuse>().OpenPasswordUI(target);
                     }
                 }
 

@@ -253,14 +253,8 @@ public class Inv_Container : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.onClick.RemoveAllListeners();
         par_Managers.GetComponent<Manager_UIReuse>().btn_CloseUI.gameObject.SetActive(false);
         isContainerInventoryOpen = false;
-        StartCoroutine(Wait());
-    }
 
-    private IEnumerator Wait()
-    {
-        PlayerInventoryScript.canOpenPlayerInventory = false;
-        yield return new WaitForSeconds(0.2f);
-        PlayerInventoryScript.canOpenPlayerInventory = true;
+        par_Managers.GetComponent<Manager_UIReuse>().StartCoroutine("Wait");
 
         if (destroySelf)
         {
