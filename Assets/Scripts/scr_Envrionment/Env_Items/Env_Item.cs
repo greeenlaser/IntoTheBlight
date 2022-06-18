@@ -66,7 +66,6 @@ public class Env_Item : MonoBehaviour
     [HideInInspector] public bool isInUpgradeMenu;
     [HideInInspector] public bool isBuying;
     [HideInInspector] public bool isTaking;
-    [HideInInspector] public bool hasUnderscore;
     [HideInInspector] public bool droppedObject;
     [HideInInspector] public bool toBeDeleted;
     [HideInInspector] public int int_ItemValue;
@@ -191,23 +190,7 @@ public class Env_Item : MonoBehaviour
         UIReuseScript.txt_tooExpensive.gameObject.SetActive(false);
 
         //replacing underscores with space
-        for (int i = 0; i < str_ItemName.Length - 1; i++)
-        {
-            if (str_ItemName[i] == '_')
-            {
-                hasUnderscore = true;
-                break;
-            }
-        }
-        if (hasUnderscore)
-        {
-            string str_fakeName = str_ItemName.Replace("_", " ");
-            UIReuseScript.txt_ItemName.text = str_fakeName;
-        }
-        else if (!hasUnderscore)
-        {
-            UIReuseScript.txt_ItemName.text = str_ItemName;
-        }
+        UIReuseScript.txt_ItemName.text = str_ItemName.Replace('_', ' ');
         //item description
         UIReuseScript.txt_ItemDescription.text = str_ItemDescription;
 
@@ -2093,7 +2076,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 gameObject.transform.position = thePlayer.transform.position + dropPos;
 
@@ -3021,7 +3004,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 gameObject.transform.position = thePlayer.transform.position + dropPos;
 
@@ -3059,7 +3042,7 @@ public class Env_Item : MonoBehaviour
                 //get a random direction (360°) in radians
                 float angle = Random.Range(0.0f, Mathf.PI * 2);
                 //create a vector with length 1.0
-                Vector3 dropPos = new(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                Vector3 dropPos = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
                 //set item drop position
                 theItem.transform.position = thePlayer.transform.position + dropPos;
 

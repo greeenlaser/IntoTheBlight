@@ -102,10 +102,10 @@ public class Item_Gun : MonoBehaviour
     private float timer_gunSFX;
     private float timer_gunBullets;
     private float gunJamChance;
-    private readonly List<GameObject> gunHitCursors = new();
-    private readonly List<GameObject> spawnedBulletCaseSFX = new();
-    private readonly List<GameObject> spawnedBulletCases = new();
-    private readonly List<GameObject> spawnedGunFireSFX = new();
+    private readonly List<GameObject> gunHitCursors = new List<GameObject>();
+    private readonly List<GameObject> spawnedBulletCaseSFX = new List<GameObject>();
+    private readonly List<GameObject> spawnedBulletCases = new List<GameObject>();
+    private readonly List<GameObject> spawnedGunFireSFX = new List<GameObject>();
     private Manager_UIReuse UIReuseScript;
 
     private void Awake()
@@ -458,7 +458,7 @@ public class Item_Gun : MonoBehaviour
             }
 
             //create new gun hit cursors
-            Vector3 center = new(960, 540, 0);
+            Vector3 center = new Vector3(960, 540, 0);
             GameObject newCursor = Instantiate(gunHitCursorTemplate, 
                                                center, 
                                                Quaternion.identity, 

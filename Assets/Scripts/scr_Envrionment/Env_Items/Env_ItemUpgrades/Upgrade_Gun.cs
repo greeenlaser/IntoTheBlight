@@ -37,7 +37,7 @@ public class Upgrade_Gun : MonoBehaviour
         if (!unlockedUpgrade)
         {
             bool missingRequirements = false;
-            List<GameObject> requiredItems = new();
+            List<GameObject> requiredItems = new List<GameObject>();
 
             //check for requirements
             foreach (string requiredItem in upgradeRequirements)

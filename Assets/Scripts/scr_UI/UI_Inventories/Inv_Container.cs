@@ -287,7 +287,7 @@ public class Inv_Container : MonoBehaviour
         //get random amount of items we want to spawn
         int selectedItemCount = Random.Range(3, 10);
         //create list for selected item indexes
-        List<int> selectedItems = new();
+        List<int> selectedItems = new List<int>();
         //pick selectedItemCount amount of random item indexes and assign to list
         for (int i = 0; i < selectedItemCount; i++)
         {
@@ -553,38 +553,13 @@ public class Inv_Container : MonoBehaviour
         Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
         btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
-        for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+        string result = item.GetComponent<Env_Item>().str_ItemName.Replace('_', ' ');
+        if (item.GetComponent<Env_Item>().int_itemCount > 1)
         {
-            if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-            {
-                item.GetComponent<Env_Item>().hasUnderscore = true;
-                break;
-            }
+            result += " x" + item.GetComponent<Env_Item>().int_itemCount.ToString();
         }
-        if (item.GetComponent<Env_Item>().hasUnderscore)
-        {
-            if (item.GetComponent<Env_Item>().int_itemCount == 1)
-            {
-                string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-            }
-            else
-            {
-                string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-            }
-        }
-        else if (!item.GetComponent<Env_Item>().hasUnderscore)
-        {
-            if (item.GetComponent<Env_Item>().int_itemCount == 1)
-            {
-                btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-            }
-            else
-            {
-                btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-            }
-        }
+
+        btn_New.GetComponentInChildren<TMP_Text>().text = result;
 
         btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
         PlayerInventoryScript.Container.GetComponent<Inv_Container>().buttons.Add(btn_New.gameObject);

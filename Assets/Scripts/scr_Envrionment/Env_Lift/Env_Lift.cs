@@ -19,8 +19,8 @@ public class Env_Lift : MonoBehaviour
     //private variables
     private int chosenFloor;
     private float distanceToChosenFloor;
-    private readonly List<GameObject> liftUsers = new();
-    private readonly List<Transform> liftUserParents = new();
+    private readonly List<GameObject> liftUsers = new List<GameObject>();
+    private readonly List<Transform> liftUserParents = new List<Transform>();
 
     private void OnTriggerEnter(Collider other)
     {

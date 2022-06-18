@@ -374,7 +374,7 @@ public class Inv_Player : MonoBehaviour
     private void RebuildInventory(GameObject item)
     {
         if (item.GetComponent<Env_Item>().isProtected
-                            && isPlayerAndTraderOpen)
+            && isPlayerAndTraderOpen)
         {
             Debug.Log(item.GetComponent<Env_Item>().str_ItemName + " was not listed in " +
                      "player inventory while selling to trader because it is protected!");
@@ -384,38 +384,13 @@ public class Inv_Player : MonoBehaviour
             Button btn_New = Instantiate(par_Managers.GetComponent<Manager_UIReuse>().btn_Template);
             btn_New.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Panel.transform, false);
 
-            for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+            string result = item.GetComponent<Env_Item>().str_ItemName.Replace('_', ' ');
+            if (item.GetComponent<Env_Item>().int_itemCount > 1)
             {
-                if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                {
-                    item.GetComponent<Env_Item>().hasUnderscore = true;
-                    break;
-                }
+                result += " x" + item.GetComponent<Env_Item>().int_itemCount.ToString();
             }
-            if (item.GetComponent<Env_Item>().hasUnderscore)
-            {
-                if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                {
-                    string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                    btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName;
-                }
-                else
-                {
-                    string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                    btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
-            }
-            else if (!item.GetComponent<Env_Item>().hasUnderscore)
-            {
-                if (item.GetComponent<Env_Item>().int_itemCount == 1)
-                {
-                    btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName;
-                }
-                else
-                {
-                    btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
-            }
+
+            btn_New.GetComponentInChildren<TMP_Text>().text = result;
 
             btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
             buttons.Add(btn_New.gameObject);

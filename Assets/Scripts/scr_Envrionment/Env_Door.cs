@@ -43,7 +43,7 @@ public class Env_Door : MonoBehaviour
 
     //private variables
     private float doorDistanceFromEndPos;
-    private readonly List<GameObject> targetsInTrigger = new();
+    private readonly List<GameObject> targetsInTrigger = new List<GameObject>();
 
     private void Start()
     {

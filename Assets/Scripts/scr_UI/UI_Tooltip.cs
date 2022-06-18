@@ -16,8 +16,8 @@ public class UI_Tooltip : MonoBehaviour
 
     //private variables
     private bool calledUICloseOnce;
-    private Color32 transparent = new(0, 0, 0, 0);
-    private Color32 black = new(0, 0, 0, 200);
+    private Color32 transparent = new Color32(0, 0, 0, 0);
+    private Color32 black = new Color32(0, 0, 0, 200);
     private RectTransform parRect;
 
     private void Awake()
@@ -88,7 +88,7 @@ public class UI_Tooltip : MonoBehaviour
         //get text scale
         Vector2 textSize = textComponent.GetRenderedValues(false);
         //extra space at the top and right
-        Vector2 padding = new(8, 8);
+        Vector2 padding = new Vector2(8, 8);
 
         //update the background scale
         backgroundRect.sizeDelta = textSize + padding;

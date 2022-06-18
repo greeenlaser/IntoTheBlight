@@ -562,23 +562,13 @@ public class Manager_UIReuse : MonoBehaviour
                 Button btn_New = Instantiate(btn_Template);
                 btn_New.transform.SetParent(par_Panel.transform, false);
 
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+                string result = item.GetComponent<Env_Item>().str_ItemName.Replace('_', ' ');
+                if (item.GetComponent<Env_Item>().int_itemCount > 1)
                 {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
+                    result += " x" + item.GetComponent<Env_Item>().int_itemCount.ToString();
                 }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                    btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
+
+                btn_New.GetComponentInChildren<TMP_Text>().text = result;
 
                 btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
 
@@ -606,23 +596,13 @@ public class Manager_UIReuse : MonoBehaviour
                 Button btn_New = Instantiate(btn_Template);
                 btn_New.transform.SetParent(par_Panel.transform, false);
 
-                for (int i = 0; i < item.GetComponent<Env_Item>().str_ItemName.Length - 1; i++)
+                string result = item.GetComponent<Env_Item>().str_ItemName.Replace('_', ' ');
+                if (item.GetComponent<Env_Item>().int_itemCount > 1)
                 {
-                    if (item.GetComponent<Env_Item>().str_ItemName[i] == '_')
-                    {
-                        item.GetComponent<Env_Item>().hasUnderscore = true;
-                        break;
-                    }
+                    result += " x" + item.GetComponent<Env_Item>().int_itemCount.ToString();
                 }
-                if (item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    string str_fakeName = item.GetComponent<Env_Item>().str_ItemName.Replace("_", " ");
-                    btn_New.GetComponentInChildren<TMP_Text>().text = str_fakeName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
-                else if (!item.GetComponent<Env_Item>().hasUnderscore)
-                {
-                    btn_New.GetComponentInChildren<TMP_Text>().text = item.GetComponent<Env_Item>().str_ItemName + " x" + item.GetComponent<Env_Item>().int_itemCount;
-                }
+
+                btn_New.GetComponentInChildren<TMP_Text>().text = result;
 
                 btn_New.onClick.AddListener(item.GetComponent<Env_Item>().ShowStats);
 
@@ -1376,7 +1356,7 @@ public class Manager_UIReuse : MonoBehaviour
                 //save last height
                 lastHeight = newPos.y;
                 //replace last positions x position with original and keep last height
-                newPos = new(spawnPos.x, lastHeight, spawnPos.z);
+                newPos = new Vector3(spawnPos.x, lastHeight, spawnPos.z);
                 //move position down
                 newPos += new Vector3(0, down, 0);
                 //create 9 new texts

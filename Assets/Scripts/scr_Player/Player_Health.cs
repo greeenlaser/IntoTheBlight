@@ -24,7 +24,7 @@ public class Player_Health : MonoBehaviour
 
     //private variables
     private Manager_UIReuse UIScript;
-    private readonly List<string> damageTypes = new();
+    private readonly List<string> damageTypes = new List<string>();
 
     //damage variables
     private bool enableTimer;

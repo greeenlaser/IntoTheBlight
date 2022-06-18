@@ -60,9 +60,9 @@ public class Manager_Console : MonoBehaviour
     private GameObject correctAmmo;
     private GameObject displayableItem;
     private GameObject duplicate;
-    private readonly List<string> separatedWords = new();
-    private readonly List<GameObject> createdTexts = new();
-    private readonly List<string> insertedCommands = new();
+    private readonly List<string> separatedWords = new List<string>();
+    private readonly List<GameObject> createdTexts = new List<GameObject>();
+    private readonly List<string> insertedCommands = new List<string>();
 
     //spawn and remove multiple items
     private GameObject spawnableItem;
@@ -74,7 +74,7 @@ public class Manager_Console : MonoBehaviour
     private string cameraAngle;
     private string playerSpeed;
     private Vector3 lastPos;
-    private readonly List<GameObject> removables = new();
+    private readonly List<GameObject> removables = new List<GameObject>();
 
     //unity log variables
     private bool startedWait;
@@ -692,7 +692,7 @@ public class Manager_Console : MonoBehaviour
     private void Command_DeleteAllSaves()
     {
         string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
-        DirectoryInfo di = new(path);
+        DirectoryInfo di = new DirectoryInfo(path);
 
         //deletes all files and folders
         //if the folder exists and there are any files in the folder
@@ -1426,7 +1426,7 @@ public class Manager_Console : MonoBehaviour
             else
             {
                 //set teleportPos;
-                Vector3 teleportPos = new(firstVec, secondVec, thirdVec);
+                Vector3 teleportPos = new Vector3(firstVec, secondVec, thirdVec);
 
                 CreateNewConsoleLine("--tp " + firstVec + " " + secondVec + " " + thirdVec + "--");
                 CreateNewConsoleLine("Success: Teleported player to " + teleportPos + "!");
@@ -1474,7 +1474,7 @@ public class Manager_Console : MonoBehaviour
             for (int i = 0; i < allCells.Count; i++)
             {
                 GameObject cell = allCells[i];
-                GameObject lastCell = allCells[^1];
+                GameObject lastCell = null;
                 if (cellName == cell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
                     CreateNewConsoleLine("Teleported to cell " + cellName + "!");
