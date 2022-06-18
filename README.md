@@ -1,6 +1,6 @@
 # REQUIRED UNITY VERSION
 
-[2022.1.1f1](https://unity3d.com/get-unity/download/archive)
+[2021.1.28f1](https://unity3d.com/get-unity/download/archive)
 
 # REQUIRED GAME FILES
 
