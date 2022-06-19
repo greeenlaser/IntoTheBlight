@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using System.Globalization;
+using System.Linq;
 
 public class Manager_GameSaving : MonoBehaviour
 {
@@ -40,6 +41,7 @@ public class Manager_GameSaving : MonoBehaviour
     [HideInInspector] public string savedFilePath;
 
     //private variables
+    private string loadFilePath;
     private float time;
     private GameObject equippedWeapon;
     private GameObject equippedFlashlight;
@@ -55,7 +57,8 @@ public class Manager_GameSaving : MonoBehaviour
         gameManagerScript = GetComponent<GameManager>();
 
         //get path to game saves folder
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
 
         par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
 
@@ -70,20 +73,31 @@ public class Manager_GameSaving : MonoBehaviour
         //if save folder already exists
         else
         {
-            //if a save file was not found
-            if (!File.Exists(path + @"\Save0001.txt"))
+            //if we have a load file
+            if (File.Exists(loadFilePath))
             {
-                firstload = true;
-                OpenLoadingMenuUI();
+                string line = File.ReadLines(loadFilePath).Skip(6).Take(1).First();
+
+                if (line != ""
+                    && File.Exists(path + @"\" + line + ".txt"))
+                {
+                    //load 6th line from load file which is the save file name
+                    LoadGameData(line);
+                }
+                else
+                {
+                    Debug.Log("Starting new game because no save files were found.");
+                }
             }
-            //loads game data if a save file was found
             else
             {
-                OpenLoadingMenuUI();
-
-                LoadGameData();
+                Debug.Log("Starting new game because no save files were found.");
             }
         }
+
+        btn_Continue.gameObject.SetActive(true);
+        txt_LoadingText.gameObject.SetActive(false);
+        img_loadingLogo.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -95,20 +109,13 @@ public class Manager_GameSaving : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F5)
                 && PlayerHealthScript.health > 0)
             {
-                CreateSaveFile();
+                CreateSaveFile("");
             }
             //game can only be loaded if game isnt currently being saved
             //and if save file exists in save files directory
             else if (Input.GetKeyDown(KeyCode.F9))
             {
-                if (File.Exists(path + @"\Save0001.txt"))
-                {
-                    SceneManager.LoadScene(1);
-                }
-                else
-                {
-                    Debug.LogWarning("Error: Cannot load game - no game save files were found!");
-                }
+                GetLoadFile("!loadnewest");
             }
         }
 
@@ -170,11 +177,58 @@ public class Manager_GameSaving : MonoBehaviour
         par_Managers.GetComponent<UI_PlayerMenu>().StartCoroutine(par_Managers.GetComponent<UI_PlayerMenu>().OpenAndClose());
     }
 
+    public void GetLoadFile(string saveName)
+    {
+        OpenLoadingMenuUI();
+
+        //the name of the new save file
+        string newFileName = "";
+        //save all files in temporary array
+        string[] files = Directory.GetFiles(path);
+
+        //if we found any save files
+        if (files.Length > 0)
+        {
+            if (saveName != "")
+            {
+                //loads newest save
+                if (saveName == "!loadnewest")
+                {
+                    var file = new DirectoryInfo(path).GetFiles().OrderByDescending(o => o.CreationTime).FirstOrDefault();
+                    newFileName = file.Name.Replace(".txt", "");
+                }
+                //all other regular loads
+                else
+                {
+                    newFileName = saveName;
+                }
+            }
+            //starts a new game if no save was found
+            else
+            {
+                SceneManager.LoadScene(0);
+            }
+
+            //using a text editor to write text to the game save file in the saved file path
+            using StreamWriter loadFile = File.CreateText(loadFilePath);
+
+            loadFile.WriteLine("Load file for Lights Off Version " + gameManagerScript.str_GameVersion);
+            loadFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
+            loadFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
+            loadFile.WriteLine("");
+            loadFile.WriteLine("WARNING: Invalid values will break the game - edit at your own risk!");
+
+            loadFile.WriteLine("");
+            loadFile.WriteLine(newFileName);
+
+            SceneManager.LoadScene(1);
+        }
+    }
     //assign saved data to gameobjects
-    public void LoadGameData()
+    private void LoadGameData(string saveName)
     {
         //looks through all the lines
-        foreach (string line in File.ReadLines(path + @"\Save0001.txt"))
+        foreach (string line in File.ReadLines(path + @"\" + saveName + ".txt"))
         {
             //get all separators in line
             char[] separators = new char[] { ' ', ',', '=', '(', ')', '_', ':' };
@@ -518,7 +572,7 @@ public class Manager_GameSaving : MonoBehaviour
                     if (spawnable.GetComponent<Item_Grenade>() != null)
                     {
                         //frag grenade
-                        if (spawnable.GetComponent<Item_Grenade>().grenadeType 
+                        if (spawnable.GetComponent<Item_Grenade>().grenadeType
                             == Item_Grenade.GrenadeType.fragmentation
                             && line.Contains(spawnable.name))
                         {
@@ -545,8 +599,8 @@ public class Manager_GameSaving : MonoBehaviour
                 }
 
                 //spawn the grenade
-                GameObject grenade = Instantiate(item, 
-                                                 position, 
+                GameObject grenade = Instantiate(item,
+                                                 position,
                                                  Quaternion.identity);
 
                 //add to thrown grenades list
@@ -857,50 +911,94 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
 
-        Debug.Log("Successfully loaded game from " + path + @"\Save0001.txt!");
-
-        btn_Continue.gameObject.SetActive(true);
-        txt_LoadingText.gameObject.SetActive(false);
-        img_loadingLogo.gameObject.SetActive(false);
+        Debug.Log("Successfully loaded game from " + path + @"\" + saveName + ".txt!");
     }
 
     //create a save file if it doesnt already exist and add data to it
     //or update existing save file
-    public void CreateSaveFile()
+    public void CreateSaveFile(string saveName)
     {
         isSaving = true;
 
-        //where the save file is located at
-        savedFilePath = path + @"\Save0001.txt";
+        //the name of the new save file
+        string newFileName;
+        //save all files in temporary array
+        string[] files = Directory.GetFiles(path);
 
-        GetPlayerValues();
-
-        try
+        //check if something was written in saveName
+        if (saveName != "")
         {
-            //if we dont have a file with the same name yet
-            if (!File.Exists(savedFilePath))
-            {
-                //creates a new safe file and inserts data into it
-                InsertSaveData();
+            newFileName = saveName;
 
-                //Debug.Log("Successfully created save file " + saveFileName + " at " + path + "!");
-            }
-            //if we already have a file with the same name
-            else if (File.Exists(savedFilePath))
-            {
-                //deletes the old file
-                File.Delete(savedFilePath);
-                //creates a new safe file and inserts data into it
-                InsertSaveData();
-
-                //Debug.Log("Successfully updated save file " + saveFileName + " at " + path + "!");
-            }
-
-            Debug.Log("Successfully saved game to " + path + @"\Save0001.txt!");
+            //where the save file is located at
+            savedFilePath = path + @"\" + newFileName + ".txt";
+            ReadSaveFileName();
         }
-        catch (Exception e)
+        else
         {
-            Debug.LogError("Error: Failed to create save file at " + savedFilePath + "! " + e.Message + ".");
+            //if we found any save files
+            if (files.Length > 0)
+            {
+                int highestIndex = 1;
+                foreach (string file in files)
+                {
+                    string fileName = Path.GetFileName(file);
+                    string[] splitParts = fileName.Split('.');
+                    fileName = splitParts[0];
+
+                    //look for only save files with the correct name
+                    if (fileName.Contains("Save_")
+                        && fileName.Length > 4
+                        && Char.IsDigit(fileName[5]))
+                    {
+                        //split the file name again with _
+                        string[] fileNameSplit = fileName.Split('_');
+                        //get the number from the split file name
+                        int num = int.Parse(fileNameSplit[1]);
+
+                        //update the highest index to this
+                        //if it is higher than the last highest index
+                        if (num > highestIndex)
+                        {
+                            highestIndex = num;
+                        }
+                    }
+                }
+                //increase highest index by 1
+                highestIndex++;
+                //create new file name with new highest index
+                newFileName = "Save_" + highestIndex;
+
+                //where the save file is located at
+                savedFilePath = path + @"\" + newFileName + ".txt";
+                ReadSaveFileName();
+            }
+            //if we did not find any save files
+            else
+            {
+                newFileName = "Save_1";
+
+                //where the save file is located at
+                savedFilePath = path + @"\" + newFileName + ".txt";
+                ReadSaveFileName();
+            }
+        }
+    }
+    private void ReadSaveFileName()
+    {
+        //if we dont have a file with the same name yet
+        if (!File.Exists(savedFilePath))
+        {
+            GetPlayerValues();
+
+            //creates a new safe file and inserts data into it
+            InsertSaveData();
+            Debug.Log("Successfully saved game to " + savedFilePath + "!");
+        }
+        //if we already have a file with the same name
+        else if (File.Exists(savedFilePath))
+        {
+            Debug.LogWarning("Error: Found save file with same name - cannot continue with game saving!");
         }
 
         isSaving = false;
@@ -910,6 +1008,7 @@ public class Manager_GameSaving : MonoBehaviour
     {
         //using a text editor to write text to the game save file in the saved file path
         using StreamWriter saveFile = File.CreateText(savedFilePath);
+
         saveFile.WriteLine("Save file for Lights Off Version " + gameManagerScript.str_GameVersion);
         saveFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
         saveFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");

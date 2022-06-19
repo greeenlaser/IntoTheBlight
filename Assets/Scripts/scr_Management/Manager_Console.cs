@@ -344,10 +344,18 @@ public class Manager_Console : MonoBehaviour
                 {
                     Command_ToggleUnityLogs();
                 }
-                else if (separatedWords[0] == "save" && separatedWords.Count == 1
+                else if (separatedWords[0] == "save" && separatedWords.Count == 2
                          && PlayerHealthScript.isPlayerAlive)
                 {
-                    Command_Save();
+                    Command_SaveWithName();
+                }
+                else if (separatedWords[0] == "load" && separatedWords.Count == 2)
+                {
+                    Command_LoadWithName();
+                }
+                else if (separatedWords[0] == "sas" && separatedWords.Count == 1)
+                {
+                    Command_ShowAllSaves();
                 }
                 else if (separatedWords[0] == "restart" && separatedWords.Count == 1
                          && PlayerHealthScript.isPlayerAlive)
@@ -447,7 +455,7 @@ public class Manager_Console : MonoBehaviour
                 //some commands are disabled if the player is dead
                 else if (!PlayerHealthScript.isPlayerAlive)
                 {
-                    if (separatedWords[0] == "save" && separatedWords.Count == 1
+                    if (separatedWords[0] == "save" && separatedWords.Count == 2
                         || separatedWords[0] == "tgm" && separatedWords.Count == 1
                         || separatedWords[0] == "tnc" && separatedWords.Count == 1
                         || separatedWords[0] == "taid" && separatedWords.Count == 1
@@ -598,6 +606,10 @@ public class Manager_Console : MonoBehaviour
             CreateNewConsoleLine("tdm - Toggles the Debug menu on and off.");
             CreateNewConsoleLine("tul - Toggles the Unity logs on and off.");
             CreateNewConsoleLine("save - Saves current game progress.");
+            CreateNewConsoleLine("save saveName - Saves current game progress with custom name.");
+            CreateNewConsoleLine("load - Loads latest save by creation date.");
+            CreateNewConsoleLine("load saveName - Loads save by name.");
+            CreateNewConsoleLine("sas - Shows all game saves.");
             CreateNewConsoleLine("restart - Loads the newest save if saves exist or restarts the game from the beginning.");
             CreateNewConsoleLine("das - deletes all the game saves - WARNING: All deleted saves are lost forever!");
             CreateNewConsoleLine("tgm - toggles godmode for player.");
@@ -666,28 +678,92 @@ public class Manager_Console : MonoBehaviour
             displayDebugMenu = false;
         }
     }
-    //saves the current game progress
-    private void Command_Save()
+    //saves the current game progress with a custom name
+    private void Command_SaveWithName()
     {
-        par_Managers.GetComponent<UI_PauseMenu>().Save();
+        if (!par_Managers.GetComponent<Manager_GameSaving>().isSaving)
+        {
+            //save the potential save name
+            string saveName = separatedWords[1];
+            bool foundBadSymbol = false;
+
+            //loop through all characters in saveName
+            foreach (char c in saveName)
+            {
+                //if character is illegal
+                if (!Char.IsLetterOrDigit(c))
+                {
+                    foundBadSymbol = true;
+                    break;
+                }
+            }
+            //if no illegal characters were found
+            if (!foundBadSymbol)
+            {
+                par_Managers.GetComponent<Manager_GameSaving>().CreateSaveFile(saveName);
+            }
+            else
+            {
+                CreateNewConsoleLine("Error: Save name must only contain letters and digits!");
+            }
+        }
+    }
+    //loads a save with a name
+    private void Command_LoadWithName()
+    {
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        if (File.Exists(path + @"\" + separatedWords[1] + ".txt"))
+        {
+            par_Managers.GetComponent<Manager_GameSaving>().GetLoadFile(separatedWords[1]);
+        }
+        else
+        {
+            CreateNewConsoleLine("Error: Save file " + separatedWords[1] + " does not exist!");
+        }
+    }
+    //show all game saves
+    private void Command_ShowAllSaves()
+    {
+        //default game saves path
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+
+        //if a directory was found at the path
+        if (Directory.Exists(path))
+        {
+            //save all save files to 
+            string[] saves = Directory.GetFiles(path);
+
+            //if any saves exist at path
+            if (saves.Length > 0)
+            {
+                //display all save names without .txt
+                foreach (string save in saves)
+                {
+                    if (save.Contains(".txt"))
+                    {
+                        string saveName = Path.GetFileName(save);
+                        CreateNewConsoleLine(saveName.Replace(".txt", ""));
+                    }
+                    else
+                    {
+                        CreateNewConsoleLine("Error: Invalid save file extention type found at " + path + "!");
+                    }
+                }
+            }
+            else
+            {
+                CreateNewConsoleLine("Error: File name is invalid or save folder at path " + path + " is empty!");
+            }
+        }
+        else
+        {
+            CreateNewConsoleLine("Error: Cannot find game saves folder!");
+        }
     }
     //loads newest save if save was found, otherwise restarts scene
     private void Command_Restart()
     {
-        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
-
-        //loads game data if a save file was found
-        if (File.Exists(savingScript.path + @"\Save0001.txt"))
-        {
-            savingScript.OpenLoadingMenuUI();
-
-            //Debug.Log("Found save file! Loading data...");
-            savingScript.LoadGameData();
-        }
-        else
-        {
-            SceneManager.LoadScene(1);
-        }
+        par_Managers.GetComponent<Manager_GameSaving>().GetLoadFile("");
     }
     //deletes all saves
     private void Command_DeleteAllSaves()
@@ -1488,7 +1564,7 @@ public class Manager_Console : MonoBehaviour
                     ToggleConsole();
                     break;
                 }
-                else if (i == allCells.Count -1
+                else if (i == allCells.Count
                         && cellName != lastCell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
                     CreateNewConsoleLine("Error: Cell name not found! Use sac to list all valid game cells.");
