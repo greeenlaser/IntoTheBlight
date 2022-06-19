@@ -8,9 +8,9 @@ public class Player_Camera : MonoBehaviour
 {
     [Header("Assignables")]
     [SerializeField] private Camera cam_Main;
-    [SerializeField] private TMP_Text txt_mouseSpeed;
+    public TMP_Text txt_mouseSpeed;
     public TMP_Text txt_fov;
-    [SerializeField] private Slider MouseSpeedSlider;
+    public Slider MouseSpeedSlider;
     public Slider FOVSlider;
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private GameObject par_Managers;
