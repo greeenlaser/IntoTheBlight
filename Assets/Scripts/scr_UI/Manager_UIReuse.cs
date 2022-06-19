@@ -677,6 +677,7 @@ public class Manager_UIReuse : MonoBehaviour
 
         gameObject.GetComponent<UI_PauseMenu>().PauseGame();
         par_ComputerMainUI.SetActive(true);
+        txt_ComputerTitle.text = computer.GetComponent<Env_ComputerManager>().computerTitle;
 
         btn_ReturnToGame.gameObject.SetActive(true);
         btn_ReturnToGame.onClick.RemoveAllListeners();

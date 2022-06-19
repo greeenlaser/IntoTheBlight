@@ -23,15 +23,18 @@ public class Env_ComputerManager : MonoBehaviour
 
     private void Update()
     {
-        if (isLocked
-            && Input.GetKeyDown(KeyCode.Return))
+        if (par_Managers.GetComponent<UI_PauseMenu>().isComputerOpen)
         {
-            CheckInput();
-        }
+            if (isLocked
+                && Input.GetKeyDown(KeyCode.Return))
+            {
+                CheckInput();
+            }
 
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            UIReuseManager.CloseComputerUI();
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                UIReuseManager.CloseComputerUI();
+            }
         }
     }
 
