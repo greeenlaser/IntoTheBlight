@@ -1062,6 +1062,7 @@ public class Manager_GameSaving : MonoBehaviour
         //player camera rotation
         saveFile.WriteLine("pv_playerCameraRotation = " + rot_PlayerCamera);
 
+        saveFile.WriteLine("");
         //player mouse speed
         saveFile.WriteLine("pv_playerMouseSpeed = " + playerCamera.GetComponent<Player_Camera>().mouseSpeed);
         //player fov
