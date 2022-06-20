@@ -28,7 +28,7 @@ public class UI_MainMenu : MonoBehaviour
     private bool startedSceneSwitch;
     private float time;
     private string path;
-    private List<Button> saveButtons = new List<Button>();
+    private readonly List<Button> saveButtons = new List<Button>();
 
     private void Awake()
     {
