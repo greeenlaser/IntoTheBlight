@@ -76,18 +76,21 @@ public class Manager_GameSaving : MonoBehaviour
             //if we have a load file
             if (File.Exists(loadFilePath))
             {
-                string line = File.ReadLines(loadFilePath).Skip(6).Take(1).First();
+                string line = File.ReadLines(loadFilePath).First();
 
                 if (line != ""
                     && File.Exists(path + @"\" + line + ".txt"))
                 {
-                    //load 6th line from load file which is the save file name
+                    //load first line from load file which is the save file name
                     LoadGameData(line);
                 }
                 else
                 {
                     Debug.Log("Starting new game because no save files were found.");
                 }
+
+                //delete the load file after it is finished being used
+                File.Delete(loadFilePath);
             }
             else
             {
@@ -212,13 +215,6 @@ public class Manager_GameSaving : MonoBehaviour
             //using a text editor to write text to the game save file in the saved file path
             using StreamWriter loadFile = File.CreateText(loadFilePath);
 
-            loadFile.WriteLine("Load file for Lights Off Version " + gameManagerScript.str_GameVersion);
-            loadFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
-            loadFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
-            loadFile.WriteLine("");
-            loadFile.WriteLine("WARNING: Invalid values will break the game - edit at your own risk!");
-
-            loadFile.WriteLine("");
             loadFile.WriteLine(newFileName);
 
             SceneManager.LoadScene(1);

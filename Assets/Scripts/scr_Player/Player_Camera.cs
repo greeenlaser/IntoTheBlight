@@ -18,7 +18,7 @@ public class Player_Camera : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool isCamEnabled;
     [HideInInspector] public bool isAimingDownSights;
-    [HideInInspector] public float mouseSpeed = 40;
+    [HideInInspector] public float mouseSpeed = 50;
     [HideInInspector] public int fov = 90;
 
     //private variables
@@ -46,14 +46,14 @@ public class Player_Camera : MonoBehaviour
         {
             if (!isAimingDownSights)
             {
-                mouseX = Input.GetAxis("Mouse X") * sensX * 5 * Time.deltaTime;
-                mouseY = Input.GetAxis("Mouse Y") * sensY * 5 * Time.deltaTime;
+                mouseX = Input.GetAxis("Mouse X") * sensX * 8 * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 8 * Time.deltaTime;
 
             }
             else if (isAimingDownSights)
             {
-                mouseX = Input.GetAxis("Mouse X") * sensX * 2.5f * Time.deltaTime;
-                mouseY = Input.GetAxis("Mouse Y") * sensY * 2.5f * Time.deltaTime;
+                mouseX = Input.GetAxis("Mouse X") * sensX * 4f * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 4f * Time.deltaTime;
             }
 
             xRot -= mouseY;
