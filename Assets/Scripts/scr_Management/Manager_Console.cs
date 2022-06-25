@@ -1600,10 +1600,12 @@ public class Manager_Console : MonoBehaviour
         }
         else if (!isInt)
         {
+            bool foundCell = false;
+
             for (int i = 0; i < allCells.Count; i++)
             {
                 GameObject cell = allCells[i];
-                GameObject lastCell = null;
+
                 if (cellName == cell.GetComponent<Manager_CurrentCell>().str_CellName)
                 {
                     CreateNewConsoleLine("Teleported to cell " + cellName + "!", "CONSOLE_SUCCESS_MESSAGE");
@@ -1614,13 +1616,16 @@ public class Manager_Console : MonoBehaviour
                     //load teleported cell items
                     cell.GetComponent<Manager_CurrentCell>().LoadCell();
                     ToggleConsole();
+
+                    foundCell = true;
+
                     break;
                 }
-                else if (i == allCells.Count
-                        && cellName != lastCell.GetComponent<Manager_CurrentCell>().str_CellName)
-                {
-                    CreateNewConsoleLine("Error: Cell name not found! Use sac to list all valid game cells.", "CONSOLE_ERROR_MESSAGE");
-                }
+            }
+
+            if (!foundCell)
+            {
+                CreateNewConsoleLine("Error: Cell name not found! Use sac to list all valid game cells.", "CONSOLE_ERROR_MESSAGE");
             }
         }
     }
