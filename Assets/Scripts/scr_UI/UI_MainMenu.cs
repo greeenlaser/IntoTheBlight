@@ -12,7 +12,6 @@ public class UI_MainMenu : MonoBehaviour
     [Header("Assignables")]
     [SerializeField] private GameObject par_MainMenuContent;
     [SerializeField] private GameObject par_GameSaves;
-    [SerializeField] private GameObject par_Graphics;
     [SerializeField] private GameObject par_Credits;
     [SerializeField] private GameObject img_loadingLogo;
     [SerializeField] private GameObject par_LoadingScreen;
@@ -21,6 +20,7 @@ public class UI_MainMenu : MonoBehaviour
     [SerializeField] private GameObject saveContent;
     [SerializeField] private TMP_Text txt_SaveTitle;
     [SerializeField] private TMP_Text txt_SaveDate;
+    [SerializeField] private TMP_Text txt_LocationName;
     [SerializeField] private Button btn_SaveButtonTemplate;
     [SerializeField] private Button btn_LoadGame; 
 
@@ -54,6 +54,13 @@ public class UI_MainMenu : MonoBehaviour
 
     public void StartGame()
     {
+        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+
+        //using a text editor to write text to the game save file in the saved file path
+        using StreamWriter loadFile = File.CreateText(loadFilePath);
+
+        loadFile.WriteLine("true");
+
         par_LoadingScreen.SetActive(true);
         startedSceneSwitch = true;
     }
@@ -63,14 +70,8 @@ public class UI_MainMenu : MonoBehaviour
         par_MainMenuContent.SetActive(false);
         par_GameSaves.SetActive(true);
 
-        RebuildSaveList();
         ClearSaveData();
-    }
-
-    public void ShowGraphics()
-    {
-        par_MainMenuContent.SetActive(false);
-        par_Graphics.SetActive(true);
+        RebuildSaveList();
     }
 
     public void ShowCredits()
@@ -83,7 +84,6 @@ public class UI_MainMenu : MonoBehaviour
     {
         par_MainMenuContent.SetActive(true);
         par_GameSaves.SetActive(false);
-        par_Graphics.SetActive(false);
         par_Credits.SetActive(false);
     }
 
@@ -94,7 +94,7 @@ public class UI_MainMenu : MonoBehaviour
 
     private void RebuildSaveList()
     {
-        btn_LoadGame.gameObject.SetActive(false);
+        btn_LoadGame.interactable = false;
 
         string[] files = Directory.GetFiles(path);
 
@@ -115,13 +115,18 @@ public class UI_MainMenu : MonoBehaviour
                 saveButtons.Add(btn_New);
             }
         }
+
+        txt_SaveTitle.text = "";
+        txt_SaveDate.text = "Created on:";
+        txt_LocationName.text = "Location:";
     }
     public void ShowSaveData(string fileName, string creationDate)
     {
         txt_SaveTitle.text = fileName.Replace(".txt", "");
-        txt_SaveDate.text = creationDate.ToString();
+        txt_SaveDate.text = "Created on: " + creationDate.ToString();
+        //txt_LocationName.text = "Location:";
 
-        btn_LoadGame.gameObject.SetActive(true);
+        btn_LoadGame.interactable = true;
         btn_LoadGame.onClick.RemoveAllListeners();
         btn_LoadGame.onClick.AddListener(delegate { LoadGame(fileName); });
     }
@@ -134,16 +139,11 @@ public class UI_MainMenu : MonoBehaviour
             //using a text editor to write text to the game save file in the saved file path
             using StreamWriter loadFile = File.CreateText(loadFilePath);
 
-            loadFile.WriteLine("Load file for Lights Off Version " + gameObject.GetComponent<GameManager>().str_GameVersion);
-            loadFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
-            loadFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
-            loadFile.WriteLine("");
-            loadFile.WriteLine("WARNING: Invalid values will break the game - edit at your own risk!");
-
-            loadFile.WriteLine("");
+            loadFile.WriteLine("false");
             loadFile.WriteLine(fileName.Replace(".txt", ""));
 
-            SceneManager.LoadScene(1);
+            par_LoadingScreen.SetActive(true);
+            startedSceneSwitch = true;
         }
     }
     private void ClearSaveData()

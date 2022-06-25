@@ -46,14 +46,14 @@ public class Player_Camera : MonoBehaviour
         {
             if (!isAimingDownSights)
             {
-                mouseX = Input.GetAxis("Mouse X") * sensX * 8 * Time.deltaTime;
-                mouseY = Input.GetAxis("Mouse Y") * sensY * 8 * Time.deltaTime;
+                mouseX = Input.GetAxis("Mouse X") * sensX * 6 * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 6 * Time.deltaTime;
 
             }
             else if (isAimingDownSights)
             {
-                mouseX = Input.GetAxis("Mouse X") * sensX * 4f * Time.deltaTime;
-                mouseY = Input.GetAxis("Mouse Y") * sensY * 4f * Time.deltaTime;
+                mouseX = Input.GetAxis("Mouse X") * sensX * 3f * Time.deltaTime;
+                mouseY = Input.GetAxis("Mouse Y") * sensY * 3f * Time.deltaTime;
             }
 
             xRot -= mouseY;

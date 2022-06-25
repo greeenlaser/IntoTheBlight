@@ -74,9 +74,9 @@ public class GameManager : MonoBehaviour
             else if (sceneIndex == 1)
             {
                 Manager_Console ConsoleScipt = par_Managers.GetComponent<Manager_Console>();
-                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---");
-                ConsoleScipt.CreateNewConsoleLine("");
-                ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---");
+                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
+                ConsoleScipt.CreateNewConsoleLine("", "CONSOLE_INFO_MESSAGE");
+                ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---", "CONSOLE_INFO_MESSAGE");
 
                 par_Managers.GetComponent<Manager_Console>().Command_ToggleDebugMenu();
             }

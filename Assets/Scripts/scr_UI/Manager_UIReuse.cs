@@ -316,6 +316,7 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_PauseMenu;
     public GameObject par_PauseMenuContent;
     public GameObject par_KeyCommandsContent;
+    public GameObject par_GraphicsContent;
     public Button btn_ReturnToGame;
     public Button btn_ReturnToPauseMenu;
 
@@ -679,9 +680,9 @@ public class Manager_UIReuse : MonoBehaviour
         par_ComputerMainUI.SetActive(true);
         txt_ComputerTitle.text = computer.GetComponent<Env_ComputerManager>().computerTitle;
 
-        btn_ReturnToGame.gameObject.SetActive(true);
-        btn_ReturnToGame.onClick.RemoveAllListeners();
-        btn_ReturnToGame.onClick.AddListener(CloseComputerUI);
+        btn_CloseUI.gameObject.SetActive(true);
+        btn_CloseUI.onClick.RemoveAllListeners();
+        btn_CloseUI.onClick.AddListener(CloseComputerUI);
 
         if (!computer.GetComponent<Env_ComputerManager>().isLocked)
         {
@@ -701,8 +702,8 @@ public class Manager_UIReuse : MonoBehaviour
     {
         gameObject.GetComponent<UI_PauseMenu>().isComputerOpen = false;
 
-        btn_ReturnToGame.onClick.RemoveAllListeners();
-        btn_ReturnToGame.gameObject.SetActive(false);
+        btn_CloseUI.onClick.RemoveAllListeners();
+        btn_CloseUI.gameObject.SetActive(false);
 
         par_ComputerUI.SetActive(false);
         par_PasswordUI.SetActive(false);

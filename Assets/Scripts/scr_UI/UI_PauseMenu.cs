@@ -1,9 +1,11 @@
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class UI_PauseMenu : MonoBehaviour
 {
@@ -12,6 +14,15 @@ public class UI_PauseMenu : MonoBehaviour
     [SerializeField] private GameObject par_PlayerSFX;
     [SerializeField] private Button btn_Save;
     [SerializeField] private Button btn_Load;
+
+    [Header("Save list")]
+    [SerializeField] private GameObject par_GameSaves;
+    [SerializeField] private GameObject saveContent;
+    [SerializeField] private TMP_Text txt_SaveTitle;
+    [SerializeField] private TMP_Text txt_SaveDate;
+    [SerializeField] private TMP_Text txt_LocationName;
+    [SerializeField] private Button btn_SaveButtonTemplate;
+    [SerializeField] private Button btn_LoadGame;
 
     [Header("Scripts")]
     [SerializeField] private Player_Movement PlayerMovementScript;
@@ -32,6 +43,8 @@ public class UI_PauseMenu : MonoBehaviour
     //private variables
     private bool calledOnce;
     private readonly List<AudioSource> pausedSFX = new List<AudioSource>();
+    private string path;
+    private readonly List<Button> saveButtons = new List<Button>();
 
     private void Awake()
     {
@@ -152,22 +165,9 @@ public class UI_PauseMenu : MonoBehaviour
 
             var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
-            //restarts current scene
-            //if no save file directory or save file was found
-            if (!Directory.Exists(savingScript.path)
-                || (Directory.Exists(savingScript.path)
-                && !File.Exists(savingScript.path + @"\Save0001.txt")))
-            {
-                btn_Load.onClick.RemoveAllListeners();
-                btn_Load.interactable = false;
-            }
-            //loads game data if a save file was found
-            else if (File.Exists(savingScript.path + @"\Save0001.txt"))
-            {
-                btn_Load.onClick.RemoveAllListeners();
-                btn_Load.onClick.AddListener(Load);
-                btn_Load.interactable = true;
-            }
+            par_GameSaves.SetActive(false);
+            btn_Load.onClick.RemoveAllListeners();
+            btn_Load.onClick.AddListener(RebuildSaveList);
 
             btn_Save.onClick.RemoveAllListeners();
             btn_Save.onClick.AddListener(Save);
@@ -198,6 +198,8 @@ public class UI_PauseMenu : MonoBehaviour
         PlayerMovementScript.canCrouch = false;
         PlayerCameraScript.isCamEnabled = false;
 
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+
         par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
         par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
 
@@ -224,6 +226,8 @@ public class UI_PauseMenu : MonoBehaviour
             PlayerMovementScript.canMove = true;
             PlayerMovementScript.canCrouch = true;
             PlayerCameraScript.isCamEnabled = true;
+
+            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
             par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
             par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
@@ -314,10 +318,11 @@ public class UI_PauseMenu : MonoBehaviour
 
         var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
-        //restarts current scene
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+
+        par_GameSaves.SetActive(false);
         btn_Load.onClick.RemoveAllListeners();
-        btn_Load.onClick.AddListener(Load);
-        btn_Load.interactable = true;
+        btn_Load.onClick.AddListener(RebuildSaveList);
 
         btn_Save.onClick.RemoveAllListeners();
         btn_Save.onClick.AddListener(Save);
@@ -348,32 +353,108 @@ public class UI_PauseMenu : MonoBehaviour
             savingScript.CreateSaveFile("");
         }
     }
-    public void Load()
+
+    private void RebuildSaveList()
     {
-        var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
+        par_GameSaves.SetActive(true);
 
-        savingScript.GetLoadFile("!loadnewest");
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
 
-        thePlayer.GetComponent<Player_Health>().txt_PlayerDied.gameObject.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().HideExoskeletonUI();
+        btn_LoadGame.interactable = false;
+
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        string[] files = Directory.GetFiles(path);
+
+        if (files.Length > 0)
+        {
+            ClearSaveData();
+
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileName(file);
+                DateTime creationDate = File.GetCreationTime(file);
+
+                Button btn_New = Instantiate(btn_SaveButtonTemplate);
+                btn_New.transform.SetParent(saveContent.transform, false);
+
+                btn_New.GetComponentInChildren<TMP_Text>().text = fileName.Replace(".txt", "");
+
+                btn_New.onClick.AddListener(delegate { ShowSaveData(fileName, creationDate.ToString()); });
+
+                saveButtons.Add(btn_New);
+            }
+        }
+
+        txt_SaveTitle.text = "";
+        txt_SaveDate.text = "Created on:";
+        txt_LocationName.text = "Location:";
+    }
+    public void ShowSaveData(string fileName, string creationDate)
+    {
+        txt_SaveTitle.text = fileName.Replace(".txt", "");
+        txt_SaveDate.text = "Created on: " + creationDate.ToString();
+        //txt_LocationName.text = "Location:";
+
+        btn_LoadGame.interactable = true;
+        btn_LoadGame.onClick.RemoveAllListeners();
+        btn_LoadGame.onClick.AddListener(delegate { LoadGame(fileName); });
+    }
+    public void LoadGame(string fileName)
+    {
+        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+
+        if (File.Exists(path + @"\" + fileName))
+        {
+            //using a text editor to write text to the game save file in the saved file path
+            using StreamWriter loadFile = File.CreateText(loadFilePath);
+
+            loadFile.WriteLine("false");
+            loadFile.WriteLine(fileName.Replace(".txt", ""));
+
+            par_Managers.GetComponent<Manager_GameSaving>().par_LoadingMenu.SetActive(true);
+            par_Managers.GetComponent<Manager_GameSaving>().img_loadingLogo.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_GameSaving>().txt_LoadingText.gameObject.SetActive(true);
+            par_Managers.GetComponent<Manager_GameSaving>().btn_Continue.gameObject.SetActive(false);
+            SceneManager.LoadScene(1);
+        }
+    }
+    private void ClearSaveData()
+    {
+        for (int i = 0; i < saveButtons.Count; i++)
+        {
+            Destroy(saveButtons[i]);
+        }
+        saveButtons.Clear();
     }
 
     public void OpenKeyCommands()
     {
         par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-    }
-    public void CloseKeyAndConsoleCommands()
-    {
-        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
 
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
+    }
+    public void OpenGraphics()
+    {
+        par_Managers.GetComponent<Manager_UIReuse>().par_GraphicsContent.SetActive(true);
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
     }
 
     public void BackToPauseMenu()
     {
         par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
+
+        par_GameSaves.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
+        par_Managers.GetComponent<Manager_UIReuse>().par_GraphicsContent.SetActive(false);
+
+        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
     }
 
     public void BackToMainMenu()

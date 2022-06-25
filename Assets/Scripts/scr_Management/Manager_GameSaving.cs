@@ -20,12 +20,11 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private GameObject Exoskeleton;
 
     [Header("Loading menu content")]
-    [SerializeField] private GameObject par_LoadingMenu;
-    [SerializeField] private RawImage img_loadingLogo;
-    [SerializeField] private RawImage img_smallLoadingLogo;
-    [SerializeField] private TMP_Text txt_LoadingText;
+    public GameObject par_LoadingMenu;
+    public RawImage img_loadingLogo;
+    public TMP_Text txt_LoadingText;
     [SerializeField] private TMP_Text txt_TipText;
-    [SerializeField] private Button btn_Continue;
+    public Button btn_Continue;
 
     [Header("Scripts")]
     [SerializeField] private Player_Health PlayerHealthScript;
@@ -76,25 +75,40 @@ public class Manager_GameSaving : MonoBehaviour
             //if we have a load file
             if (File.Exists(loadFilePath))
             {
-                string line = File.ReadLines(loadFilePath).First();
+                string loadNewGame = "";
+                string saveName = "";
 
-                if (line != ""
-                    && File.Exists(path + @"\" + line + ".txt"))
+                string[] lines = File.ReadAllLines(loadFilePath);
+                if (lines.Length >= 1
+                    && !string.IsNullOrEmpty(lines[0]))
+                {
+                    loadNewGame = File.ReadLines(loadFilePath).First();
+                }
+                if (lines.Length >= 2
+                    && !string.IsNullOrEmpty(lines[1]))
+                {
+                    saveName = File.ReadLines(loadFilePath).Skip(1).Take(1).First();
+                }
+
+                if (loadNewGame == "true")
+                {
+                    Debug.Log("Started new game!");
+                }
+                else if (loadNewGame == "false"
+                         && saveName != ""
+                         && File.Exists(path + @"\" + saveName + ".txt"))
                 {
                     //load first line from load file which is the save file name
-                    LoadGameData(line);
+                    LoadGameData(saveName);
                 }
                 else
                 {
-                    Debug.Log("Starting new game because no save files were found.");
+                    Debug.Log("Loaded new game because load file was invalid or empty.");
                 }
-
-                //delete the load file after it is finished being used
-                File.Delete(loadFilePath);
             }
             else
             {
-                Debug.Log("Starting new game because no save files were found.");
+                Debug.Log("Loaded new game because load file was not found.");
             }
         }
 
@@ -144,15 +158,6 @@ public class Manager_GameSaving : MonoBehaviour
 
                 time = 0;
             }
-        }
-        if (isSaving)
-        {
-            img_smallLoadingLogo.gameObject.SetActive(true);
-            img_smallLoadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
-        }
-        else if (!isSaving)
-        {
-            img_smallLoadingLogo.gameObject.SetActive(false);
         }
     }
 
@@ -215,6 +220,7 @@ public class Manager_GameSaving : MonoBehaviour
             //using a text editor to write text to the game save file in the saved file path
             using StreamWriter loadFile = File.CreateText(loadFilePath);
 
+            loadFile.WriteLine("false");
             loadFile.WriteLine(newFileName);
 
             SceneManager.LoadScene(1);
@@ -922,7 +928,7 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
 
-        Debug.Log("Successfully loaded game from " + path + @"\" + saveName + ".txt!");
+        Debug.Log("Successfully loaded game save " + saveName + ".txt!");
     }
 
     //create a save file if it doesnt already exist and add data to it
