@@ -194,7 +194,8 @@ public class Player_RaycastSystem : MonoBehaviour
                         foreach (Transform child in doorParent)
                         {
                             if (child.GetComponent<Env_Door>() != null
-                                && child.GetComponent<Env_Door>().isLocked)
+                                && child.GetComponent<Env_Door>().isLocked
+                                && !child.GetComponent<Env_Door>().controlledByComputer)
                             {
                                 if (target != child.gameObject)
                                 {

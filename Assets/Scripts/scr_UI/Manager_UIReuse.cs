@@ -304,6 +304,7 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_InputField Input_ComputerPassword;
     public GameObject par_ComputerPagesPanel;
     public Button btn_PageButtonTemplate;
+    public Button btn_PageAction;
     private readonly List<Button> computerPages = new List<Button>();
 
     [Header("Console")]
@@ -669,6 +670,41 @@ public class Manager_UIReuse : MonoBehaviour
             btn_New.onClick.AddListener(delegate { OpenPasswordUI(parentScript); });
             computerPages.Add(btn_New);
         }
+
+        btn_PageAction.gameObject.SetActive(false);
+        if (computer.GetComponent<Env_ComputerPage>().targetDoor != null)
+        {
+            if (computer.GetComponent<Env_ComputerPage>().canReuseTarget)
+            {
+                if (!computer.GetComponent<Env_ComputerPage>().targetIsEnabled)
+                {
+                    btn_PageAction.gameObject.SetActive(true);
+                    btn_PageAction.GetComponentInChildren<TMP_Text>().text = "Open door";
+
+                    btn_PageAction.onClick.RemoveAllListeners();
+                    btn_PageAction.onClick.AddListener(computer.GetComponent<Env_ComputerPage>().OpenDoor);
+                }
+                else if (computer.GetComponent<Env_ComputerPage>().targetIsEnabled)
+                {
+                    btn_PageAction.gameObject.SetActive(true);
+                    btn_PageAction.GetComponentInChildren<TMP_Text>().text = "Close door";
+
+                    btn_PageAction.onClick.RemoveAllListeners();
+                    btn_PageAction.onClick.AddListener(computer.GetComponent<Env_ComputerPage>().CloseDoor);
+                }
+            }
+            else
+            {
+                if (!computer.GetComponent<Env_ComputerPage>().targetIsEnabled)
+                {
+                    btn_PageAction.gameObject.SetActive(true);
+                    btn_PageAction.GetComponentInChildren<TMP_Text>().text = "Unlock door";
+
+                    btn_PageAction.onClick.RemoveAllListeners();
+                    btn_PageAction.onClick.AddListener(computer.GetComponent<Env_ComputerPage>().UnlockDoor);
+                }
+            }
+        }
     }
     public void OpenPasswordUI(GameObject computer)
     {
@@ -679,6 +715,8 @@ public class Manager_UIReuse : MonoBehaviour
         gameObject.GetComponent<UI_PauseMenu>().PauseGame();
         par_ComputerMainUI.SetActive(true);
         txt_ComputerTitle.text = computer.GetComponent<Env_ComputerManager>().computerTitle;
+
+        btn_PageAction.gameObject.SetActive(false);
 
         btn_CloseUI.gameObject.SetActive(true);
         btn_CloseUI.onClick.RemoveAllListeners();

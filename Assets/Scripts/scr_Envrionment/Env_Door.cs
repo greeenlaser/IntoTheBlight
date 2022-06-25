@@ -9,6 +9,7 @@ public class Env_Door : MonoBehaviour
     public bool isLocked;
     public bool needsKey;
     public bool controlledByLift;
+    public bool controlledByComputer;
     [Range(1, 10)]
     [SerializeField] private float doorMoveSpeed;
     public Vector3 trigger_Open;
@@ -83,7 +84,8 @@ public class Env_Door : MonoBehaviour
             }
         }
         if ((closeDoor
-            && !controlledByLift)
+            && !controlledByLift
+            && !controlledByComputer)
             || forceCloseDoor)
         {
             openDoor = false;
@@ -113,7 +115,8 @@ public class Env_Door : MonoBehaviour
         if (targetsInTrigger.Count == 0 
             && !isClosed 
             && !closeDoor
-            && !controlledByLift)
+            && !controlledByLift
+            && !controlledByComputer)
         {
             closeDoor = true;
         }
@@ -124,7 +127,8 @@ public class Env_Door : MonoBehaviour
         if (!isLocked 
             && (other.CompareTag("Player") 
             || other.CompareTag("NPC"))
-            && !controlledByLift)
+            && !controlledByLift
+            && !controlledByComputer)
         {
             if (!targetsInTrigger.Contains(other.gameObject))
             {
@@ -142,7 +146,8 @@ public class Env_Door : MonoBehaviour
         if (!isLocked
             && (other.CompareTag("Player") 
             || other.CompareTag("NPC"))
-            && !controlledByLift)
+            && !controlledByLift
+            && !controlledByComputer)
         {
             if (targetsInTrigger.Contains(other.gameObject))
             {
