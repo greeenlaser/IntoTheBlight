@@ -804,7 +804,7 @@ public class Manager_Console : MonoBehaviour
             }
             else
             {
-                CreateNewConsoleLine("Error: File name is invalid or save folder at path " + path + " is empty!", "CONSOLE_ERROR_MESSAGE");
+                CreateNewConsoleLine("Save folder at path " + path + " is empty.", "CONSOLE_INFO_MESSAGE");
             }
         }
         else
@@ -820,7 +820,7 @@ public class Manager_Console : MonoBehaviour
     //deletes all saves
     private void Command_DeleteAllSaves()
     {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
         DirectoryInfo di = new DirectoryInfo(path);
 
         //deletes all files and folders

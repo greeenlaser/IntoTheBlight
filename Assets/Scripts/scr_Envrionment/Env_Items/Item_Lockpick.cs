@@ -66,6 +66,8 @@ public class Item_Lockpick : MonoBehaviour
             par_Managers.GetComponent<Manager_UIReuse>().txt_RemainingLockpicks.text = gameObject.GetComponent<Env_Item>().int_itemCount.ToString();
             lockpickDurability = maxLockpickDurability;
             //Debug.Log("Broke a lockpick! Remaining lockpicks: " + gameObject.GetComponent<Env_Item>().int_itemCount + ".");
+
+            LockScript.ResetLock();
         }
     }
 }

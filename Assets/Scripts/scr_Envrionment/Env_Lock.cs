@@ -23,6 +23,7 @@ public class Env_Lock : MonoBehaviour
     [SerializeField] private Inv_Container ContainerScript;
 
     //public but hidden variables
+    [HideInInspector] public bool canPickLock;
     [HideInInspector] public bool isPickingLock;
 
     //private variables
@@ -62,7 +63,8 @@ public class Env_Lock : MonoBehaviour
 
     private void Update()
     {
-        if (isPickingLock)
+        if (canPickLock
+            && isPickingLock)
         {
             //looks for a lockpick in the player inventory
             if (lockpick == null)
@@ -122,7 +124,7 @@ public class Env_Lock : MonoBehaviour
                     //lockpick durability degrades over time
                     timer += 0.1f;
                     //Debug.Log("Timer is: " + timer);
-                    if (timer > 0.5f)
+                    if (timer > 2f)
                     {
                         lockpick.GetComponent<Item_Lockpick>().UseLockpick();
                         timer = 0;
@@ -215,6 +217,19 @@ public class Env_Lock : MonoBehaviour
         }
     }
 
+    //reset lock position
+    public void ResetLock()
+    {
+        lockZRot = 0;
+        par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles
+            = new Vector3(par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.x,
+        par_Managers.GetComponent<Manager_UIReuse>().lockpick_Body.transform.eulerAngles.y,
+        0);
+
+        canPickLock = false;
+        StartCoroutine(LockWait());
+    }
+
     public void Unlock()
     {
         if (target == Target.door)
@@ -264,6 +279,7 @@ public class Env_Lock : MonoBehaviour
         }
         par_Managers.GetComponent<Manager_UIReuse>().btn_CancelLockpicking.onClick.AddListener(CloseLockUI);
 
+        canPickLock = true;
         isPickingLock = true;
     }
     public void CloseLockUI()
@@ -302,5 +318,12 @@ public class Env_Lock : MonoBehaviour
             negativeResult = lockCorrectRotation - 2;
             //Debug.Log("New value: " + lockCorrectRotation + ", new min value: " + negativeResult + ", new max value: " + positiveResult + ".");
         }
+    }
+
+    private IEnumerator LockWait()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+
+        canPickLock = true;
     }
 }

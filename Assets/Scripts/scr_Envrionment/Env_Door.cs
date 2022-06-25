@@ -62,14 +62,14 @@ public class Env_Door : MonoBehaviour
             {
                 doorDistanceFromEndPos = Vector3.Distance(pos_DoorOpen.position, door.transform.position);
 
-                float step = doorMoveSpeed * Time.deltaTime;
+                float step = doorMoveSpeed * Time.unscaledDeltaTime;
                 door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorOpen.position, step);
             }
             else if (doorType == DoorType.door_double)
             {
                 doorDistanceFromEndPos = Vector3.Distance(pos_DoorOpen1.position, door1.transform.position);
 
-                float step = doorMoveSpeed * Time.deltaTime;
+                float step = doorMoveSpeed * Time.unscaledDeltaTime;
                 door1.transform.position = Vector3.MoveTowards(door1.transform.position, pos_DoorOpen1.position, step);
                 door2.transform.position = Vector3.MoveTowards(door2.transform.position, pos_DoorOpen2.position, step);
             }
@@ -94,14 +94,14 @@ public class Env_Door : MonoBehaviour
             {
                 doorDistanceFromEndPos = Vector3.Distance(pos_DoorClosed.position, door.transform.position);
 
-                float step = doorMoveSpeed * Time.deltaTime;
+                float step = doorMoveSpeed * Time.unscaledDeltaTime;
                 door.transform.position = Vector3.MoveTowards(door.transform.position, pos_DoorClosed.position, step);
             }
             else if (doorType == DoorType.door_double)
             {
                 doorDistanceFromEndPos = Vector3.Distance(pos_DoorClosed1.position, door1.transform.position);
 
-                float step = doorMoveSpeed * Time.deltaTime;
+                float step = doorMoveSpeed * Time.unscaledDeltaTime;
                 door1.transform.position = Vector3.MoveTowards(door1.transform.position, pos_DoorClosed1.position, step);
                 door2.transform.position = Vector3.MoveTowards(door2.transform.position, pos_DoorClosed2.position, step);
             }
