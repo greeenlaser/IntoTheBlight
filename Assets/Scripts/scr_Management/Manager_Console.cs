@@ -637,15 +637,16 @@ public class Manager_Console : MonoBehaviour
                 Destroy(oldestText);
             }
 
+            string date = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]";
+            string msg = "[" + source + "] " + date + " - " + message;
+
             newConsoleText.transform.SetParent(par_Managers.GetComponent<Manager_UIReuse>().par_Content.transform, false);
-            newConsoleText.GetComponent<TMP_Text>().text = message;
+            newConsoleText.GetComponent<TMP_Text>().text = date + " " + message;
 
             //using a text editor to write new text to new debug file in the debug file path
             using StreamWriter debugFile = File.AppendText(debugNewFilePath);
 
-            string date = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]";
-
-            debugFile.WriteLine("[" + source + "] " + date + " - " + message);
+            debugFile.WriteLine(msg);
         }
     }
 
