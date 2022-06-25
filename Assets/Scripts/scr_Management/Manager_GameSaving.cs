@@ -105,6 +105,9 @@ public class Manager_GameSaving : MonoBehaviour
                 {
                     Debug.Log("Loaded new game because load file was invalid or empty.");
                 }
+
+                //delete load file once it has finished loading
+                File.Delete(loadFilePath);
             }
             else
             {

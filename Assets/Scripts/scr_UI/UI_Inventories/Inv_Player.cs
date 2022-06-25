@@ -403,6 +403,13 @@ public class Inv_Player : MonoBehaviour
     {
         par_Managers.GetComponent<Manager_UIReuse>().ClearAllInventories();
         par_Managers.GetComponent<Manager_UIReuse>().EnableInventorySortButtons();
+        showingAllItems = false;
+        showingAllWeapons = false;
+        showingAllArmor = false;
+        showingAllConsumables = false;
+        showingAllAmmo = false;
+        showingAllGear = false;
+        showingAllMisc = false;
 
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowAll.interactable = true;
         par_Managers.GetComponent<Manager_UIReuse>().btn_ShowWeapons.interactable = true;
