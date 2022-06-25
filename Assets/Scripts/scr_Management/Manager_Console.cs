@@ -639,7 +639,10 @@ public class Manager_Console : MonoBehaviour
             //using a text editor to write new text to new debug file in the debug file path
             using StreamWriter debugFile = File.AppendText(debugNewFilePath);
 
-            debugFile.WriteLine(msg);
+            if (message != "")
+            {
+                debugFile.WriteLine(msg);
+            }
         }
     }
 
@@ -886,7 +889,7 @@ public class Manager_Console : MonoBehaviour
 
     private void Command_SelectTarget()
     {
-        CreateNewConsoleLine("Selecting target - Click on any object on screen or press ESC to cancel selection and to return back to console.", "CONSOLE_SUCCESS_MESSAGE");
+        CreateNewConsoleLine("Selecting target - Click on any object on screen or press ESC to cancel selection and to return back to console.", "CONSOLE_INFO_MESSAGE");
 
         txt_SelectedTargetName.text = "Click on a GameObject to select it as a target.";
         par_Managers.GetComponent<Manager_UIReuse>().par_Console.transform.localPosition = new Vector3(0, -3000, 0);
@@ -985,44 +988,22 @@ public class Manager_Console : MonoBehaviour
                         }
                     }
                     //door/container states and commands
-                    else if (target.name == "door_interactable"
+                    else if (target.GetComponent<Env_Door>() != null
                              || target.GetComponent<Inv_Container>() != null)
                     {
                         CreateNewConsoleLine("--- target states:", "CONSOLE_INFO_MESSAGE");
 
-                        Transform par = target.transform.parent;
-                        GameObject door = null;
-                        GameObject container = null;
-
-                        if (target.GetComponent<Inv_Container>() != null)
-                        {
-                            container = target;
-                        }
-                        else
-                        {
-                            foreach (Transform child in par)
-                            {
-                                if (child.GetComponent<Env_Door>() != null)
-                                {
-                                    door = child.gameObject;
-                                    break;
-                                }
-                            }
-                        }
-
                         //is door locked and protected or not
-                        if (door != null
-                            && door.GetComponent<Env_Door>() != null)
+                        if (target.GetComponent<Env_Door>() != null)
                         {
-                            CreateNewConsoleLine("isprotected = " + door.GetComponent<Env_Door>().isProtected + "", "CONSOLE_INFO_MESSAGE");
-                            CreateNewConsoleLine("islocked = " + door.GetComponent<Env_Door>().isLocked, "CONSOLE_INFO_MESSAGE");
+                            CreateNewConsoleLine("isprotected = " + target.GetComponent<Env_Door>().isProtected + "", "CONSOLE_INFO_MESSAGE");
+                            CreateNewConsoleLine("islocked = " + target.GetComponent<Env_Door>().isLocked, "CONSOLE_INFO_MESSAGE");
                         }
                         //is container locked and protected or not
-                        else if (container != null
-                                 && container.GetComponent<Inv_Container>() != null)
+                        else if (target.GetComponent<Inv_Container>() != null)
                         {
-                            CreateNewConsoleLine("isprotected = " + container.GetComponent<Inv_Container>().isProtected + "", "CONSOLE_INFO_MESSAGE");
-                            CreateNewConsoleLine("islocked = " + container.GetComponent<Inv_Container>().isLocked, "CONSOLE_INFO_MESSAGE");
+                            CreateNewConsoleLine("isprotected = " + target.GetComponent<Inv_Container>().isProtected + "", "CONSOLE_INFO_MESSAGE");
+                            CreateNewConsoleLine("islocked = " + target.GetComponent<Inv_Container>().isLocked, "CONSOLE_INFO_MESSAGE");
                         }
 
                         CreateNewConsoleLine("--- target commands:", "CONSOLE_INFO_MESSAGE");
@@ -1112,28 +1093,10 @@ public class Manager_Console : MonoBehaviour
                 else if (secondCommandName == "unlock"
                          && !secondCommand)
                 {
-                    Transform par = target.transform.parent.parent;
-                    GameObject door = null;
-                    GameObject container = null;
+                    if (target.GetComponent<Env_Door>() != null)
+                    {
+                        GameObject door = target;
 
-                    if (target.GetComponent<Inv_Container>() != null)
-                    {
-                        container = target;
-                    }
-                    else
-                    {
-                        foreach (Transform child in par)
-                        {
-                            if (child.GetComponent<Env_Door>() != null)
-                            {
-                                door = child.gameObject;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (door != null)
-                    {
                         if (door.GetComponent<Env_Door>().isLocked
                         && !door.GetComponent<Env_Door>().isProtected)
                         {
@@ -1152,8 +1115,10 @@ public class Manager_Console : MonoBehaviour
                             CreateNewConsoleLine("Error: Target cannot be unlocked through console because it is protected!", "CONSOLE_ERROR_MESSAGE");
                         }
                     }
-                    else if (container != null)
+                    else if (target.GetComponent<Inv_Container>() != null)
                     {
+                        GameObject container = target;
+
                         if (container.GetComponent<Inv_Container>().isLocked
                             && !container.GetComponent<Inv_Container>().isProtected)
                         {
