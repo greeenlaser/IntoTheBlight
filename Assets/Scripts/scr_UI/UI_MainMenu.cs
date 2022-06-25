@@ -148,9 +148,9 @@ public class UI_MainMenu : MonoBehaviour
     }
     private void ClearSaveData()
     {
-        for (int i = 0; i < saveButtons.Count; i++)
+        foreach (Button btn in saveButtons)
         {
-            Destroy(saveButtons[i]);
+            Destroy(btn.gameObject);
         }
         saveButtons.Clear();
     }
