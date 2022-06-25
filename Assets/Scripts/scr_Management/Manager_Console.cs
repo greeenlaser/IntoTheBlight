@@ -83,7 +83,8 @@ public class Manager_Console : MonoBehaviour
     private string debugFilePath;
     private string debugNewFilePath;
 
-    private void Awake()
+    //load console data at the beginning of the game
+    public void LoadConsole()
     {
         debugFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\DebugFiles";
         if (!Directory.Exists(debugFilePath))
@@ -113,11 +114,11 @@ public class Manager_Console : MonoBehaviour
         debugFile.WriteLine("CPU: " + processorType + "with " + processorThreadCount + " threads at " + processorFrequency + "mhz");
         //add user gpu
         string gpuName = SystemInfo.graphicsDeviceName;
-        int gpuMemory = SystemInfo.graphicsMemorySize/1000;
+        int gpuMemory = SystemInfo.graphicsMemorySize / 1000;
 
         debugFile.WriteLine("GPU: " + gpuName + " with " + gpuMemory + "gb memory");
         //add user ram
-        int ramSize = SystemInfo.systemMemorySize/1000;
+        int ramSize = SystemInfo.systemMemorySize / 1000;
 
         debugFile.WriteLine("RAM: " + ramSize + "gb");
         //add user OS
@@ -139,10 +140,7 @@ public class Manager_Console : MonoBehaviour
         originalSpeed = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().speedIncrease);
         originalJumpHeight = Mathf.FloorToInt(thePlayer.GetComponent<Player_Movement>().jumpHeight);
         originalMaxInvspace = Mathf.FloorToInt(thePlayer.GetComponent<Inv_Player>().maxInvSpace);
-    }
 
-    private void Start()
-    {
         //get all game cells and add to list
         foreach (GameObject cell in allCells)
         {
@@ -220,7 +218,9 @@ public class Manager_Console : MonoBehaviour
             timer += Time.deltaTime;
             if (timer > 0.05f)
             {
-                UpdateValues();
+                txt_PlayerPos.text = playerPos;
+                txt_CameraAngle.text = cameraAngle;
+                txt_PlayerSpeed.text = playerSpeed;
                 timer = 0;
             }
         }
@@ -274,13 +274,6 @@ public class Manager_Console : MonoBehaviour
             par_Managers.GetComponent<UI_PauseMenu>().canPauseGame = true;
             isSelectingTarget = false;
         }
-    }
-
-    private void UpdateValues()
-    {
-        txt_PlayerPos.text = playerPos;
-        txt_CameraAngle.text = cameraAngle;
-        txt_PlayerSpeed.text = playerSpeed;
     }
 
     private void ToggleConsole()

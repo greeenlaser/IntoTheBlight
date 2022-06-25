@@ -212,7 +212,7 @@ public class Item_Gun : MonoBehaviour
             {
                 if (!isAimingDownSights)
                 {
-                    PlayerCamera.fieldOfView = 45;
+                    PlayerCamera.fieldOfView /= 2;
                     PlayerMovementScript.canJump = false;
                     PlayerMovementScript.canSprint = false;
                     PlayerMovementScript.isSprinting = false;
@@ -224,7 +224,7 @@ public class Item_Gun : MonoBehaviour
             //stop aiming down sights
             else if (Input.GetKeyUp(KeyCode.Mouse1) && isAimingDownSights)
             {
-                PlayerCamera.fieldOfView = PlayerCamera.gameObject.GetComponent<Player_Camera>().fov;
+                PlayerCamera.fieldOfView = par_Managers.GetComponent<Manager_Graphics>().current_fov;
                 PlayerMovementScript.canJump = true;
                 PlayerMovementScript.canSprint = true;
                 gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
@@ -240,7 +240,7 @@ public class Item_Gun : MonoBehaviour
             {
                 if (isAimingDownSights)
                 {
-                    PlayerCamera.fieldOfView = PlayerCamera.gameObject.GetComponent<Player_Camera>().fov;
+                    PlayerCamera.fieldOfView = par_Managers.GetComponent<Manager_Graphics>().current_fov;
                     PlayerMovementScript.canJump = true;
                     PlayerMovementScript.canSprint = true;
                     gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
@@ -275,7 +275,7 @@ public class Item_Gun : MonoBehaviour
             //resets aim if game is paused and player is aiming down sights
             if (isAimingDownSights)
             {
-                PlayerCamera.fieldOfView = PlayerCamera.gameObject.GetComponent<Player_Camera>().fov;
+                PlayerCamera.fieldOfView = par_Managers.GetComponent<Manager_Graphics>().current_fov;
                 PlayerMovementScript.canJump = true;
                 PlayerMovementScript.canSprint = true;
                 gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;

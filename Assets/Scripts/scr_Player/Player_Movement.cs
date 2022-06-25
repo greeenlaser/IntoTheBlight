@@ -80,7 +80,8 @@ public class Player_Movement : MonoBehaviour
     private float closestDistance;
     private string cellName;
 
-    private void Awake()
+    //load player data at the beginning of the game
+    public void LoadPlayer()
     {
         currentSpeed = walkSpeed;
         currentStamina = maxStamina;
@@ -88,10 +89,7 @@ public class Player_Movement : MonoBehaviour
         canSprint = true;
         canCrouch = true;
         canJump = true;
-    }
 
-    private void Start()
-    {
         originalHeight = controller.height;
         PlayerCamera.transform.localPosition = cameraFullHeight;
 

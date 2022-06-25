@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +15,7 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject cursor;
     public Button btn_CloseUI;
     public RawImage bgr_PlayerStun;
+    public GameObject thePlayer;
 
     [Header("Player menu")]
     public GameObject par_PlayerMenu;
@@ -321,7 +324,16 @@ public class Manager_UIReuse : MonoBehaviour
     public Button btn_ReturnToGame;
     public Button btn_ReturnToPauseMenu;
 
-    private void Start()
+    [Header("Graphics settings")]
+    public Button btn_SaveGraphicsSettings;
+    public Button btn_ResetGraphicsSettings;
+    public TMP_Text txt_mouseSpeedValue;
+    public Slider slider_mouseSpeed;
+    public TMP_Text txt_fovValue;
+    public Slider slider_fovValue;
+
+    //load UI data at the beginning of the game
+    public void LoadUIManager()
     {
         InteractUIDisabled();
 
@@ -471,6 +483,34 @@ public class Manager_UIReuse : MonoBehaviour
         par_PlayerMainUIElementIcons.transform.localPosition += new Vector3(100, 0, 0);
         par_AbilityUI.transform.localPosition += new Vector3(0, 1000, 0);
         par_AssingedAbilityButtonUI.transform.localPosition += new Vector3(0, 300, 0);
+    }
+
+    public void SetMouseSpeed()
+    {
+        float mouseSpeed = slider_mouseSpeed.value;
+
+        float sensX = slider_mouseSpeed.value;
+        float sensY = slider_mouseSpeed.value;
+
+        txt_mouseSpeedValue.text = slider_mouseSpeed.value.ToString();
+
+        foreach (Transform child in thePlayer.transform)
+        {
+            if (child.name == "Camera_Player")
+            {
+                child.GetComponent<Player_Camera>().mouseSpeed = mouseSpeed;
+                child.GetComponent<Player_Camera>().sensX = sensX;
+                child.GetComponent<Player_Camera>().sensY = sensY;
+                break;
+            }
+        }
+    }
+    public void SetFOV()
+    {
+        int fov = Mathf.FloorToInt(slider_fovValue.value);
+        txt_fovValue.text = slider_fovValue.value.ToString();
+
+        thePlayer.GetComponentInChildren<Camera>().fieldOfView = fov;
     }
 
     public void RebuildPlayerInventory()

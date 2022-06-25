@@ -46,6 +46,14 @@ public class GameManager : MonoBehaviour
     [Header("Tip list")]
     public List<string> tips;
 
+    [Header("Scripts")]
+    [SerializeField] private Player_Movement PlayerMovementScript;
+    [SerializeField] private UI_PauseMenu PauseMenuScript;
+    [SerializeField] private Manager_UIReuse UIReuseScript;
+    [SerializeField] private Manager_Console ConsoleScript;
+    [SerializeField] private Manager_GameSaving GameSavingScript;
+    [SerializeField] private Manager_Graphics GraphicsScript;
+
     //public but hidden variables
     [HideInInspector] public List<GameObject> thrownGrenades;
 
@@ -73,12 +81,21 @@ public class GameManager : MonoBehaviour
             //show debug menu in game scene
             else if (sceneIndex == 1)
             {
+                PauseMenuScript.PauseGame();
+                UIReuseScript.LoadUIManager();
+                ConsoleScript.LoadConsole();
+
                 Manager_Console ConsoleScipt = par_Managers.GetComponent<Manager_Console>();
                 ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
                 ConsoleScipt.CreateNewConsoleLine("", "CONSOLE_INFO_MESSAGE");
                 ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---", "CONSOLE_INFO_MESSAGE");
 
                 par_Managers.GetComponent<Manager_Console>().Command_ToggleDebugMenu();
+
+                PlayerMovementScript.LoadPlayer();
+
+                GameSavingScript.LoadSaveData();
+                GraphicsScript.LoadData();
             }
         }
     }

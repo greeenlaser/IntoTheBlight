@@ -45,11 +45,11 @@ public class UI_PauseMenu : MonoBehaviour
     private readonly List<AudioSource> pausedSFX = new List<AudioSource>();
     private string path;
     private readonly List<Button> saveButtons = new List<Button>();
+    private Manager_UIReuse UIReuseScript;
 
     private void Awake()
     {
-        //game is paused by default when main game scene is loaded
-        PauseGame();
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
     }
 
     private void Update()
@@ -110,14 +110,14 @@ public class UI_PauseMenu : MonoBehaviour
 
         if (isUIOpen && isInventoryOpen && !calledOnce)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToGame.onClick.AddListener(CloseUI);
+            UIReuseScript.btn_ReturnToGame.onClick.AddListener(CloseUI);
             //Debug.Log("Added return button function to only close pause menu UI.");
             calledOnce = true;
         }
 
         else if (isUIOpen && !isInventoryOpen && !calledOnce)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToGame.onClick.AddListener(UnpauseGame);
+            UIReuseScript.btn_ReturnToGame.onClick.AddListener(UnpauseGame);
             //Debug.Log("Added return button function to unpause the game.");
             calledOnce = true;
         }
@@ -159,9 +159,9 @@ public class UI_PauseMenu : MonoBehaviour
             PlayerMovementScript.canCrouch = false;
             PlayerCameraScript.isCamEnabled = false;
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
-            par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
+            UIReuseScript.par_PauseMenu.SetActive(true);
+            UIReuseScript.par_PauseMenuContent.SetActive(true);
+            UIReuseScript.par_KeyCommandsContent.SetActive(false);
 
             var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
@@ -172,7 +172,7 @@ public class UI_PauseMenu : MonoBehaviour
             btn_Save.onClick.RemoveAllListeners();
             btn_Save.onClick.AddListener(Save);
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+            UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
             PauseSFX();
 
@@ -198,10 +198,10 @@ public class UI_PauseMenu : MonoBehaviour
         PlayerMovementScript.canCrouch = false;
         PlayerCameraScript.isCamEnabled = false;
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
+        UIReuseScript.par_PauseMenu.SetActive(false);
+        UIReuseScript.par_PauseMenuContent.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -227,10 +227,10 @@ public class UI_PauseMenu : MonoBehaviour
             PlayerMovementScript.canCrouch = true;
             PlayerCameraScript.isCamEnabled = true;
 
-            par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+            UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
-            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
-            par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
+            UIReuseScript.par_PauseMenu.SetActive(false);
+            UIReuseScript.par_PauseMenuContent.SetActive(false);
 
             //unpauses all paused player SFX audiosources
             for (int i = 0; i < pausedSFX.Count; i++)
@@ -310,15 +310,15 @@ public class UI_PauseMenu : MonoBehaviour
     //only opens the UI
     public void OpenUI()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
+        UIReuseScript.par_PauseMenu.SetActive(true);
+        UIReuseScript.par_PauseMenuContent.SetActive(true);
 
         calledOnce = false;
         isUIOpen = true;
 
         var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
         par_GameSaves.SetActive(false);
         btn_Load.onClick.RemoveAllListeners();
@@ -333,8 +333,8 @@ public class UI_PauseMenu : MonoBehaviour
     //only closes the UI but keeps the game paused
     public void CloseUI()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenu.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(false);
+        UIReuseScript.par_PauseMenu.SetActive(false);
+        UIReuseScript.par_PauseMenuContent.SetActive(false);
 
         calledOnce = false;
         isUIOpen = false;
@@ -358,9 +358,9 @@ public class UI_PauseMenu : MonoBehaviour
     {
         par_GameSaves.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
 
         btn_LoadGame.interactable = false;
 
@@ -431,30 +431,30 @@ public class UI_PauseMenu : MonoBehaviour
 
     public void OpenKeyCommands()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(true);
+        UIReuseScript.par_KeyCommandsContent.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
     }
     public void OpenGraphics()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_GraphicsContent.SetActive(true);
+        UIReuseScript.par_GraphicsContent.SetActive(true);
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(true);
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(true);
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.RemoveAllListeners();
+        UIReuseScript.btn_ReturnToPauseMenu.onClick.AddListener(BackToPauseMenu);
     }
 
     public void BackToPauseMenu()
     {
-        par_Managers.GetComponent<Manager_UIReuse>().par_PauseMenuContent.SetActive(true);
+        UIReuseScript.par_PauseMenuContent.SetActive(true);
 
         par_GameSaves.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_KeyCommandsContent.SetActive(false);
-        par_Managers.GetComponent<Manager_UIReuse>().par_GraphicsContent.SetActive(false);
+        UIReuseScript.par_KeyCommandsContent.SetActive(false);
+        UIReuseScript.par_GraphicsContent.SetActive(false);
 
-        par_Managers.GetComponent<Manager_UIReuse>().btn_ReturnToPauseMenu.gameObject.SetActive(false);
+        UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
     }
 
     public void BackToMainMenu()

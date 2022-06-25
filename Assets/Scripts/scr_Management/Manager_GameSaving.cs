@@ -51,7 +51,8 @@ public class Manager_GameSaving : MonoBehaviour
     private Vector3 rot_PlayerCamera;
     private GameManager gameManagerScript;
 
-    private void Awake()
+    //load save data at the beginning of the game
+    public void LoadSaveData()
     {
         gameManagerScript = GetComponent<GameManager>();
 
@@ -323,21 +324,6 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerYVelocity"))
                 {
                     PlayerMovementScript.velocity.y = float.Parse(numbers[0]);
-                }
-
-                //loading player mouse speed
-                else if (line.Contains("playerMouseSpeed"))
-                {
-                    playerCamera.GetComponent<Player_Camera>().mouseSpeed = float.Parse(numbers[0]);
-                    playerCamera.GetComponent<Player_Camera>().MouseSpeedSlider.value = float.Parse(numbers[0]);
-                    playerCamera.GetComponent<Player_Camera>().txt_mouseSpeed.text = float.Parse(numbers[0]).ToString();
-                }
-                //loading player fov
-                else if (line.Contains("playerFOV"))
-                {
-                    playerCamera.GetComponent<Player_Camera>().fov = int.Parse(numbers[0]);
-                    playerCamera.GetComponent<Player_Camera>().FOVSlider.value = int.Parse(numbers[0]);
-                    playerCamera.GetComponent<Player_Camera>().txt_fov.text = int.Parse(numbers[0]).ToString();
                 }
 
                 //loading player health
@@ -1066,12 +1052,6 @@ public class Manager_GameSaving : MonoBehaviour
         saveFile.WriteLine("pv_playerRotation = " + rot_Player);
         //player camera rotation
         saveFile.WriteLine("pv_playerCameraRotation = " + rot_PlayerCamera);
-
-        saveFile.WriteLine("");
-        //player mouse speed
-        saveFile.WriteLine("pv_playerMouseSpeed = " + playerCamera.GetComponent<Player_Camera>().mouseSpeed);
-        //player fov
-        saveFile.WriteLine("pv_playerFOV = " + playerCamera.GetComponent<Player_Camera>().fov);
 
         saveFile.WriteLine("");
         //player health
