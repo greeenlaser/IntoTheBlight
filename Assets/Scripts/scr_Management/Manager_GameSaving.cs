@@ -214,18 +214,34 @@ public class Manager_GameSaving : MonoBehaviour
                 {
                     newFileName = saveName;
                 }
+
+                //using a text editor to write text to the game load file in the load file path
+                using StreamWriter loadFile = File.CreateText(loadFilePath);
+
+                loadFile.WriteLine("false");
+                loadFile.WriteLine(newFileName);
+
+                SceneManager.LoadScene(1);
             }
             //starts a new game if no save was found
             else
             {
-                SceneManager.LoadScene(0);
-            }
+                //using a text editor to write text to the game load file in the load file path
+                using StreamWriter loadFile = File.CreateText(loadFilePath);
 
-            //using a text editor to write text to the game save file in the saved file path
+                loadFile.WriteLine("true");
+
+                SceneManager.LoadScene(1);
+            }
+        }
+        else
+        {
+            //starts a new game if no save was found
+
+            //using a text editor to write text to the game load file in the load file path
             using StreamWriter loadFile = File.CreateText(loadFilePath);
 
-            loadFile.WriteLine("false");
-            loadFile.WriteLine(newFileName);
+            loadFile.WriteLine("true");
 
             SceneManager.LoadScene(1);
         }

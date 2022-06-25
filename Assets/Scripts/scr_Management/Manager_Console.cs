@@ -180,11 +180,7 @@ public class Manager_Console : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
                 currentSelectedInsertedCommand--;
-                if (currentSelectedInsertedCommand < 0)
-                {
-                    currentSelectedInsertedCommand = insertedCommands.Count -1;
-                }
-                txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand];
+                txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand +1];
                 txt_ConsoleInputField.MoveToEndOfLine(false, false);
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
