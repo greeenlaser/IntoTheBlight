@@ -990,7 +990,7 @@ public class Manager_Console : MonoBehaviour
                     {
                         CreateNewConsoleLine("--- target states:", "CONSOLE_INFO_MESSAGE");
 
-                        Transform par = target.transform.parent.parent;
+                        Transform par = target.transform.parent;
                         GameObject door = null;
                         GameObject container = null;
 
@@ -1011,13 +1011,15 @@ public class Manager_Console : MonoBehaviour
                         }
 
                         //is door locked and protected or not
-                        if (door.GetComponent<Env_Door>() != null)
+                        if (door != null
+                            && door.GetComponent<Env_Door>() != null)
                         {
                             CreateNewConsoleLine("isprotected = " + door.GetComponent<Env_Door>().isProtected + "", "CONSOLE_INFO_MESSAGE");
                             CreateNewConsoleLine("islocked = " + door.GetComponent<Env_Door>().isLocked, "CONSOLE_INFO_MESSAGE");
                         }
                         //is container locked and protected or not
-                        else if (container.GetComponent<Inv_Container>() != null)
+                        else if (container != null
+                                 && container.GetComponent<Inv_Container>() != null)
                         {
                             CreateNewConsoleLine("isprotected = " + container.GetComponent<Inv_Container>().isProtected + "", "CONSOLE_INFO_MESSAGE");
                             CreateNewConsoleLine("islocked = " + container.GetComponent<Inv_Container>().isLocked, "CONSOLE_INFO_MESSAGE");
@@ -2898,7 +2900,20 @@ public class Manager_Console : MonoBehaviour
 
     private void NewUnitylogMessage()
     {
-        CreateNewConsoleLine(output, "UNITY_LOG_MESSAGE");
+        string resultMessage;
+
+        if (output.Contains("Exception")
+            || output.Contains("CS")
+            || output.Contains("Error"))
+        {
+            resultMessage = "UNITY_ERROR_MESSAGE";
+        }
+        else
+        {
+            resultMessage = "UNITY_LOG_MESSAGE";
+        }
+
+        CreateNewConsoleLine(output, resultMessage);
         lastOutput = output;
     }
 
