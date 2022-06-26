@@ -174,24 +174,42 @@ public class Manager_Console : MonoBehaviour
             ToggleConsole();
         }
 
-        //simple way to choose newer and older inserted commands with arrow keys
+        //choose newer and older inserted commands with arrow keys
         if (consoleOpen && insertedCommands.Count > 0)
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            //always picks newest added console command if input field is empty
+            if ((Input.GetKeyDown(KeyCode.UpArrow)
+                || Input.GetKeyDown(KeyCode.DownArrow))
+                && txt_ConsoleInputField.text == "")
             {
-                currentSelectedInsertedCommand--;
-                txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand +1];
+                currentSelectedInsertedCommand = insertedCommands.Count - 1;
+                txt_ConsoleInputField.text = insertedCommands[insertedCommands.Count - 1];
                 txt_ConsoleInputField.MoveToEndOfLine(false, false);
             }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            else
             {
-                currentSelectedInsertedCommand++;
-                if (currentSelectedInsertedCommand == insertedCommands.Count)
+                if (Input.GetKeyDown(KeyCode.UpArrow))
                 {
-                    currentSelectedInsertedCommand = 0;
+                    currentSelectedInsertedCommand--;
+                    if (currentSelectedInsertedCommand < 0)
+                    {
+                        currentSelectedInsertedCommand = insertedCommands.Count - 1;
+                    }
+
+                    txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand];
+                    txt_ConsoleInputField.MoveToEndOfLine(false, false);
                 }
-                txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand];
-                txt_ConsoleInputField.MoveToEndOfLine(false, false);
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    currentSelectedInsertedCommand++;
+                    if (currentSelectedInsertedCommand == insertedCommands.Count)
+                    {
+                        currentSelectedInsertedCommand = 0;
+                    }
+
+                    txt_ConsoleInputField.text = insertedCommands[currentSelectedInsertedCommand];
+                    txt_ConsoleInputField.MoveToEndOfLine(false, false);
+                }
             }
         }
 

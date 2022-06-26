@@ -15,9 +15,8 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private GameObject light_Flashlight;
-
-    [Header("Special items")]
     [SerializeField] private GameObject Exoskeleton;
+    [SerializeField] private List<string> tips = new List<string>();
 
     [Header("Loading menu content")]
     public GameObject par_LoadingMenu;
@@ -157,8 +156,8 @@ public class Manager_GameSaving : MonoBehaviour
             }
             if (time > 10)
             {
-                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, gameManagerScript.tips.Count - 1));
-                txt_TipText.text = gameManagerScript.tips[randomTip];
+                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, tips.Count - 1));
+                txt_TipText.text = tips[randomTip];
 
                 time = 0;
             }
@@ -172,8 +171,8 @@ public class Manager_GameSaving : MonoBehaviour
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
-        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, gameManagerScript.tips.Count - 1));
-        txt_TipText.text = gameManagerScript.tips[randomTip];
+        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, tips.Count - 1));
+        txt_TipText.text = tips[randomTip];
 
         btn_Continue.gameObject.SetActive(false);
     }

@@ -13,8 +13,25 @@ public class UI_TabletMessages : MonoBehaviour
     [SerializeField] private GameObject template_message;
     [SerializeField] private Transform par_SpawnedTabletMessages;
 
+    [Header("Message send test")]
+    [SerializeField] private GameObject logo;
+
     //public but hidden variables
     [HideInInspector] public List<GameObject> messages;
+
+    //placeholder tablet message send feature
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P)
+            && !GetComponent<UI_PauseMenu>().isGamePaused
+            && !GetComponent<Manager_Console>().consoleOpen)
+        {
+            string messageTime = GetComponent<Manager_WorldClock>().time;
+            string senderName = "System";
+            string messageContent = "this shit is crazy, how are they even surviving after that crazy rad-storm, a regular human wouldve died in 5 seconds but it looks like this rad storm only made them stronger! ive never seen anythng like that...";
+            SendMessage(logo, messageTime, senderName, messageContent);
+        }
+    }
 
     public void SendMessage(GameObject logo, string messageTime, string senderName, string messageContent)
     {

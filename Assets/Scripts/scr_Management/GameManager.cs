@@ -39,13 +39,6 @@ public class GameManager : MonoBehaviour
     [Header("Framerate")]
     [SerializeField] private TMP_Text txt_fpsValue;
 
-    [Header("Message send test")]
-    [SerializeField] private GameObject logo;
-    [SerializeField] private GameObject par_Managers;
-
-    [Header("Tip list")]
-    public List<string> tips;
-
     [Header("Scripts")]
     [SerializeField] private Player_Movement PlayerMovementScript;
     [SerializeField] private UI_PauseMenu PauseMenuScript;
@@ -85,12 +78,12 @@ public class GameManager : MonoBehaviour
                 UIReuseScript.LoadUIManager();
                 ConsoleScript.LoadConsole();
 
-                Manager_Console ConsoleScipt = par_Managers.GetComponent<Manager_Console>();
-                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + par_Managers.GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
+                Manager_Console ConsoleScipt = GetComponent<Manager_Console>();
+                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
                 ConsoleScipt.CreateNewConsoleLine("", "CONSOLE_INFO_MESSAGE");
                 ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---", "CONSOLE_INFO_MESSAGE");
 
-                par_Managers.GetComponent<Manager_Console>().Command_ToggleDebugMenu();
+                GetComponent<Manager_Console>().Command_ToggleDebugMenu();
 
                 PlayerMovementScript.LoadPlayer();
 
@@ -116,16 +109,6 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F12))
         {
             Screenshot();
-        }
-
-        if (Input.GetKeyDown(KeyCode.P)
-            && !par_Managers.GetComponent<UI_PauseMenu>().isGamePaused
-            && !par_Managers.GetComponent<Manager_Console>().consoleOpen)
-        {
-            string messageTime = par_Managers.GetComponent<Manager_WorldClock>().time;
-            string senderName = "System";
-            string messageContent = "this shit is crazy, how are they even surviving after that crazy rad-storm, a regular human wouldve died in 5 seconds but it looks like this rad storm only made them stronger! ive never seen anythng like that...";
-            par_Managers.GetComponent<UI_TabletMessages>().SendMessage(logo, messageTime, senderName, messageContent);
         }
     }
 
