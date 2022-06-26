@@ -72,6 +72,8 @@ public class Manager_GameSaving : MonoBehaviour
         //if save folder already exists
         else
         {
+            OpenLoadingMenuUI();
+
             //if we have a load file
             if (File.Exists(loadFilePath))
             {
@@ -139,7 +141,7 @@ public class Manager_GameSaving : MonoBehaviour
             }
         }
 
-        if (isLoading)
+        if (par_LoadingMenu.activeInHierarchy)
         {
             //time for loading screen timer continues regardless of game being paused
             time += Time.unscaledDeltaTime;
@@ -154,9 +156,9 @@ public class Manager_GameSaving : MonoBehaviour
                 txt_LoadingText.gameObject.SetActive(false);
                 img_loadingLogo.gameObject.SetActive(false);
             }
-            if (time > 10)
+            if (time >= 10)
             {
-                int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, tips.Count - 1));
+                int randomTip = UnityEngine.Random.Range(0, tips.Count);
                 txt_TipText.text = tips[randomTip];
 
                 time = 0;
@@ -171,7 +173,7 @@ public class Manager_GameSaving : MonoBehaviour
         par_LoadingMenu.SetActive(true);
         img_loadingLogo.gameObject.SetActive(true);
 
-        int randomTip = UnityEngine.Random.Range(0, UnityEngine.Random.Range(0, tips.Count - 1));
+        int randomTip = UnityEngine.Random.Range(0, tips.Count);
         txt_TipText.text = tips[randomTip];
 
         btn_Continue.gameObject.SetActive(false);
