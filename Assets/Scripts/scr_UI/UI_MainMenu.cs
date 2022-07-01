@@ -27,7 +27,7 @@ public class UI_MainMenu : MonoBehaviour
     //private variables
     private bool startedSceneSwitch;
     private float time;
-    private string path;
+    private string gameSavePath;
     private readonly List<Button> saveButtons = new List<Button>();
 
     private void Awake()
@@ -35,7 +35,24 @@ public class UI_MainMenu : MonoBehaviour
         Time.timeScale = 1;
         ReturnToMainMenu();
 
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        //create game folder directory
+        string gamePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+        if (!Directory.Exists(gamePath))
+        {
+            Directory.CreateDirectory(gamePath);
+        }
+        //create debug files directory
+        string debugFilesPath = gamePath + @"\DebugFiles";
+        if (!Directory.Exists(debugFilesPath))
+        {
+            Directory.CreateDirectory(debugFilesPath);
+        }
+        //create game save directory
+        gameSavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        if (!Directory.Exists(gameSavePath))
+        {
+            Directory.CreateDirectory(gameSavePath);
+        }
     }
 
     private void Update()
@@ -96,7 +113,7 @@ public class UI_MainMenu : MonoBehaviour
     {
         btn_LoadGame.interactable = false;
 
-        string[] files = Directory.GetFiles(path);
+        string[] files = Directory.GetFiles(gameSavePath);
 
         if (files.Length > 0)
         {
@@ -134,7 +151,7 @@ public class UI_MainMenu : MonoBehaviour
     {
         string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
 
-        if (File.Exists(path + @"\" + fileName))
+        if (File.Exists(gameSavePath + @"\" + fileName))
         {
             //using a text editor to write text to the game save file in the saved file path
             using StreamWriter loadFile = File.CreateText(loadFilePath);
