@@ -32,7 +32,6 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
-    [HideInInspector] public bool firstload;
     [HideInInspector] public bool isSaving;
     [HideInInspector] public bool isLoading;
     [HideInInspector] public string path;
@@ -61,60 +60,48 @@ public class Manager_GameSaving : MonoBehaviour
 
         par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
 
-        //create LightsOff save folder if it doesnt already exist
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
+        OpenLoadingMenuUI();
 
-            firstload = true;
-            OpenLoadingMenuUI();
-        }
-        //if save folder already exists
-        else
+        //if we have a load file
+        if (File.Exists(loadFilePath))
         {
-            OpenLoadingMenuUI();
+            string loadNewGame = "";
+            string saveName = "";
 
-            //if we have a load file
-            if (File.Exists(loadFilePath))
+            string[] lines = File.ReadAllLines(loadFilePath);
+            if (lines.Length >= 1
+                && !string.IsNullOrEmpty(lines[0]))
             {
-                string loadNewGame = "";
-                string saveName = "";
+                loadNewGame = File.ReadLines(loadFilePath).First();
+            }
+            if (lines.Length >= 2
+                && !string.IsNullOrEmpty(lines[1]))
+            {
+                saveName = File.ReadLines(loadFilePath).Skip(1).Take(1).First();
+            }
 
-                string[] lines = File.ReadAllLines(loadFilePath);
-                if (lines.Length >= 1
-                    && !string.IsNullOrEmpty(lines[0]))
-                {
-                    loadNewGame = File.ReadLines(loadFilePath).First();
-                }
-                if (lines.Length >= 2
-                    && !string.IsNullOrEmpty(lines[1]))
-                {
-                    saveName = File.ReadLines(loadFilePath).Skip(1).Take(1).First();
-                }
-
-                if (loadNewGame == "true")
-                {
-                    Debug.Log("Started new game!");
-                }
-                else if (loadNewGame == "false"
-                         && saveName != ""
-                         && File.Exists(path + @"\" + saveName + ".txt"))
-                {
-                    //load first line from load file which is the save file name
-                    LoadGameData(saveName);
-                }
-                else
-                {
-                    Debug.Log("Loaded new game because load file was invalid or empty.");
-                }
-
-                //delete load file once it has finished loading
-                File.Delete(loadFilePath);
+            if (loadNewGame == "true")
+            {
+                Debug.Log("Started new game!");
+            }
+            else if (loadNewGame == "false"
+                     && saveName != ""
+                     && File.Exists(path + @"\" + saveName + ".txt"))
+            {
+                //load first line from load file which is the save file name
+                LoadGameData(saveName);
             }
             else
             {
-                Debug.Log("Loaded new game because load file was not found.");
+                Debug.Log("Loaded new game because load file was invalid or empty.");
             }
+
+            //delete load file once it has finished loading
+            File.Delete(loadFilePath);
+        }
+        else
+        {
+            Debug.Log("Loaded new game because load file was not found.");
         }
 
         btn_Continue.gameObject.SetActive(true);
@@ -148,14 +135,7 @@ public class Manager_GameSaving : MonoBehaviour
 
             img_loadingLogo.transform.eulerAngles -= new Vector3(0, 0, 100) * Time.deltaTime;
 
-            //0.5 seconds to load first startup
-            //otherwise waiting until game save file finishes loading
-            if (time > 0.5f && firstload)
-            {
-                btn_Continue.gameObject.SetActive(true);
-                txt_LoadingText.gameObject.SetActive(false);
-                img_loadingLogo.gameObject.SetActive(false);
-            }
+            //waiting until game save file finishes loading
             if (time >= 10)
             {
                 int randomTip = UnityEngine.Random.Range(0, tips.Count);

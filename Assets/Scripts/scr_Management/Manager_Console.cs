@@ -87,10 +87,6 @@ public class Manager_Console : MonoBehaviour
     public void LoadConsole()
     {
         debugFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\DebugFiles";
-        if (!Directory.Exists(debugFilePath))
-        {
-            Directory.CreateDirectory(debugFilePath);
-        }
 
         string date = DateTime.Now.ToString();
         string replaceSlash = date.Replace('/', '_');
