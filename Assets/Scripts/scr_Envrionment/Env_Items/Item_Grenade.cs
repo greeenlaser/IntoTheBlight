@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Item_Grenade : MonoBehaviour
 {
-    [Header("Assignables")]
+    [Header("Variables")]
     [Range(0, 100)]
     public float maxDamage;
     [Range(0, 500)]
@@ -33,13 +33,15 @@ public class Item_Grenade : MonoBehaviour
         sticky
     }
 
-    [SerializeField] private Player_Movement PlayerMovementScript;
-    [SerializeField] private Player_RaycastSystem PlayerRaycastScript;
+    [Header("Assignables")]
+
     [SerializeField] private GameObject particleEffect;
     [SerializeField] private Transform pos_HoldItem;
     [SerializeField] private Transform pos_GrenadeInstantiate;
     [SerializeField] private Transform par_ThrownGrenades;
     [SerializeField] private Rigidbody rb;
+    [SerializeField] private Player_Movement PlayerMovementScript;
+    [SerializeField] private Player_RaycastSystem PlayerRaycastScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private GameObject par_Managers;
@@ -294,6 +296,20 @@ public class Item_Grenade : MonoBehaviour
                             && target.transform.parent.GetComponent<Env_DestroyableCrate>() != null
                             && target.transform.parent.GetComponent<Env_DestroyableCrate>().crateHealth > 0))
                         {
+                            GameObject disabledTrigger = null;
+                            if (target.name == "Player")
+                            {
+                                foreach (Transform child in target.transform)
+                                {
+                                    if (child.name == "trigger_meleeRange")
+                                    {
+                                        disabledTrigger = child.gameObject;
+                                        disabledTrigger.SetActive(false);
+                                        break;
+                                    }
+                                }
+                            }
+
                             //get the direction of the target
                             Vector3 destination = target.transform.position - gameObject.transform.position;
 
@@ -395,7 +411,7 @@ public class Item_Grenade : MonoBehaviour
                                         //player needs to see the stun grenade to be stunned by it
                                         foreach (GameObject item in PlayerRaycastScript.targets)
                                         {
-                                            if (item.name == name)
+                                            if (item == gameObject)
                                             {
                                                 //stuns the player
                                                 PlayerMovementScript.Stun();
@@ -421,6 +437,11 @@ public class Item_Grenade : MonoBehaviour
                                         }
                                     }
                                 }
+                            }
+
+                            if (disabledTrigger != null)
+                            {
+                                disabledTrigger.SetActive(true);
                             }
                         }
                     }

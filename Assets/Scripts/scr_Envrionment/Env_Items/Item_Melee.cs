@@ -88,7 +88,8 @@ public class Item_Melee : MonoBehaviour
             }
 
             //protected melee weapons dont take durability damage
-            if (!hitSomething && !gameObject.GetComponent<Env_Item>().isProtected)
+            if (!hitSomething 
+                && !gameObject.GetComponent<Env_Item>().isProtected)
             {
                 hitSomething = true;
             }

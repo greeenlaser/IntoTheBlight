@@ -11,7 +11,7 @@ public class Player_RaycastSystem : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public GameObject heldObject;
     [HideInInspector] public bool isColliding;
-    [HideInInspector] public List<GameObject> targets;
+    public List<GameObject> targets;
 
     //private variables
     private bool canInteract;
@@ -61,8 +61,6 @@ public class Player_RaycastSystem : MonoBehaviour
                                     IgnoredLayermask, 
                                     QueryTriggerInteraction.Ignore))
                 {
-                    //Debug.Log("Hit target is " + hitTarget.transform.name);
-
                     //if the target is AI and it doesn't have a health script
                     //or it has a health script and it is alive
                     if (hitTarget.transform.GetComponent<UI_AIContent>() != null
@@ -94,7 +92,7 @@ public class Player_RaycastSystem : MonoBehaviour
                         GameObject par = target.transform.parent.gameObject;
                         foreach (Transform child in par.transform)
                         {
-                            if (child.name == "par_DeadAILoot"
+                            if (child.name.Contains("Dead")
                                 && child.GetComponent<Inv_Container>() != null)
                             {
                                 deadAIContainer = child.transform.gameObject;

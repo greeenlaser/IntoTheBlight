@@ -32,7 +32,6 @@ public class Player_MeleeRangeTargets : MonoBehaviour
                 && other.GetComponent<AI_Health>().isAlive
                 && other.GetComponent<AI_Health>().isKillable)
             {
-                //ebug.Log(other.GetComponent<UI_AIContent>().str_NPCName + " is in melee range!");
                 targets.Add(other.gameObject);
             }
             else if (other.GetComponentInParent<Env_DestroyableCrate>() != null)

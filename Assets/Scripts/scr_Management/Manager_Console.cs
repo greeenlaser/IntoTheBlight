@@ -46,7 +46,6 @@ public class Manager_Console : MonoBehaviour
 
     //private variables
     private bool foundDuplicate;
-    private bool foundRepairable;
     private bool displayDebugMenu;
     private bool canContinueItemRemoval;
     private bool isSelectingTarget;
@@ -829,27 +828,19 @@ public class Manager_Console : MonoBehaviour
         string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
         DirectoryInfo di = new DirectoryInfo(path);
 
-        //deletes all files and folders
-        //if the folder exists and there are any files in the folder
-        if (Directory.Exists(path))
+        //deletes all save files
+        if (Directory.GetFiles(path).Length > 0)
         {
-            if (Directory.GetFiles(path).Length > 0)
+            foreach (FileInfo file in di.EnumerateFiles())
             {
-                foreach (FileInfo file in di.EnumerateFiles())
-                {
-                    //deletes all files with Save in their name
-                    if (file.Name.Contains("Save"))
-                    {
-                        file.Delete();
-                    }
-                }
+                file.Delete();
+            }
 
-                CreateNewConsoleLine("Successfully deleted all save files from " + path + "!", "CONSOLE_SUCCESS_MESSAGE");
-            }
-            else
-            {
-                CreateNewConsoleLine("Error: " + path + " has no save files to delete!", "CONSOLE_ERROR_MESSAGE");
-            }
+            CreateNewConsoleLine("Successfully deleted all save files from " + path + "!", "CONSOLE_SUCCESS_MESSAGE");
+        }
+        else
+        {
+            CreateNewConsoleLine("Error: " + path + " has no save files to delete!", "CONSOLE_ERROR_MESSAGE");
         }
     }
     //toggles the unity logs on and off
@@ -2569,17 +2560,33 @@ public class Manager_Console : MonoBehaviour
     //fixes all repairable items for free
     private void Command_FixAllItems()
     {
+        bool foundRepairableGun = false;
+        bool foundRepairableMelee = false;
+
         foreach (GameObject repairable in PlayerInventoryScript.inventory)
         {
-            if (repairable.GetComponent<Item_Gun>() != null
+            if (!foundRepairableGun
+                && repairable.GetComponent<Item_Gun>() != null
                 && repairable.GetComponent<Item_Gun>().durability 
                 < repairable.GetComponent<Item_Gun>().maxDurability)
             {
-                foundRepairable = true;
+                foundRepairableGun = true;
+            }
+            else if (!foundRepairableMelee
+                     && repairable.GetComponent<Item_Melee>() != null
+                     && repairable.GetComponent<Item_Melee>().durability
+                     < repairable.GetComponent<Item_Melee>().maxDurability)
+            {
+                foundRepairableMelee = true;
+            }
+            else
+            {
+                break;
             }
         }
 
-        if (foundRepairable)
+        if (foundRepairableGun
+            || foundRepairableMelee)
         {
             for (int i = 0; i < PlayerInventoryScript.inventory.Count; i++)
             {
@@ -2598,13 +2605,26 @@ public class Manager_Console : MonoBehaviour
 
                     CreateNewConsoleLine("Fully repaired " + displayableItem.GetComponent<Env_Item>().str_ItemName + "!", "CONSOLE_SUCCESS_MESSAGE");
                 }
+                else if (displayableItem.GetComponent<Item_Melee>() != null)
+                {
+                    displayableItem.GetComponent<Item_Melee>().durability = displayableItem.GetComponent<Item_Melee>().maxDurability;
+
+                    if (displayableItem.GetComponent<Item_Melee>().hasEquippedMeleeWeapon)
+                    {
+                        par_Managers.GetComponent<Manager_UIReuse>().durability = displayableItem.GetComponent<Item_Melee>().durability;
+                        par_Managers.GetComponent<Manager_UIReuse>().maxDurability = displayableItem.GetComponent<Item_Melee>().maxDurability;
+                        par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
+                    }
+
+                    CreateNewConsoleLine("Fully repaired " + displayableItem.GetComponent<Env_Item>().str_ItemName + "!", "CONSOLE_SUCCESS_MESSAGE");
+                }
             }
         }
-        else if (!foundRepairable)
+        else if (!foundRepairableGun
+                 && !foundRepairableMelee)
         {
             CreateNewConsoleLine("Error: No repairable items were found in the players inventory or all items are already fully repaired!", "CONSOLE_ERROR_MESSAGE");
         }
-        foundRepairable = false;
     }
 
     //set player reputation with a faction

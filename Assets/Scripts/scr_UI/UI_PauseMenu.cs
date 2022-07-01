@@ -59,7 +59,8 @@ public class UI_PauseMenu : MonoBehaviour
             && !par_Managers.GetComponent<Manager_GameSaving>().isLoading)
         {
             //pauses game and opens pause menu UI
-            if (!isGamePaused && !isUIOpen)
+            if (!isGamePaused 
+                && !isUIOpen)
             {
                 PauseGameAndOpenUI();
             }
@@ -161,7 +162,12 @@ public class UI_PauseMenu : MonoBehaviour
 
             UIReuseScript.par_PauseMenu.SetActive(true);
             UIReuseScript.par_PauseMenuContent.SetActive(true);
+
+            par_GameSaves.SetActive(false);
             UIReuseScript.par_KeyCommandsContent.SetActive(false);
+            UIReuseScript.par_GraphicsContent.SetActive(false);
+
+            UIReuseScript.btn_ReturnToPauseMenu.gameObject.SetActive(false);
 
             var savingScript = par_Managers.GetComponent<Manager_GameSaving>();
 
