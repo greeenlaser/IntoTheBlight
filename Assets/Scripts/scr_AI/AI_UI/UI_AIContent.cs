@@ -36,7 +36,7 @@ public class UI_AIContent : MonoBehaviour
         par_Managers.GetComponent<Manager_UIReuse>().par_Dialogue.SetActive(true);
         par_Managers.GetComponent<Manager_UIReuse>().txt_NPCName.text = str_NPCName;
 
-        gameObject.GetComponent<UI_DialogueParent>().BuildDialogueTree();
+        gameObject.GetComponent<UI_DialogueChoice>().BuildDialogueTree();
 
         if (!par_Managers.GetComponent<UI_PauseMenu>().isUIOpen)
         {

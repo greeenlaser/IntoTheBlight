@@ -13,7 +13,8 @@ public class UI_DialogueChoice : MonoBehaviour
         dialogue,
         quest,
         repair,
-        shop
+        shop,
+        closeDialogue
     }
     [TextArea(2, 5)]
     public string parentButtonText;
@@ -24,7 +25,7 @@ public class UI_DialogueChoice : MonoBehaviour
     public List<GameObject> dialogues;
 
     [Header("Scripts")]
-    [SerializeField] private UI_DialogueParent DialogueParentScript;
+    [SerializeField] private GameObject AI;
     public UI_QuestContent QuestMenu;
     [SerializeField] private UI_RepairContent RepairMenu;
     [SerializeField] private UI_ShopContent ShopMenu;
@@ -41,16 +42,17 @@ public class UI_DialogueChoice : MonoBehaviour
         UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
     }
 
-    private void BuildDialogueTree()
+    public void BuildDialogueTree()
     {
-        UIReuseScript.txt_NPCName.text = DialogueParentScript.AIContentScript.str_NPCName;
+        UIReuseScript.txt_NPCName.text = AI.GetComponent<UI_AIContent>().str_NPCName;
         UIReuseScript.txt_NPCDialogue.text = npcResponse;
 
         if (UIReuseScript.buttons.Count > 0)
         {
             UIReuseScript.CloseDialogueUI();
-
         }
+
+        bool hasCloseDialogueButton = false;
 
         if (dialogues.Count > 0)
         {
@@ -62,58 +64,84 @@ public class UI_DialogueChoice : MonoBehaviour
 
                 UIReuseScript.buttons.Add(btn_new);
 
-                //if this is a dialogue choice
-                //or a repair shop
-                //or a regular shop
-                //or a quest that isnt yet turned in or failed
+                //dialogue
                 if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
-                    == UI_DialogueChoice.DialogueChoice.dialogue
-                    || dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
-                    == UI_DialogueChoice.DialogueChoice.repair
-                    || dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
-                    == UI_DialogueChoice.DialogueChoice.shop
-                    || (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
-                    == UI_DialogueChoice.DialogueChoice.quest
-                    && dialogue.GetComponent<UI_DialogueChoice>().QuestMenu != null
-                    && !dialogue.GetComponent<UI_DialogueChoice>().QuestMenu.turnedInQuest
-                    && !dialogue.GetComponent<UI_DialogueChoice>().QuestMenu.failedQuest))
+                    == UI_DialogueChoice.DialogueChoice.dialogue)
                 {
-                    dialogue.GetComponent<UI_DialogueChoice>().buttonIndex
-                        = UIReuseScript.buttons.IndexOf(btn_new);
-
-                    //add button function
-                    btn_new.onClick.AddListener(dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction);
-
-                    //add button text to each dialogue option
-                    int dialogueIndex = dialogues.IndexOf(dialogue);
-                    string buttonText = dialogues[dialogueIndex].GetComponent<UI_DialogueChoice>().parentButtonText;
-                    btn_new.GetComponentInChildren<TMP_Text>().text = buttonText;
-
-                    btn_new.interactable = true;
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("dialogue"); } );
                 }
+                //repair shop
+                else if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
+                         == UI_DialogueChoice.DialogueChoice.repair)
+                {
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("repair"); });
+                }
+                //shop
+                else if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
+                         == UI_DialogueChoice.DialogueChoice.shop)
+                {
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("shop"); });
+                }
+                //quest
+                else if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
+                         == UI_DialogueChoice.DialogueChoice.quest
+                         && dialogue.GetComponent<UI_DialogueChoice>().QuestMenu != null
+                         && !dialogue.GetComponent<UI_DialogueChoice>().QuestMenu.turnedInQuest
+                         && !dialogue.GetComponent<UI_DialogueChoice>().QuestMenu.failedQuest)
+                {
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("quest"); });
+                }
+                //close dialogue
+                else if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
+                         == UI_DialogueChoice.DialogueChoice.closeDialogue)
+                {
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("close"); });
+                    hasCloseDialogueButton = true;
+                }
+
+                dialogue.GetComponent<UI_DialogueChoice>().buttonIndex
+                    = UIReuseScript.buttons.IndexOf(btn_new);
+
+                //add button text to each dialogue option
+                int dialogueIndex = dialogues.IndexOf(dialogue);
+                string buttonText = dialogues[dialogueIndex].GetComponent<UI_DialogueChoice>().parentButtonText;
+                btn_new.GetComponentInChildren<TMP_Text>().text = buttonText;
+
+                btn_new.interactable = true;
             }
         }
 
-        //the final button which returns to main npc dialogue
-        Button btn_return = Instantiate(UIReuseScript.btn_dialogueTemplate);
-        btn_return.transform.SetParent(UIReuseScript.par_DialoguePanel.transform, false);
+        if (!hasCloseDialogueButton)
+        {
+            //the final button which returns to main npc dialogue
+            Button btn_return = Instantiate(UIReuseScript.btn_dialogueTemplate);
+            btn_return.transform.SetParent(UIReuseScript.par_DialoguePanel.transform, false);
 
-        UIReuseScript.buttons.Add(btn_return);
+            UIReuseScript.buttons.Add(btn_return);
 
-        btn_return.onClick.AddListener(DialogueParentScript.BuildDialogueTree);
+            btn_return.onClick.AddListener(AI.GetComponent<UI_DialogueChoice>().BuildDialogueTree);
 
-        btn_return.GetComponentInChildren<TMP_Text>().text = returnText;
+            btn_return.GetComponentInChildren<TMP_Text>().text = returnText;
 
-        btn_return.interactable = true;
+            btn_return.interactable = true;
+        }
     }
 
-    public void ButtonFunction()
+    public void ButtonFunction(string function)
     {
-        if (dialogueChoice == DialogueChoice.dialogue)
+        if (function == "dialogue")
         {
             BuildDialogueTree();
         }
-        else if (dialogueChoice == DialogueChoice.quest)
+        else if (function == "repair")
+        {
+            RepairMenu.OpenRepairUI();
+        }
+        else if (function == "shop")
+        {
+            ShopMenu.OpenShopUI();
+        }
+        else if (function == "quest")
         {
             if (!QuestMenu.startedQuest
                 && !QuestMenu.completedQuest
@@ -130,13 +158,9 @@ public class UI_DialogueChoice : MonoBehaviour
                 QuestMenu.TurnedInQuest();
             }
         }
-        else if (dialogueChoice == DialogueChoice.repair)
+        else if (function == "close")
         {
-            RepairMenu.OpenRepairUI();
-        }
-        else if (dialogueChoice == DialogueChoice.shop)
-        {
-            ShopMenu.OpenShopUI();
+            AI.GetComponent<UI_AIContent>().CloseNPCDialogue();
         }
     }
 }
