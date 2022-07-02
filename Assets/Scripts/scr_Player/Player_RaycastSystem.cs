@@ -188,7 +188,7 @@ public class Player_RaycastSystem : MonoBehaviour
                     //if theyre inside a trigger we dont want to interact with
                     else if (hitTarget.transform.name == "door_interactable")
                     {
-                        Transform doorParent = hitTarget.transform.parent;
+                        Transform doorParent = hitTarget.transform.parent.parent;
                         foreach (Transform child in doorParent)
                         {
                             if (child.GetComponent<Env_Door>() != null

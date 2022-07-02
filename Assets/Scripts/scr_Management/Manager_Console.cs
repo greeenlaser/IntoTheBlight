@@ -271,7 +271,8 @@ public class Manager_Console : MonoBehaviour
             }
 
         }
-        if (Input.GetKeyDown(KeyCode.Escape) && isSelectingTarget)
+        if (Input.GetKeyDown(KeyCode.Escape) 
+            && isSelectingTarget)
         {
             CreateNewConsoleLine("Cancelled target selection.", "CONSOLE_SUCCESS_MESSAGE");
 
@@ -994,14 +995,8 @@ public class Manager_Console : MonoBehaviour
                     {
                         CreateNewConsoleLine("--- target states:", "CONSOLE_INFO_MESSAGE");
 
-                        //is door locked and protected or not
-                        if (target.GetComponent<Env_Door>() != null)
-                        {
-                            CreateNewConsoleLine("isprotected = " + target.GetComponent<Env_Door>().isProtected + "", "CONSOLE_INFO_MESSAGE");
-                            CreateNewConsoleLine("islocked = " + target.GetComponent<Env_Door>().isLocked, "CONSOLE_INFO_MESSAGE");
-                        }
                         //is container locked and protected or not
-                        else if (target.GetComponent<Inv_Container>() != null)
+                        if (target.GetComponent<Inv_Container>() != null)
                         {
                             CreateNewConsoleLine("isprotected = " + target.GetComponent<Inv_Container>().isProtected + "", "CONSOLE_INFO_MESSAGE");
                             CreateNewConsoleLine("islocked = " + target.GetComponent<Inv_Container>().isLocked, "CONSOLE_INFO_MESSAGE");
@@ -1094,29 +1089,7 @@ public class Manager_Console : MonoBehaviour
                 else if (secondCommandName == "unlock"
                          && !secondCommand)
                 {
-                    if (target.GetComponent<Env_Door>() != null)
-                    {
-                        GameObject door = target;
-
-                        if (door.GetComponent<Env_Door>().isLocked
-                        && !door.GetComponent<Env_Door>().isProtected)
-                        {
-                            door.GetComponent<Env_Lock>().Unlock();
-                            CreateNewConsoleLine("Unlocked this door.", "CONSOLE_SUCCESS_MESSAGE");
-                        }
-
-                        //custom unlock errors
-                        else if (!door.GetComponent<Env_Door>().isLocked
-                                 || door.GetComponent<Env_Lock>() == null)
-                        {
-                            CreateNewConsoleLine("Error: Target is already unlocked!", "CONSOLE_ERROR_MESSAGE");
-                        }
-                        else if (door.GetComponent<Env_Door>().isProtected)
-                        {
-                            CreateNewConsoleLine("Error: Target cannot be unlocked through console because it is protected!", "CONSOLE_ERROR_MESSAGE");
-                        }
-                    }
-                    else if (target.GetComponent<Inv_Container>() != null)
+                    if (target.GetComponent<Inv_Container>() != null)
                     {
                         GameObject container = target;
 

@@ -46,7 +46,7 @@ public class Env_Door : MonoBehaviour
     private float doorDistanceFromEndPos;
     private readonly List<GameObject> targetsInTrigger = new List<GameObject>();
 
-    private void Start()
+    private void Awake()
     {
         isClosed = true;
     }
@@ -78,7 +78,9 @@ public class Env_Door : MonoBehaviour
             {
                 DoorIsOpen();
             }
-            else if (doorDistanceFromEndPos > 0.01f && targetsInTrigger.Count == 0 && !closeDoor)
+            else if (doorDistanceFromEndPos > 0.01f 
+                     && targetsInTrigger.Count == 0 
+                     && !closeDoor)
             {
                 closeDoor = true;
             }
@@ -125,8 +127,8 @@ public class Env_Door : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!isLocked 
-            && (other.CompareTag("Player") 
-            || other.CompareTag("NPC"))
+            && (other.GetComponent<Player_Movement>() != null
+            || other.GetComponent<AI_Movement>() != null)
             && !controlledByLift
             && !controlledByComputer)
         {
@@ -135,7 +137,8 @@ public class Env_Door : MonoBehaviour
                 targetsInTrigger.Add(other.gameObject);
             }
 
-            if (isClosed && !openDoor)
+            if (isClosed 
+                && !openDoor)
             {
                 openDoor = true;
             }
@@ -214,7 +217,7 @@ public class Env_Door : MonoBehaviour
 
         //Debug.Log("Door is open!");
     }
-    private void DoorIsClosed()
+    public void DoorIsClosed()
     {
         closeDoor = false;
         openDoor = false;
