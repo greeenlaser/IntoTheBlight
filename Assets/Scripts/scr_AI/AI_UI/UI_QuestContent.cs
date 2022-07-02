@@ -6,25 +6,24 @@ public class UI_QuestContent : MonoBehaviour
 {
     [SerializeField] private bool canReDoQuest;
     public string str_questTitle;
-    [TextArea] public string str_questDescription;
-    [Tooltip("Which section starts mentioning this quest?")]
-    public int questInfoPoint;
-    [Tooltip("Which section in an npc's dialogue will this quest inject itself into to start at?")]
-    public int injectPoint;
+    [TextArea(5, 5)]
+    public string str_questDescription;
 
-    [Header("Quest end response")]
-    public string str_questEndNPCResponse;
-    public string str_questEndPlayerResponse;
-
-    [Header("Assignables")]
-    public List<GameObject> questStages;
-    public List<GameObject> questRewards;
+    [Header("AI content")]
+    [SerializeField] private bool assignedByNPC;
+    [SerializeField] private UI_DialogueChoice dialogueParent;
+    [SerializeField] private GameObject dialogue_acceptQuest;
+    [SerializeField] private GameObject dialogue_turnInQuest;
     [SerializeField] private UI_AIContent AIScript;
-    [SerializeField] private GameObject par_Managers;
 
     [Header("Quest give stage assignables")]
     [SerializeField] private QuestStage_General QuestStage_Give;
+
+    [Header("Assignables")]
+    public List<GameObject> questStages;
+    [SerializeField] private List<GameObject> questRewards;
     [SerializeField] private Inv_Player PlayerInventoryScript;
+    [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool startedQuest;
@@ -35,11 +34,16 @@ public class UI_QuestContent : MonoBehaviour
     [HideInInspector] public int questCurrentStage;
 
     //private variables
-    Manager_UIReuse UIReuseScript;
+    private Manager_UIReuse UIReuseScript;
 
     private void Awake()
     {
         UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+
+        if (assignedByNPC)
+        {
+            dialogueParent.dialogues.Remove(dialogue_turnInQuest);
+        }
     }
 
     public void ShowStats()
@@ -72,7 +76,6 @@ public class UI_QuestContent : MonoBehaviour
         startedQuest = true;
         UIReuseScript.questTitle = str_questTitle;
 
-
         UIReuseScript.StartCoroutine(UIReuseScript.StartedQuestUI());
         questCurrentStage = 1;
         Debug.Log("Accepted " + str_questTitle + "!");
@@ -81,6 +84,12 @@ public class UI_QuestContent : MonoBehaviour
 
         //start first stage
         questStages[0].GetComponent<QuestStage_General>().StartStage();
+
+        if (assignedByNPC)
+        {
+            dialogueParent.dialogues.Remove(dialogue_acceptQuest);
+            dialogueParent.BuildDialogueTree();
+        }
     }
     public void CompletedQuest()
     {
@@ -88,11 +97,99 @@ public class UI_QuestContent : MonoBehaviour
         completedQuest = true;
         UIReuseScript.questTitle = str_questTitle;
         UIReuseScript.StartCoroutine(UIReuseScript.CompletedQuestUI());
+
+        if (assignedByNPC)
+        {
+            dialogueParent.dialogues.Add(dialogue_turnInQuest);
+            dialogueParent.BuildDialogueTree();
+        }
+
         Debug.Log("Completed " + str_questTitle + "! Waiting until player turns it in...");
     }
     public void TurnedInQuest()
     {
-        //add all quest rewards to players inventory if player has enough inventory space
+        if (questRewards.Count > 0)
+        {
+            foreach (GameObject reward in questRewards)
+            {
+                if (reward.name.Contains("-"))
+                {
+                    string[] sides = reward.name.Split('-');
+                    int count = int.Parse(sides[1]);
+
+                    if (sides[0].Contains("money"))
+                    {
+                        PlayerInventoryScript.money += count;
+
+                        UIReuseScript.txt_PlayerMoney.text = PlayerInventoryScript.money.ToString();
+                    }
+                    else
+                    {
+                        foreach (GameObject spawnable in par_Managers.GetComponent<Manager_Console>().spawnables)
+                        {
+                            if (spawnable.name == sides[0])
+                            {
+                                int itemWeight = spawnable.GetComponent<Env_Item>().int_ItemWeight;
+                                int spaceTaken = count * itemWeight;
+                                int playerRemainingSpace = PlayerInventoryScript.maxInvSpace - PlayerInventoryScript.invSpace;
+
+                                if (playerRemainingSpace - spaceTaken >= 0)
+                                {
+                                    GameObject foundItem = null;
+                                    foreach (GameObject item in PlayerInventoryScript.inventory)
+                                    {
+                                        if (item.name == sides[0])
+                                        {
+                                            foundItem = item;
+                                            break;
+                                        }
+                                    }
+
+                                    if (foundItem != null)
+                                    {
+                                        foundItem.GetComponent<Env_Item>().int_itemCount += count;
+                                    }
+                                    else if (foundItem == null
+                                             || PlayerInventoryScript.inventory.Count == 0)
+                                    {
+                                        GameObject questReward = Instantiate(spawnable,
+                                                                             PlayerInventoryScript.par_PlayerItems.transform.position,
+                                                                             Quaternion.identity);
+
+                                        questReward.name = questReward.GetComponent<Env_Item>().str_ItemName;
+
+                                        questReward.GetComponent<Env_Item>().int_itemCount = count;
+                                        questReward.SetActive(false);
+                                        par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(questReward.name);
+                                        PlayerInventoryScript.inventory.Add(questReward);
+                                    }
+
+                                    PlayerInventoryScript.invSpace -= spaceTaken;
+
+                                    UIReuseScript.txt_PlayerInventorySpace.text = PlayerInventoryScript.invSpace.ToString();
+                                }
+                                else
+                                {
+                                    GameObject questReward = Instantiate(spawnable,
+                                                                         dialogueParent.AI.transform.position,
+                                                                         Quaternion.identity);
+
+                                    questReward.name = questReward.GetComponent<Env_Item>().str_ItemName;
+
+                                    questReward.GetComponent<Env_Item>().int_itemCount = count;
+
+                                    Debug.LogWarning("Error: Failed to add " + sides[0].Replace("_", " ") + " to players " +
+                                                     "inventory because player doesn't have enough inventory space for it!" +
+                                                     " Item was dropped on the ground.");
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         par_Managers.GetComponent<UI_AcceptedQuests>().acceptedQuests.Remove(gameObject);
         if (!canReDoQuest)
@@ -106,6 +203,12 @@ public class UI_QuestContent : MonoBehaviour
         {
             finishedSingleTimeQuestOnce = true;
             turnedInQuest = true;
+
+            if (assignedByNPC)
+            {
+                dialogueParent.dialogues.Remove(dialogue_turnInQuest);
+                dialogueParent.BuildDialogueTree();
+            }
         }
         else if (canReDoQuest)
         {
@@ -117,6 +220,13 @@ public class UI_QuestContent : MonoBehaviour
             }
 
             finishedSingleTimeQuestOnce = false;
+
+            if (assignedByNPC)
+            {
+                dialogueParent.dialogues.Add(dialogue_acceptQuest);
+                dialogueParent.dialogues.Remove(dialogue_turnInQuest);
+                dialogueParent.BuildDialogueTree();
+            }
         }
 
         if (QuestStage_Give != null)
@@ -138,6 +248,14 @@ public class UI_QuestContent : MonoBehaviour
         //this quest can never be redone
         par_Managers.GetComponent<UI_AcceptedQuests>().acceptedQuests.Remove(gameObject);
         failedQuest = true;
+
+        if (assignedByNPC)
+        {
+            dialogueParent.dialogues.Remove(dialogue_acceptQuest);
+            dialogueParent.dialogues.Remove(dialogue_turnInQuest);
+            dialogueParent.BuildDialogueTree();
+        }
+
         Debug.Log("Failed " + str_questTitle + "!");
     }
 }

@@ -53,7 +53,7 @@ public class QuestStage_General : MonoBehaviour
     {
         if (stageType == StageType.unassigned)
         {
-            Debug.LogError("Error: Unassigned questStage type!");
+            Debug.LogWarning("Error: Unassigned questStage type!");
         }
         if (stageType == StageType.goTo)
         {
@@ -92,12 +92,12 @@ public class QuestStage_General : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Incomplete stage start method or incorrectly assigned state!");
+                Debug.LogWarning("Error: Incomplete stage start method or incorrectly assigned state!");
             }
         }
         else
         {
-            Debug.LogError("This quest can't be started automatically because it requires to be started from elsewhere!");
+            Debug.LogWarning("Error: This quest can't be started automatically because it requires to be started from elsewhere!");
         }
     }
 
@@ -174,7 +174,7 @@ public class QuestStage_General : MonoBehaviour
                         }
                         else
                         {
-                            Debug.LogError("This queststage (" + Quest.str_questTitle + " [" + nextStage + "]) does not have a start yet assigned!");
+                            Debug.LogWarning("Error: This queststage (" + Quest.str_questTitle + " [" + nextStage + "]) does not have a start yet assigned!");
                         }
                         break;
                     }

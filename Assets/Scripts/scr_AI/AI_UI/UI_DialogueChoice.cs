@@ -25,7 +25,7 @@ public class UI_DialogueChoice : MonoBehaviour
     public List<GameObject> dialogues;
 
     [Header("Scripts")]
-    [SerializeField] private GameObject AI;
+    public GameObject AI;
     public UI_QuestContent QuestMenu;
     [SerializeField] private UI_RepairContent RepairMenu;
     [SerializeField] private UI_ShopContent ShopMenu;
@@ -68,7 +68,7 @@ public class UI_DialogueChoice : MonoBehaviour
                 if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
                     == UI_DialogueChoice.DialogueChoice.dialogue)
                 {
-                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("dialogue"); } );
+                    btn_new.onClick.AddListener(delegate { dialogue.GetComponent<UI_DialogueChoice>().ButtonFunction("dialogue"); });
                 }
                 //repair shop
                 else if (dialogue.GetComponent<UI_DialogueChoice>().dialogueChoice
