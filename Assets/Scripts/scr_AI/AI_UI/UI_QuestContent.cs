@@ -117,7 +117,7 @@ public class UI_QuestContent : MonoBehaviour
                     string[] sides = reward.name.Split('-');
                     int count = int.Parse(sides[1]);
 
-                    if (sides[0].Contains("money"))
+                    if (sides[0].Contains("Money"))
                     {
                         PlayerInventoryScript.money += count;
 
@@ -162,6 +162,7 @@ public class UI_QuestContent : MonoBehaviour
                                         questReward.SetActive(false);
                                         par_Managers.GetComponent<Manager_Console>().playeritemnames.Add(questReward.name);
                                         PlayerInventoryScript.inventory.Add(questReward);
+                                        questReward.transform.SetParent(PlayerInventoryScript.par_PlayerItems.transform);
                                     }
 
                                     PlayerInventoryScript.invSpace -= spaceTaken;
@@ -187,6 +188,10 @@ public class UI_QuestContent : MonoBehaviour
                             }
                         }
                     }
+                }
+                else
+                {
+                    Debug.LogWarning("Error: Failed to create " + reward.name + " because its name is invalid!");
                 }
             }
         }

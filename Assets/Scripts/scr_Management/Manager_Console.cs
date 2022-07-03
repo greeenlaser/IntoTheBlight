@@ -2190,7 +2190,9 @@ public class Manager_Console : MonoBehaviour
         {
             CreateNewConsoleLine("Error: Inserted addable item count must be a whole number!", "CONSOLE_ERROR_MESSAGE");
         }
-        else if (!isInt && isinsertedValueInt)
+        else if (!isInt 
+                 && isinsertedValueInt
+                 && itemName != "Money")
         {
             insertedValue = int.Parse(separatedWords[3]);
 
@@ -2333,6 +2335,10 @@ public class Manager_Console : MonoBehaviour
             {
                 CreateNewConsoleLine("Error: Item count must be less than 1000001!", "CONSOLE_ERROR_MESSAGE");
             }
+        }
+        else if (itemName == "Money")
+        {
+            CreateNewConsoleLine("Error: Cannot add money as an item! Use player setstat money instead!", "CONSOLE_ERROR_MESSAGE");
         }
 
         selectedItem = null;

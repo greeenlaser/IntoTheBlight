@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class UI_ShopContent : MonoBehaviour
 {
@@ -38,16 +39,67 @@ public class UI_ShopContent : MonoBehaviour
 
     private void Start()
     {
-        foreach (GameObject item in inventory)
+        if (inventory.Count > 0)
         {
-            item.GetComponent<Env_Item>().isInTraderShop = true;
-            item.GetComponent<Env_Item>().DeactivateItem();
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                GameObject item = inventory[i];
+
+                if (item.name.Contains('-'))
+                {
+                    string[] sides = item.name.Split('-');
+                    string itemName = sides[0];
+                    int count = int.Parse(sides[1]);
+
+                    GameObject spawnedItem = null;
+                    foreach (GameObject spawnable in par_Managers.GetComponent<Manager_Console>().spawnables)
+                    {
+                        if (spawnable.name == itemName)
+                        {
+                            spawnedItem = spawnable;
+                            break;
+                        }
+                    }
+                    if (spawnedItem != null)
+                    {
+                        GameObject newItem = Instantiate(spawnedItem,
+                                                         par_TraderItems.transform.position,
+                                                         Quaternion.identity);
+                        newItem.name = itemName;
+                        newItem.GetComponent<Env_Item>().int_itemCount = count;
+                        inventory.Add(newItem);
+                        newItem.transform.SetParent(par_TraderItems.transform);
+
+                        newItem.GetComponent<Env_Item>().isInTraderShop = true;
+                        newItem.GetComponent<Env_Item>().DeactivateItem();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Error: Failed to create " + itemName + " because its name is invalid!");
+                    }
+                }
+            }
+
+            List<GameObject> removables = new List<GameObject>();
+            foreach (GameObject item in inventory)
+            {
+                if (item.name.Contains('-'))
+                {
+                    removables.Add(item);
+                }
+            }
+            foreach (GameObject item in removables)
+            {
+                inventory.Remove(item);
+                Destroy(item);
+            }
         }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) && isShopOpen)
+        if (Input.GetKeyDown(KeyCode.Tab) 
+            && isShopOpen)
         {
             CloseShopAndPlayerInventory();
         }

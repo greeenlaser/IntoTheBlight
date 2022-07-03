@@ -1645,7 +1645,7 @@ public class Env_Item : MonoBehaviour
             }
         }
 
-        if (str_ItemName == "money")
+        if (str_ItemName == "Money")
         {
             PlayerInventoryScript.Container.GetComponent<Inv_Container>().inventory.Remove(gameObject);
             isInContainer = false;
