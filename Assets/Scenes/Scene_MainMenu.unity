@@ -2162,7 +2162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46034f97bd6ffa742bae6747360405e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  str_GameVersion: 0.1.1_indev
+  str_GameVersion: 0.1.1.030722
   txt_GameVersion: {fileID: 962294958}
   playerFaction: 0
   vsScientists: 0
@@ -2175,15 +2175,12 @@ MonoBehaviour:
   vsOthers: 0
   gameFactions: []
   txt_fpsValue: {fileID: 1483036526}
-  logo: {fileID: 0}
-  par_Managers: {fileID: 0}
-  tips:
-  - Try pressing P
-  - The save system supports editing.. within reason.
-  - You can shoot your gun and swing your weapon while climbing the ladder, we don't
-    know how you figured out how to do that...
-  - Jumping can be dangerous
-  - Stay away from flashing lights
+  PlayerMovementScript: {fileID: 0}
+  PauseMenuScript: {fileID: 0}
+  UIReuseScript: {fileID: 0}
+  ConsoleScript: {fileID: 0}
+  GameSavingScript: {fileID: 0}
+  GraphicsScript: {fileID: 0}
   thrownGrenades: []
 --- !u!4 &472816657
 Transform:

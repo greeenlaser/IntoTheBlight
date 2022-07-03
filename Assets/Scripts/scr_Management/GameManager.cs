@@ -63,33 +63,30 @@ public class GameManager : MonoBehaviour
 
         //get current scene index
         int sceneIndex = SceneManager.GetActiveScene().buildIndex;
-        if (str_GameVersion.Contains("indev"))
+        //show fps and game version in main scene
+        if (sceneIndex == 0)
         {
-            //show fps and game version in main scene
-            if (sceneIndex == 0)
-            {
-                txt_GameVersion.transform.localPosition -= new Vector3(0, 75, 0);
-                txt_fpsValue.transform.localPosition -= new Vector3(0, 125, 0);
-            }
-            //show debug menu in game scene
-            else if (sceneIndex == 1)
-            {
-                PauseMenuScript.PauseGame();
-                UIReuseScript.LoadUIManager();
-                ConsoleScript.LoadConsole();
+            txt_GameVersion.transform.localPosition -= new Vector3(0, 75, 0);
+            txt_fpsValue.transform.localPosition -= new Vector3(0, 125, 0);
+        }
+        //show debug menu in game scene
+        else if (sceneIndex == 1)
+        {
+            PauseMenuScript.PauseGame();
+            UIReuseScript.LoadUIManager();
+            ConsoleScript.LoadConsole();
 
-                Manager_Console ConsoleScipt = GetComponent<Manager_Console>();
-                ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
-                ConsoleScipt.CreateNewConsoleLine("", "CONSOLE_INFO_MESSAGE");
-                ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---", "CONSOLE_INFO_MESSAGE");
+            Manager_Console ConsoleScipt = GetComponent<Manager_Console>();
+            ConsoleScipt.CreateNewConsoleLine("---GAME VERSION: " + GetComponent<GameManager>().str_GameVersion + "---", "CONSOLE_INFO_MESSAGE");
+            ConsoleScipt.CreateNewConsoleLine("", "CONSOLE_INFO_MESSAGE");
+            ConsoleScipt.CreateNewConsoleLine("---Type help to list all game commands---", "CONSOLE_INFO_MESSAGE");
 
-                GetComponent<Manager_Console>().Command_ToggleDebugMenu();
+            GetComponent<Manager_Console>().Command_ToggleDebugMenu();
 
-                PlayerMovementScript.LoadPlayer();
+            PlayerMovementScript.LoadPlayer();
 
-                GameSavingScript.LoadSaveData();
-                GraphicsScript.LoadData();
-            }
+            GameSavingScript.LoadSaveData();
+            GraphicsScript.LoadData();
         }
     }
 
