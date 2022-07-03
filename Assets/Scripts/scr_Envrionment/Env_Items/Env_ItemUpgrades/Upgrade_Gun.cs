@@ -116,7 +116,7 @@ public class Upgrade_Gun : MonoBehaviour
                 {
                     gunScript.maxClipSize = int.Parse(upgradeValue);
 
-                    GameObject ammo = null;
+                    GameObject ammo;
                     if (gunScript.ammoClip != null)
                     {
                         ammo = gunScript.ammoClip;
@@ -205,7 +205,6 @@ public class Upgrade_Gun : MonoBehaviour
                 //update UI
                 par_Managers.GetComponent<Manager_UIReuse>().ClearStatsUI();
                 par_Managers.GetComponent<Manager_UIReuse>().ClearInventoryUI();
-                par_Managers.GetComponent<Manager_UIReuse>().RebuildPlayerInventory();
 
                 par_Managers.GetComponent<Manager_UIReuse>().txt_InventoryName.text = "Player inventory";
 
