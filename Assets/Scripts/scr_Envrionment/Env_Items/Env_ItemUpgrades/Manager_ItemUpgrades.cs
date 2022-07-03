@@ -79,42 +79,45 @@ public class Manager_ItemUpgrades : MonoBehaviour
             //get each script
             foreach (Transform script in transform)
             {
-                //look for upgrade type
-                if ((btn.GetComponentInChildren<TMP_Text>().text == "Fire type"
-                    && script.name.Contains("FireType")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade)
-
-                    || (btn.GetComponentInChildren<TMP_Text>().text == "Firerate"
-                    && script.name.Contains("Firerate")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade)
-
-                    || (btn.GetComponentInChildren<TMP_Text>().text == "Accuracy"
-                    && script.name.Contains("Accuracy")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade)
-
-                    || (btn.GetComponentInChildren<TMP_Text>().text == "Bullet drop"
-                    && script.name.Contains("BulletDrop")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade)
-
-                    || (btn.GetComponentInChildren<TMP_Text>().text == "Clip size"
-                    && script.name.Contains("ClipSize")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade)
-
-                    || (btn.GetComponentInChildren<TMP_Text>().text == "Ammo type"
-                    && script.name.Contains("AmmoType")
-                    && !script.GetComponent<Upgrade_Gun>().unlockedUpgrade))
+                if (script.GetComponent<Upgrade_Gun>() != null)
                 {
-                    btn.GetComponent<UI_UpgradeButtonTooltip>().target = script.gameObject;
+                    Upgrade_Gun gunUpradeScript = script.GetComponent<Upgrade_Gun>();
+                    int tier = gunUpradeScript.upgradeTier;
 
-                    btn.interactable = true;
-
-                    if (PlayerInventoryScript.equippedGun != script.parent.gameObject)
+                    if (tier < gunUpradeScript.maxTier)
                     {
-                        script.parent.gameObject.SetActive(true);
-                    }
+                        //look for upgrade type
+                        if ((btn.GetComponentInChildren<TMP_Text>().text == "Fire type"
+                            && script.name.Contains("FireType"))
 
-                    btn.onClick.AddListener(script.GetComponent<Upgrade_Gun>().UpgradeGun);
-                    break;
+                            || (btn.GetComponentInChildren<TMP_Text>().text == "Firerate"
+                            && script.name.Contains("Firerate"))
+
+                            || (btn.GetComponentInChildren<TMP_Text>().text == "Accuracy"
+                            && script.name.Contains("Accuracy"))
+
+                            || (btn.GetComponentInChildren<TMP_Text>().text == "Bullet drop"
+                            && script.name.Contains("BulletDrop"))
+
+                            || (btn.GetComponentInChildren<TMP_Text>().text == "Clip size"
+                            && script.name.Contains("ClipSize"))
+
+                            || (btn.GetComponentInChildren<TMP_Text>().text == "Ammo type"
+                            && script.name.Contains("AmmoType")))
+                        {
+                            btn.GetComponent<UI_UpgradeButtonTooltip>().target = script.gameObject;
+
+                            btn.interactable = true;
+
+                            if (PlayerInventoryScript.equippedGun != script.parent.gameObject)
+                            {
+                                script.parent.gameObject.SetActive(true);
+                            }
+
+                            btn.onClick.AddListener(script.GetComponent<Upgrade_Gun>().UpgradeGun);
+                            break;
+                        }
+                    }
                 }
             }
         }
