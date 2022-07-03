@@ -130,6 +130,9 @@ public class Upgrade_Gun : MonoBehaviour
                                 item.GetComponent<Env_Item>().int_itemCount += removedAmount;
 
                                 par_Managers.GetComponent<Manager_UIReuse>().ClearWeaponUI();
+                                par_Managers.GetComponent<Manager_UIReuse>().durability = gunScript.durability;
+                                par_Managers.GetComponent<Manager_UIReuse>().maxDurability = gunScript.maxDurability;
+                                par_Managers.GetComponent<Manager_UIReuse>().UpdateWeaponQuality();
 
                                 break;
                             }
