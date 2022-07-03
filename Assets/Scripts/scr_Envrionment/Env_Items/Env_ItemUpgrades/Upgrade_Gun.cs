@@ -222,26 +222,9 @@ public class Upgrade_Gun : MonoBehaviour
             }
         }
 
-        StartCoroutine(UpdateTooltip());
-
-        UpgradeManagerScript.UpdateWeaponUpgradeButtons();
-    }
-
-    //simple update for tooltip when selected ability data updates
-    private IEnumerator UpdateTooltip()
-    {
         TooltipScript.showTooltipUI = false;
 
-        yield return new WaitForSecondsRealtime(0.05f);
-
-        ShowTooltipText();
-
-        yield return new WaitForSeconds(0.05f);
-
-        if (PlayerInventoryScript.equippedGun != transform.parent.gameObject)
-        {
-            transform.parent.gameObject.SetActive(false);
-        }
+        UpgradeManagerScript.UpdateWeaponUpgradeButtons();
     }
 
     public void ShowTooltipText()

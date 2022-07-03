@@ -65,7 +65,7 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 || (upgradeStatus == 2
                 && AbilityManagerScript.upgradeCellCount >= cost_tier3)))
             {
-                StartCoroutine(UpdateTooltip());
+                TooltipScript.showTooltipUI = false;
             }
             //assign this ability to selected slot in assign ui
             else
@@ -73,7 +73,7 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 int newAbility = AbilityManagerScript.abilities.IndexOf(gameObject);
                 AbilityManagerScript.AssignToSlot(selectedSlot, newAbility);
 
-                StartCoroutine(UpdateTooltip());
+                TooltipScript.showTooltipUI = false;
             }
         }
     }
@@ -165,15 +165,6 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         AbilityManagerScript.ShowUpgradeButtonPositions();
     }
 
-    //simple update for tooltip when selected ability data updates
-    private IEnumerator UpdateTooltip()
-    {
-        TooltipScript.showTooltipUI = false;
-
-        yield return new WaitForSecondsRealtime(0.05f);
-
-        ShowTooltipText();
-    }
     //shows the actual tooltip ui
     private void ShowTooltipText()
     {
