@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("Assignables")]
     public string abilityName;
-    [TextArea(10, 10)]
+    [TextArea(5, 5)]
     [SerializeField] private string abilityDescription;
-    public int cost_unlock;
-    public int cost_tier2;
-    public int cost_tier3;
     [SerializeField] private float cooldownTime;
-    [SerializeField] private float reuseTime;
     public Ability ability;
     public enum Ability
     {
@@ -26,29 +23,115 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     }
     public Transform pos_Assign;
     public Transform pos_Upgrade;
+
+    [Header("Tier 1")]
+    [Range(0, 10)]
+    [SerializeField] private float boost1_1;
+    [Range(0, 10)]
+    [SerializeField] private float boost1_2;
+    public int cost_unlock;
     public RawImage img_Tier1;
+
+    [Header("Tier 2")]
+    [Range(0, 10)]
+    [SerializeField] private float boost2_1;
+    [Range(0, 10)]
+    [SerializeField] private float boost2_2;
+    public int cost_tier2;
     public RawImage img_Tier2;
+
+    [Header("Tier 3")]
+    [Range(0, 10)]
+    [SerializeField] private float boost3_1;
+    [Range(0, 10)]
+    [SerializeField] private float boost3_2;
+    public int cost_tier3;
     public RawImage img_Tier3;
 
     [Header("Scripts")]
     [SerializeField] private UI_Tooltip TooltipScript;
+    [SerializeField] private Player_Movement PlayerMovementScript;
+    [SerializeField] private Player_Health PlayerHealthScript;
     [SerializeField] private Inv_Player PlayerInventoryScript;
     [SerializeField] private GameObject par_Managers;
 
     //public but hidden variables
     [HideInInspector] public bool isCooldownTimeRunning;
-    [HideInInspector] public bool isReuseTimeRunning;
     [HideInInspector] public int upgradeStatus;
     [HideInInspector] public int assignStatus;
     [HideInInspector] public int selectedSlot;
 
     //private variables
+    private bool usingAbility;
+    private bool calledAbilityBoostOnce;
+    private float remainder;
+    private float boost_1;
+    private float boost_2;
     private GameObject upgradeCell;
+    private TMP_Text targetText;
     private UI_AbilityManager AbilityManagerScript;
+    private Manager_UIReuse UIReuseScript;
 
     private void Start()
     {
         AbilityManagerScript = par_Managers.GetComponentInChildren<UI_AbilityManager>();
+        UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
+
+        remainder = cooldownTime;
+    }
+
+    private void Update()
+    {
+        if (isCooldownTimeRunning
+            && remainder > 0)
+        {
+            if (targetText == null)
+            {
+                if (assignStatus == 1)
+                {
+                    UIReuseScript.txt_cooldownTimer1.text = cooldownTime.ToString();
+                    targetText = UIReuseScript.txt_cooldownTimer1;
+                }
+                else if (assignStatus == 2)
+                {
+                    UIReuseScript.txt_cooldownTimer2.text = cooldownTime.ToString();
+                    targetText = UIReuseScript.txt_cooldownTimer2;
+                }
+                else if (assignStatus == 3)
+                {
+                    UIReuseScript.txt_cooldownTimer3.text = cooldownTime.ToString();
+                    targetText = UIReuseScript.txt_cooldownTimer3;
+                }
+            }   
+
+            remainder -= 1 * Time.deltaTime;
+            targetText.text = Mathf.FloorToInt(remainder +1).ToString();
+
+            if (!usingAbility)
+            {
+                usingAbility = true;
+            }
+
+            AssignBuffs();
+        }
+        else if (isCooldownTimeRunning
+                 && remainder <= 0)
+        {
+            if (assignStatus == 1)
+            {
+                UIReuseScript.txt_cooldownTimer1.text = "0";
+            }
+            else if (assignStatus == 2)
+            {
+                UIReuseScript.txt_cooldownTimer2.text = "0";
+            }
+            else if (assignStatus == 3)
+            {
+                UIReuseScript.txt_cooldownTimer3.text = "0";
+            }
+
+            RemoveBuffs();
+        }
     }
 
     //assigns or unlocks/upgrades this ability when clicked
@@ -88,10 +171,78 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         TooltipScript.showTooltipUI = false;
     }
 
+    //assign the buffs from this ability to player
+    private void AssignBuffs()
+    {
+        if (ability == Ability.jumpBoost
+            && !calledAbilityBoostOnce)
+        {
+            PlayerMovementScript.jumpBuff += boost_1;
+            PlayerHealthScript.fallProtection += boost_2;
+            calledAbilityBoostOnce = true;
+        }
+        else if (ability == Ability.sprintBoost
+                 && !calledAbilityBoostOnce)
+        {
+            PlayerMovementScript.sprintBuff += boost_1;
+            calledAbilityBoostOnce = true;
+        }
+        else if (ability == Ability.healthRegenBoost)
+        {
+            if (PlayerHealthScript.health < PlayerHealthScript.maxHealth)
+            {
+                PlayerHealthScript.health += boost_1 * Time.deltaTime;
+                UIReuseScript.health = PlayerHealthScript.health;
+                UIReuseScript.maxHealth = PlayerHealthScript.maxHealth;
+                UIReuseScript.UpdatePlayerHealth();
+            }
+        }
+        else if (ability == Ability.staminaRegenBoost)
+        {
+            if (PlayerMovementScript.currentStamina < PlayerMovementScript.maxStamina)
+            {
+                PlayerMovementScript.currentStamina += boost_1 * Time.deltaTime;
+                UIReuseScript.stamina = PlayerMovementScript.currentStamina;
+                UIReuseScript.maxStamina = PlayerMovementScript.maxStamina;
+                UIReuseScript.UpdatePlayerStamina();
+            }
+        }
+        else if (ability == Ability.envProtectionBoost
+                 && !calledAbilityBoostOnce)
+        {
+            PlayerHealthScript.psyProtection += boost_1;
+            PlayerHealthScript.radProtection += boost_2;
+        }
+    }
+    //remove the buffs of this ability from player
+    private void RemoveBuffs()
+    {
+        if (ability == Ability.jumpBoost)
+        {
+            PlayerMovementScript.jumpBuff -= boost_1;
+            PlayerHealthScript.fallProtection -= boost_2;
+        }
+        else if (ability == Ability.sprintBoost)
+        {
+            PlayerMovementScript.sprintBuff -= boost_1;
+        }
+        else if (ability == Ability.envProtectionBoost)
+        {
+            PlayerHealthScript.psyProtection -= boost_1;
+            PlayerHealthScript.radProtection -= boost_2;
+        }
+
+        isCooldownTimeRunning = false;
+        calledAbilityBoostOnce = false;
+        usingAbility = false;
+
+        remainder = cooldownTime;
+    }
     //use this ability
     public void UseAbility()
     {
         Debug.Log("Using ability " + abilityName + " in slot " + assignStatus + ".");
+        StartCoroutine(AbilityCooldown());
     }
     //unlock or upgrade this ability
     public void UnlockOrUpgradeAbility()
@@ -111,6 +262,9 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         if (upgradeStatus == 1)
         {
+            boost_1 = boost1_1;
+            boost_2 = boost1_2;
+
             if (AbilityManagerScript.upgradeCellCount > cost_unlock)
             {
                 upgradeCell.GetComponent<Env_Item>().int_itemCount -= cost_unlock;
@@ -128,6 +282,9 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
         else if (upgradeStatus == 2)
         {
+            boost_1 = boost2_1;
+            boost_2 = boost2_2;
+
             if (AbilityManagerScript.upgradeCellCount > cost_tier2)
             {
                 upgradeCell.GetComponent<Env_Item>().int_itemCount -= cost_tier2;
@@ -145,6 +302,9 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
         else if (upgradeStatus == 3)
         {
+            boost_1 = boost3_1;
+            boost_2 = boost3_2;
+
             if (AbilityManagerScript.upgradeCellCount > cost_tier3)
             {
                 upgradeCell.GetComponent<Env_Item>().int_itemCount -= cost_tier3;
@@ -224,5 +384,12 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         tooltipText += "\n" + "Tier: " + upgradeStatus;
         TooltipScript.SetText(tooltipText);
+    }
+
+    private IEnumerator AbilityCooldown()
+    {
+        isCooldownTimeRunning = true;
+        yield return new WaitForSeconds(cooldownTime);
+        isCooldownTimeRunning = false;
     }
 }

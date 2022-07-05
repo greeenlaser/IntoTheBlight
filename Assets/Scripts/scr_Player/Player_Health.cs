@@ -20,6 +20,9 @@ public class Player_Health : MonoBehaviour
     [HideInInspector] public float health;
     [HideInInspector] public float mentalState;
     [HideInInspector] public float radiation;
+    [HideInInspector] public float fallProtection;
+    [HideInInspector] public float psyProtection;
+    [HideInInspector] public float radProtection;
     [HideInInspector] public List<GameObject> elementalDamageDealers;
 
     //private variables
@@ -103,17 +106,23 @@ public class Player_Health : MonoBehaviour
         if (damageAmount > 0
             && damageDealer != "")
         {
-            if (damageType == "fall"
-            || damageType == "melee"
-            || damageType == "fragmentation"
-            || damageType == "plasma"
-            || damageType == "fire"
-            || damageType == "electricity"
-            || damageType == "gas")
+            if (damageType == "gravity"
+                || damageType == "melee"
+                || damageType == "fragmentation"
+                || damageType == "plasma"
+                || damageType == "fire"
+                || damageType == "electricity"
+                || damageType == "gas")
             {
-                if (health - damageAmount > 0)
+                float damageDealt = damageAmount;
+                if (damageType == "gravity")
                 {
-                    health -= damageAmount;
+                    damageDealt /= fallProtection;
+                }
+
+                if (health - damageDealt > 0)
+                {
+                    health -= Mathf.FloorToInt(damageDealt);
                 }
                 else
                 {
@@ -129,7 +138,7 @@ public class Player_Health : MonoBehaviour
             {
                 if (damageAmount + radiation < maxRadiation)
                 {
-                    radiation += damageAmount;
+                    radiation += Mathf.FloorToInt(damageAmount / radProtection);
                 }
                 else
                 {
@@ -145,12 +154,12 @@ public class Player_Health : MonoBehaviour
             {
                 if (mentalState - damageAmount > 0)
                 {
-                    mentalState -= damageAmount;
+                    mentalState -= Mathf.FloorToInt(damageAmount / psyProtection);
                 }
                 else
                 {
                     mentalState = 0;
-                    Death("You went insane trying to uncover the secrets of the reactor and the wasteland...");
+                    Death("You went insane trying to uncover the secrets of the wasteland...");
                 }
 
                 UIScript.mentalState = mentalState;

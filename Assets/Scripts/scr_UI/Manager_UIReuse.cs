@@ -151,6 +151,9 @@ public class Manager_UIReuse : MonoBehaviour
     public TMP_Text txt_UpgradeCellCount;
     public GameObject par_AbilityUI;
     public GameObject par_AssingedAbilityButtonUI;
+    public TMP_Text txt_cooldownTimer1;
+    public TMP_Text txt_cooldownTimer2;
+    public TMP_Text txt_cooldownTimer3;
 
     [Header("Factions")]
     [SerializeField] private TMP_Text txt_factionRepTemplate;

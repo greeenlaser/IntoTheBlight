@@ -79,22 +79,32 @@ public class Manager_Console : MonoBehaviour
     private bool startedWait;
     private string lastOutput;
     private string output;
+    private string path;
     private string debugFilePath;
-    private string debugNewFilePath;
 
     //load console data at the beginning of the game
     public void LoadConsole()
     {
-        debugFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\DebugFiles";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+
+        DirectoryInfo dir = new DirectoryInfo(path);
+        FileInfo[] files = dir.GetFiles();
+        foreach (FileInfo file in files)
+        {
+            if (file.Name.Contains("DebugFile_"))
+            {
+                file.Delete();
+            }
+        }
 
         string date = DateTime.Now.ToString();
         string replaceSlash = date.Replace('/', '_');
         string replaceColon = replaceSlash.Replace(':', '_');
         string replaceEmpty = replaceColon.Replace(' ', '_');
-        debugNewFilePath = debugFilePath + @"\DebugFile_" + replaceEmpty + ".txt";
+        debugFilePath = path + @"\DebugFile_" + replaceEmpty + ".txt";
 
         //using a text editor to write new text to new debug file in the debug file path
-        using StreamWriter debugFile = File.CreateText(debugNewFilePath);
+        using StreamWriter debugFile = File.CreateText(debugFilePath);
 
         debugFile.WriteLine("Debug information file for Lights Off Version " + par_Managers.GetComponent<GameManager>().str_GameVersion);
         debugFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
@@ -647,7 +657,7 @@ public class Manager_Console : MonoBehaviour
             newConsoleText.GetComponent<TMP_Text>().text = date + " " + message;
 
             //using a text editor to write new text to new debug file in the debug file path
-            using StreamWriter debugFile = File.AppendText(debugNewFilePath);
+            using StreamWriter debugFile = File.AppendText(debugFilePath);
 
             if (message != "")
             {

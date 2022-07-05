@@ -117,8 +117,7 @@ public class UI_AbilityManager : MonoBehaviour
 
         //if a valid ability is assigned and it is not in use
         if (slots[slot - 1].GetComponent<UI_Ability>() != null
-            && !slots[slot - 1].GetComponent<UI_Ability>().isCooldownTimeRunning
-            && !slots[slot - 1].GetComponent<UI_Ability>().isReuseTimeRunning)
+            && !slots[slot - 1].GetComponent<UI_Ability>().isCooldownTimeRunning)
         {
             UI_Ability ability = slots[slot - 1].GetComponent<UI_Ability>();
 
@@ -136,9 +135,23 @@ public class UI_AbilityManager : MonoBehaviour
             || (slots[slot - 1] != null
             && slots[slot - 1].GetComponent<UI_Ability>() == null))
         {
-            newAbility.assignStatus = slot;
+            newAbility.assignStatus = slot -1;
 
-            //Debug.Log("Assigned " + newAbility.abilityName + " to slot " + slot + ".");
+            int abilitySlot = slots.IndexOf(slots[slot -1]);
+            if (abilitySlot == 0)
+            {
+                UIReuseScript.txt_cooldownTimer1.text = "0";
+            }
+            else if (abilitySlot == 1)
+            {
+                UIReuseScript.txt_cooldownTimer2.text = "0";
+            }
+            else if (abilitySlot == 2)
+            {
+                UIReuseScript.txt_cooldownTimer3.text = "0";
+            }
+
+            Debug.Log("Added " + newAbility.abilityName + " to slot " + slots.IndexOf(slots[slot -1]) + "!");
 
             FillEmptyAbilitySlots();
         }
@@ -149,8 +162,7 @@ public class UI_AbilityManager : MonoBehaviour
             UI_Ability oldAbility = slots[slot - 1].GetComponent<UI_Ability>();
 
             //if old ability is still in use
-            if (oldAbility.isCooldownTimeRunning
-                || oldAbility.isReuseTimeRunning)
+            if (oldAbility.isCooldownTimeRunning)
             {
                 string oldAbilityName = oldAbility.abilityName;
                 string newAbilityName = newAbility.abilityName;
@@ -159,8 +171,38 @@ public class UI_AbilityManager : MonoBehaviour
             //if old ability is no longer in use
             else
             {
-                oldAbility.assignStatus = 0;
+                oldAbility.assignStatus = -1;
                 newAbility.assignStatus = slot;
+
+                int oldAbilitySlot = slots.IndexOf(slots[slot -1]);
+                if (oldAbilitySlot == 0)
+                {
+                    UIReuseScript.txt_cooldownTimer1.text = "";
+                }
+                else if (oldAbilitySlot == 1)
+                {
+                    UIReuseScript.txt_cooldownTimer2.text = "";
+                }
+                else if (oldAbilitySlot == 2)
+                {
+                    UIReuseScript.txt_cooldownTimer3.text = "";
+                }
+
+                int abilitySlot = slots.IndexOf(slots[slot -1]);
+                if (abilitySlot == 0)
+                {
+                    UIReuseScript.txt_cooldownTimer1.text = "0";
+                }
+                else if (abilitySlot == 1)
+                {
+                    UIReuseScript.txt_cooldownTimer2.text = "0";
+                }
+                else if (abilitySlot == 2)
+                {
+                    UIReuseScript.txt_cooldownTimer3.text = "0";
+                }
+
+                Debug.Log("Moved " + oldAbility.abilityName + " from slot " + slots.IndexOf(slots[oldAbilitySlot - 1]) + " to new slot " + slots.IndexOf(slots[slot - 1]) + "!");
 
                 //Debug.Log("Assigned " + newAbility.abilityName + " to slot " + slot + ".");
 
@@ -298,8 +340,7 @@ public class UI_AbilityManager : MonoBehaviour
             else if (upgradeCell != null
                      && abilityScript.upgradeStatus == 1
                      && upgradeCellCount >= abilityScript.cost_tier2
-                     && !abilityScript.isCooldownTimeRunning
-                     && !abilityScript.isReuseTimeRunning)
+                     && !abilityScript.isCooldownTimeRunning)
             {
                 abilityScript.GetComponent<Button>().interactable = true;
 
@@ -308,8 +349,7 @@ public class UI_AbilityManager : MonoBehaviour
             else if (upgradeCell != null
                      && abilityScript.upgradeStatus == 2
                      && upgradeCellCount >= abilityScript.cost_tier3
-                     && !abilityScript.isCooldownTimeRunning
-                     && !abilityScript.isReuseTimeRunning)
+                     && !abilityScript.isCooldownTimeRunning)
             {
                 abilityScript.GetComponent<Button>().interactable = true;
 

@@ -41,12 +41,6 @@ public class UI_MainMenu : MonoBehaviour
         {
             Directory.CreateDirectory(gamePath);
         }
-        //create debug files directory
-        string debugFilesPath = gamePath + @"\DebugFiles";
-        if (!Directory.Exists(debugFilesPath))
-        {
-            Directory.CreateDirectory(debugFilesPath);
-        }
         //create game save directory
         gameSavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
         if (!Directory.Exists(gameSavePath))

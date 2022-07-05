@@ -80,6 +80,13 @@ public class Player_Movement : MonoBehaviour
     private float closestDistance;
     private string cellName;
 
+    private Manager_UIReuse UIReuseManager;
+
+    private void Awake()
+    {
+        UIReuseManager = par_Managers.GetComponent<Manager_UIReuse>();
+    }
+
     //load player data at the beginning of the game
     public void LoadPlayer()
     {
@@ -95,24 +102,24 @@ public class Player_Movement : MonoBehaviour
 
         alphaValue = 255;
 
-        par_Managers.GetComponent<Manager_UIReuse>().stamina = currentStamina;
-        par_Managers.GetComponent<Manager_UIReuse>().maxStamina = maxStamina;
-        par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+        UIReuseManager.stamina = currentStamina;
+        UIReuseManager.maxStamina = maxStamina;
+        UIReuseManager.UpdatePlayerStamina();
 
         nc_moveSpeed = walkSpeed * 2.5f;
     }
 
     private void Update()
     {
-        if (par_Managers.GetComponent<Manager_UIReuse>().stamina != currentStamina)
+        if (UIReuseManager.stamina != currentStamina)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().stamina = currentStamina;
-            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+            UIReuseManager.stamina = currentStamina;
+            UIReuseManager.UpdatePlayerStamina();
         }
-        if (par_Managers.GetComponent<Manager_UIReuse>().maxStamina != maxStamina)
+        if (UIReuseManager.maxStamina != maxStamina)
         {
-            par_Managers.GetComponent<Manager_UIReuse>().maxStamina = maxStamina;
-            par_Managers.GetComponent<Manager_UIReuse>().UpdatePlayerStamina();
+            UIReuseManager.maxStamina = maxStamina;
+            UIReuseManager.UpdatePlayerStamina();
         }
 
         if (canMove
@@ -121,7 +128,9 @@ public class Player_Movement : MonoBehaviour
             if (!isNoclipping)
             {
                 //check if player is grounded
-                if (Physics.CheckSphere(checkSphere.transform.position, groundDistance, groundMask))
+                if (Physics.CheckSphere(checkSphere.transform.position, 
+                                        groundDistance, 
+                                        groundMask))
                 {
                     isGrounded = true;
                     //Debug.Log("Player is grounded!");
@@ -151,7 +160,8 @@ public class Player_Movement : MonoBehaviour
     private void PlayerRegularMovement()
     {
         //gravity if player is grounded
-        if (velocity.y < 0 && isGrounded)
+        if (velocity.y < 0 
+            && isGrounded)
         {
             //get smallest velocity
             if (velocity.y < minVelocity)
@@ -195,7 +205,9 @@ public class Player_Movement : MonoBehaviour
         Vector3 horizontalVelocity = transform.right * x + transform.forward * z;
 
         //sprinting
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canSprint && currentStamina >= 0.1f)
+        if (Input.GetKeyDown(KeyCode.LeftShift) 
+            && canSprint 
+            && currentStamina >= 0.1f)
         {
             staminaCooldown = 0;
             isSprinting = true;
@@ -204,7 +216,8 @@ public class Player_Movement : MonoBehaviour
         {
             isSprinting = false;
         }
-        if (isSprinting && horizontalVelocity.magnitude > 0.3f)
+        if (isSprinting 
+            && horizontalVelocity.magnitude > 0.3f)
         {
             //Debug.Log("Player is sprinting!");
 
@@ -228,7 +241,8 @@ public class Player_Movement : MonoBehaviour
             }
         }
         //force-disables sprinting if the player is no longer moving but still holding down sprint key
-        else if (isSprinting && horizontalVelocity.magnitude < 0.3f)
+        else if (isSprinting
+                 && horizontalVelocity.magnitude < 0.3f)
         {
             isSprinting = false;
         }
@@ -278,9 +292,13 @@ public class Player_Movement : MonoBehaviour
         }
 
         //jumping
-        if (Input.GetKey(KeyCode.Space) && isGrounded && !isJumping && canJump && currentStamina >= 5)
+        if (Input.GetKey(KeyCode.Space) 
+            && isGrounded 
+            && !isJumping 
+            && canJump 
+            && currentStamina >= 5)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -5.2f * gravity + jumpBuff);
+            velocity.y = Mathf.Sqrt(jumpHeight * -5.2f * gravity + (jumpBuff * 100));
             controller.stepOffset = 0;
             currentStamina -= 5;
             isJumping = true;
@@ -292,7 +310,9 @@ public class Player_Movement : MonoBehaviour
         }
 
         //crouching
-        if (Input.GetKeyDown(KeyCode.LeftControl) && isGrounded && canCrouch)
+        if (Input.GetKeyDown(KeyCode.LeftControl) 
+            && isGrounded 
+            && canCrouch)
         {
             isCrouching = !isCrouching;
 
@@ -359,22 +379,29 @@ public class Player_Movement : MonoBehaviour
         if (!isGrounded)
         {
             //pressing either W or S while the other isnt being pressed and while player is not grounded
-            if ((Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S)) || (!Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.S)))
+            if ((Input.GetKey(KeyCode.W) 
+                && !Input.GetKey(KeyCode.S)) 
+                || (!Input.GetKey(KeyCode.W) 
+                && Input.GetKey(KeyCode.S)))
             {
                 //ladder SFX is played while not climbing ladder and while not playing any SFX
-                if (!isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                if (!isPlayingLadderSFX 
+                    && !ladderAudioSource.isPlaying)
                 {
                     PlayLadderSFX();
                 }
                 //another ladder SFX is played while already climbing ladder and while not playing any SFX
-                else if (isPlayingLadderSFX && !ladderAudioSource.isPlaying)
+                else if (isPlayingLadderSFX 
+                         && !ladderAudioSource.isPlaying)
                 {
                     PlayOtherLadderSFX();
                 }
             }
             //if player is no longer pressing W and S
             //then ladder SFX is stopped if ladder SFX is currently playing
-            else if (!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S) && isPlayingLadderSFX)
+            else if (!Input.GetKey(KeyCode.W) 
+                     && !Input.GetKey(KeyCode.S) 
+                     && isPlayingLadderSFX)
             {
                 ladderAudioSource.Stop();
                 isPlayingLadderSFX = false;
@@ -382,15 +409,19 @@ public class Player_Movement : MonoBehaviour
 
             //if player presses space while not grounded
             //then player has basic jump
-            else if (Input.GetKeyDown(KeyCode.Space) && currentStamina > 5)
+            else if (Input.GetKeyDown(KeyCode.Space) 
+                && currentStamina > 5)
             {
                 //jump up 0.5 meters
-                transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
+                transform.position = new Vector3(transform.position.x, 
+                                                 transform.position.y + 0.5f, 
+                                                 transform.position.z);
                 currentStamina -= 5;
             }
             //if player is not grounded but presses A or D
             //then the ladder SFX will stop and player is no longer climbing ladder
-            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+            else if (Input.GetKeyDown(KeyCode.A) 
+                     || Input.GetKeyDown(KeyCode.D))
             {
                 if (isPlayingLadderSFX)
                 {
@@ -404,11 +435,11 @@ public class Player_Movement : MonoBehaviour
         //if player is grounded and presses space/A/D
         //then the ladder SFX will stop and player is no longer climbing ladder
         else if (isGrounded
-                && !facingOtherLadderSide
-                && (Input.GetKey(KeyCode.Space)
-                || Input.GetKey(KeyCode.A)
-                || Input.GetKey(KeyCode.S)
-                || Input.GetKey(KeyCode.D)))
+                 && !facingOtherLadderSide
+                 && (Input.GetKey(KeyCode.Space)
+                 || Input.GetKey(KeyCode.A)
+                 || Input.GetKey(KeyCode.S)
+                 || Input.GetKey(KeyCode.D)))
         {
             if (isPlayingLadderSFX)
             {
@@ -419,11 +450,11 @@ public class Player_Movement : MonoBehaviour
             //Debug.Log("Stopped climbing ladder.");
         }
         else if (isGrounded
-                && facingOtherLadderSide
-                && (Input.GetKey(KeyCode.Space)
-                || Input.GetKey(KeyCode.A)
-                || Input.GetKey(KeyCode.W)
-                || Input.GetKey(KeyCode.D)))
+                 && facingOtherLadderSide
+                 && (Input.GetKey(KeyCode.Space)
+                 || Input.GetKey(KeyCode.A)
+                 || Input.GetKey(KeyCode.W)
+                 || Input.GetKey(KeyCode.D)))
         {
             if (isPlayingLadderSFX)
             {
@@ -474,7 +505,7 @@ public class Player_Movement : MonoBehaviour
     {
         float damageDealt = Mathf.Round(Mathf.Abs(velocity.y * 1.2f) * 10) / 10;
 
-        PlayerHealthScript.DealDamage("Player falling", "fall", damageDealt);
+        PlayerHealthScript.DealDamage("Ground", "gravity", damageDealt);
 
         if (damageDealt >= PlayerHealthScript.health)
         {
@@ -492,8 +523,8 @@ public class Player_Movement : MonoBehaviour
         {
             gameObject.GetComponent<CharacterController>().Move(new Vector3(0, 0, 0));
 
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, 255);
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.transform.localPosition = new Vector3(0, 0, 0);
+            UIReuseManager.bgr_PlayerStun.color = new Color32(255, 255, 255, 255);
+            UIReuseManager.bgr_PlayerStun.transform.localPosition = new Vector3(0, 0, 0);
 
             StartCoroutine(Stunned());
         }
@@ -505,13 +536,13 @@ public class Player_Movement : MonoBehaviour
         while (alphaValue > 0)
         {
             alphaValue -= 1;
-            par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, (byte)alphaValue);
+            UIReuseManager.bgr_PlayerStun.color = new Color32(255, 255, 255, (byte)alphaValue);
             //Debug.Log(alphaValue);
             yield return new WaitForSeconds(0.01f);
         }
 
-        par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.color = new Color32(255, 255, 255, 0);
-        par_Managers.GetComponent<Manager_UIReuse>().bgr_PlayerStun.transform.localPosition = new Vector3(0, -1200, 0);
+        UIReuseManager.bgr_PlayerStun.color = new Color32(255, 255, 255, 0);
+        UIReuseManager.bgr_PlayerStun.transform.localPosition = new Vector3(0, -1200, 0);
 
         alphaValue = 255;
 
