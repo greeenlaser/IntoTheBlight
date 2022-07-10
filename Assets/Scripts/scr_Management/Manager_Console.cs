@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Manager_Console : MonoBehaviour
 {
@@ -842,7 +843,14 @@ public class Manager_Console : MonoBehaviour
     //loads newest save if save was found, otherwise restarts scene
     private void Command_Restart()
     {
-        par_Managers.GetComponent<Manager_GameSaving>().GetLoadFile("");
+        string loadFilePath = path + @"\LoadFile.txt";
+
+        //using a text editor to write text to the game save file in the saved file path
+        using StreamWriter loadFile = File.CreateText(loadFilePath);
+
+        loadFile.WriteLine("true");
+
+        SceneManager.LoadScene(1);
     }
     //deletes all saves
     private void Command_DeleteAllSaves()

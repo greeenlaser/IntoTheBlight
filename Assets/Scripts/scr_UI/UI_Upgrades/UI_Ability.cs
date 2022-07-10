@@ -323,6 +323,8 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         AbilityManagerScript.LoadUI();
         AbilityManagerScript.ShowUpgradeButtonPositions();
+
+        Debug.Log("Upgraded " + abilityName + " to level " + upgradeStatus + "!");
     }
 
     //shows the actual tooltip ui
