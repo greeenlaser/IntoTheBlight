@@ -20,7 +20,7 @@ public class Manager_Graphics : MonoBehaviour
 
     private void Awake()
     {
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\GraphicsSettings.txt";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight" + @"\GraphicsSettings.txt";
         UIReuseScript = par_Managers.GetComponent<Manager_UIReuse>();
 
         UIReuseScript.btn_SaveGraphicsSettings.onClick.AddListener(SaveData);
@@ -32,8 +32,8 @@ public class Manager_Graphics : MonoBehaviour
         //using a text editor to write text to the game graphics file
         using StreamWriter graphicsFile = File.CreateText(path);
 
-        graphicsFile.WriteLine("Graphics settings file for Lights Off Version " + GetComponent<GameManager>().str_GameVersion);
-        graphicsFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
+        graphicsFile.WriteLine("Graphics settings file for Into The Blight Version " + GetComponent<GameManager>().str_GameVersion);
+        graphicsFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/intotheblight");
         graphicsFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
         graphicsFile.WriteLine("");
         graphicsFile.WriteLine("WARNING: Invalid values will break the game - edit at your own risk!");

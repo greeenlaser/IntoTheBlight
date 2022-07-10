@@ -28,7 +28,7 @@ public class UI_MainMenu : MonoBehaviour
     private bool startedSceneSwitch;
     private float time;
     private string gameSavePath;
-    private readonly List<Button> saveButtons = new List<Button>();
+    private readonly List<Button> saveButtons = new();
 
     private void Awake()
     {
@@ -36,13 +36,13 @@ public class UI_MainMenu : MonoBehaviour
         ReturnToMainMenu();
 
         //create game folder directory
-        string gamePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+        string gamePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight";
         if (!Directory.Exists(gamePath))
         {
             Directory.CreateDirectory(gamePath);
         }
         //create game save directory
-        gameSavePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        gameSavePath = gamePath + @"\GameSaves";
         if (!Directory.Exists(gameSavePath))
         {
             Directory.CreateDirectory(gameSavePath);
@@ -65,7 +65,7 @@ public class UI_MainMenu : MonoBehaviour
 
     public void StartGame()
     {
-        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight" + @"\LoadFile.txt";
 
         //using a text editor to write text to the game save file in the saved file path
         using StreamWriter loadFile = File.CreateText(loadFilePath);
@@ -143,7 +143,7 @@ public class UI_MainMenu : MonoBehaviour
     }
     public void LoadGame(string fileName)
     {
-        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight" + @"\LoadFile.txt";
 
         if (File.Exists(gameSavePath + @"\" + fileName))
         {

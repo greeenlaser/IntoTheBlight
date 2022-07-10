@@ -59,9 +59,9 @@ public class Manager_Console : MonoBehaviour
     private GameObject correctAmmo;
     private GameObject displayableItem;
     private GameObject duplicate;
-    private readonly List<string> separatedWords = new List<string>();
-    private readonly List<GameObject> createdTexts = new List<GameObject>();
-    private readonly List<string> insertedCommands = new List<string>();
+    private readonly List<string> separatedWords = new();
+    private readonly List<GameObject> createdTexts = new();
+    private readonly List<string> insertedCommands = new();
 
     //spawn and remove multiple items
     private GameObject spawnableItem;
@@ -73,7 +73,7 @@ public class Manager_Console : MonoBehaviour
     private string cameraAngle;
     private string playerSpeed;
     private Vector3 lastPos;
-    private readonly List<GameObject> removables = new List<GameObject>();
+    private readonly List<GameObject> removables = new();
 
     //unity log variables
     private bool startedWait;
@@ -85,9 +85,20 @@ public class Manager_Console : MonoBehaviour
     //load console data at the beginning of the game
     public void LoadConsole()
     {
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight";
 
-        DirectoryInfo dir = new DirectoryInfo(path);
+        //create game folder directory
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        //create game save directory
+        if (!Directory.Exists(path + @"\GameSaves"))
+        {
+            Directory.CreateDirectory(path + @"\GameSaves");
+        }
+
+        DirectoryInfo dir = new(path);
         FileInfo[] files = dir.GetFiles();
         foreach (FileInfo file in files)
         {
@@ -106,8 +117,8 @@ public class Manager_Console : MonoBehaviour
         //using a text editor to write new text to new debug file in the debug file path
         using StreamWriter debugFile = File.CreateText(debugFilePath);
 
-        debugFile.WriteLine("Debug information file for Lights Off Version " + par_Managers.GetComponent<GameManager>().str_GameVersion);
-        debugFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
+        debugFile.WriteLine("Debug information file for Into The Blight Version " + par_Managers.GetComponent<GameManager>().str_GameVersion);
+        debugFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/intotheblight");
         debugFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
         debugFile.WriteLine("");
 
@@ -188,7 +199,7 @@ public class Manager_Console : MonoBehaviour
                 && txt_ConsoleInputField.text == "")
             {
                 currentSelectedInsertedCommand = insertedCommands.Count - 1;
-                txt_ConsoleInputField.text = insertedCommands[insertedCommands.Count - 1];
+                txt_ConsoleInputField.text = insertedCommands[^1];
                 txt_ConsoleInputField.MoveToEndOfLine(false, false);
             }
             else
@@ -779,7 +790,7 @@ public class Manager_Console : MonoBehaviour
     //loads a save with a name
     private void Command_LoadWithName()
     {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\GameSaves";
         if (File.Exists(path + @"\" + separatedWords[1] + ".txt"))
         {
             par_Managers.GetComponent<Manager_GameSaving>().GetLoadFile(separatedWords[1]);
@@ -793,7 +804,7 @@ public class Manager_Console : MonoBehaviour
     private void Command_ShowAllSaves()
     {
         //default game saves path
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\GameSaves";
 
         //if a directory was found at the path
         if (Directory.Exists(path))
@@ -836,8 +847,8 @@ public class Manager_Console : MonoBehaviour
     //deletes all saves
     private void Command_DeleteAllSaves()
     {
-        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
-        DirectoryInfo di = new DirectoryInfo(path);
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\GameSaves";
+        DirectoryInfo di = new(path);
 
         //deletes all save files
         if (Directory.GetFiles(path).Length > 0)
@@ -1499,7 +1510,7 @@ public class Manager_Console : MonoBehaviour
             else
             {
                 //set teleportPos;
-                Vector3 teleportPos = new Vector3(firstVec, secondVec, thirdVec);
+                Vector3 teleportPos = new(firstVec, secondVec, thirdVec);
 
                 CreateNewConsoleLine("--tp " + firstVec + " " + secondVec + " " + thirdVec + "--", "CONSOLE_SUCCESS_MESSAGE");
                 CreateNewConsoleLine("Success: Teleported player to " + teleportPos + "!", "CONSOLE_SUCCESS_MESSAGE");

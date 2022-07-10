@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Linq;
 
 public class UI_ShopContent : MonoBehaviour
 {
@@ -80,7 +79,7 @@ public class UI_ShopContent : MonoBehaviour
                 }
             }
 
-            List<GameObject> removables = new List<GameObject>();
+            List<GameObject> removables = new();
             foreach (GameObject item in inventory)
             {
                 if (item.name.Contains('-'))

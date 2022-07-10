@@ -15,7 +15,8 @@ public class AI_Movement : MonoBehaviour
     [SerializeField] private UI_AIContent AIContentScript;
     [SerializeField] private GameObject par_Managers;
 
-    //these two bools are only used when the AI has combat mechanics, otherwise theyre always false by default
+    //goingTowardsTarget and calledTargetLostOnce are only used when the
+    //AI has combat mechanics, otherwise theyre always false by default
     [HideInInspector] public bool canMove;
     [HideInInspector] public bool isStunned;
     [HideInInspector] public bool goingTowardsTarget;

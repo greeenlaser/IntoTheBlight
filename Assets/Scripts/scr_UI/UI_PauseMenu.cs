@@ -42,9 +42,9 @@ public class UI_PauseMenu : MonoBehaviour
 
     //private variables
     private bool calledOnce;
-    private readonly List<AudioSource> pausedSFX = new List<AudioSource>();
+    private readonly List<AudioSource> pausedSFX = new();
     private string path;
-    private readonly List<Button> saveButtons = new List<Button>();
+    private readonly List<Button> saveButtons = new();
     private Manager_UIReuse UIReuseScript;
 
     private void Awake()
@@ -370,7 +370,7 @@ public class UI_PauseMenu : MonoBehaviour
 
         btn_LoadGame.interactable = false;
 
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\GameSaves";
         string[] files = Directory.GetFiles(path);
 
         if (files.Length > 0)
@@ -409,7 +409,7 @@ public class UI_PauseMenu : MonoBehaviour
     }
     public void LoadGame(string fileName)
     {
-        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+        string loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight" + @"\LoadFile.txt";
 
         if (File.Exists(path + @"\" + fileName))
         {

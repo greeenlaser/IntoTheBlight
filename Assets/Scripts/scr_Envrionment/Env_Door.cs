@@ -44,7 +44,7 @@ public class Env_Door : MonoBehaviour
 
     //private variables
     private float doorDistanceFromEndPos;
-    private readonly List<GameObject> targetsInTrigger = new List<GameObject>();
+    private readonly List<GameObject> targetsInTrigger = new();
 
     private void Awake()
     {

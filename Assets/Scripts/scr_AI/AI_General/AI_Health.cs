@@ -129,7 +129,7 @@ public class AI_Health : MonoBehaviour
         //get random amount of items we want to spawn
         int selectedItemCount = Random.Range(3, 10);
         //create list for selected item indexes
-        List<int> selectedItems = new List<int>();
+        List<int> selectedItems = new();
         //pick selectedItemCount amount of random item indexes and assign to list
         for (int i = 0; i < selectedItemCount; i++)
         {

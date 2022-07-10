@@ -311,7 +311,7 @@ public class Manager_UIReuse : MonoBehaviour
     public GameObject par_ComputerPagesPanel;
     public Button btn_PageButtonTemplate;
     public Button btn_PageAction;
-    private readonly List<Button> computerPages = new List<Button>();
+    private readonly List<Button> computerPages = new();
 
     [Header("Console")]
     public GameObject par_Console;

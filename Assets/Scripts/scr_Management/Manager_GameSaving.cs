@@ -16,7 +16,7 @@ public class Manager_GameSaving : MonoBehaviour
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private GameObject light_Flashlight;
     [SerializeField] private GameObject Exoskeleton;
-    [SerializeField] private List<string> tips = new List<string>();
+    [SerializeField] private List<string> tips = new();
 
     [Header("Loading menu content")]
     public GameObject par_LoadingMenu;
@@ -55,8 +55,8 @@ public class Manager_GameSaving : MonoBehaviour
         gameManagerScript = GetComponent<GameManager>();
 
         //get path to game saves folder
-        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\GameSaves";
-        loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff" + @"\LoadFile.txt";
+        path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\GameSaves";
+        loadFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight" + @"\LoadFile.txt";
 
         par_Managers.GetComponent<Manager_Console>().Command_GlobalCellReset();
 
@@ -238,7 +238,7 @@ public class Manager_GameSaving : MonoBehaviour
             //remove unwanted separators and split line into separate strings
             string[] values = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
             //list of confirmed numbers
-            List<string> numbers = new List<string>();
+            List<string> numbers = new();
             //add all numbers to new list
             foreach (string value in values)
             {
@@ -291,9 +291,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerPosition"))
                 {
                     //add all values to temporary playerPos value
-                    Vector3 playerPos = new Vector3(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                                    float.Parse(values[3], CultureInfo.InvariantCulture),
-                                                    float.Parse(values[4], CultureInfo.InvariantCulture));
+                    Vector3 playerPos = new(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                            float.Parse(values[3], CultureInfo.InvariantCulture),
+                                            float.Parse(values[4], CultureInfo.InvariantCulture));
                     //add all temporary playerPos values to real player position
                     player.transform.localPosition = playerPos;
                 }
@@ -301,9 +301,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerRotation"))
                 {
                     //add all values to temporary playerRot value
-                    Vector3 playerRot = new Vector3(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                                    float.Parse(values[3], CultureInfo.InvariantCulture),
-                                                    float.Parse(values[4], CultureInfo.InvariantCulture));
+                    Vector3 playerRot = new(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                            float.Parse(values[3], CultureInfo.InvariantCulture),
+                                            float.Parse(values[4], CultureInfo.InvariantCulture));
                     //add all temporary playerRot values to real player rotation
                     player.transform.eulerAngles = playerRot;
                 }
@@ -311,9 +311,9 @@ public class Manager_GameSaving : MonoBehaviour
                 else if (line.Contains("playerCameraRotation"))
                 {
                     //add all values to temporary playerCameraRot value
-                    Vector3 playerCameraRot = new Vector3(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                                          float.Parse(values[3], CultureInfo.InvariantCulture),
-                                                          float.Parse(values[4], CultureInfo.InvariantCulture));
+                    Vector3 playerCameraRot = new(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                                  float.Parse(values[3], CultureInfo.InvariantCulture),
+                                                  float.Parse(values[4], CultureInfo.InvariantCulture));
                     //add all temporary playerCameraRot values to real player camera rotation
                     playerCamera.transform.eulerAngles = playerCameraRot;
                 }
@@ -554,13 +554,13 @@ public class Manager_GameSaving : MonoBehaviour
             else if (line.Contains("tg_"))
             {
                 //get grenade position
-                Vector3 position = new Vector3(float.Parse(values[0], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                               float.Parse(values[1], CultureInfo.InvariantCulture),
-                                               float.Parse(values[2], CultureInfo.InvariantCulture));
+                Vector3 position = new(float.Parse(values[0], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                       float.Parse(values[1], CultureInfo.InvariantCulture),
+                                       float.Parse(values[2], CultureInfo.InvariantCulture));
                 //get grenade velocity
-                Vector3 velocity = new Vector3(float.Parse(values[3], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                               float.Parse(values[4], CultureInfo.InvariantCulture),
-                                               float.Parse(values[5], CultureInfo.InvariantCulture));
+                Vector3 velocity = new(float.Parse(values[3], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                       float.Parse(values[4], CultureInfo.InvariantCulture),
+                                       float.Parse(values[5], CultureInfo.InvariantCulture));
                 //get grenade time until explosion if this grenade has a timer
                 float timeUntilExplosion = 0;
                 if (numbers.Count > 6)
@@ -762,14 +762,14 @@ public class Manager_GameSaving : MonoBehaviour
                             if (npcIndex == cell.GetComponent<Manager_CurrentCell>().AI.IndexOf(npc))
                             {
                                 //load npc position
-                                Vector3 AIPos = new Vector3(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                                            float.Parse(values[3], CultureInfo.InvariantCulture),
-                                                            float.Parse(values[4], CultureInfo.InvariantCulture));
+                                Vector3 AIPos = new(float.Parse(values[2], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                                    float.Parse(values[3], CultureInfo.InvariantCulture),
+                                                    float.Parse(values[4], CultureInfo.InvariantCulture));
                                 npc.transform.localPosition = AIPos;
                                 //load npc rotation
-                                Vector3 AIRot = new Vector3(float.Parse(values[5], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
-                                                            float.Parse(values[6], CultureInfo.InvariantCulture),
-                                                            float.Parse(values[7], CultureInfo.InvariantCulture));
+                                Vector3 AIRot = new(float.Parse(values[5], CultureInfo.InvariantCulture), //fix for error FormatException: Input string was not in a correct format.
+                                                    float.Parse(values[6], CultureInfo.InvariantCulture),
+                                                    float.Parse(values[7], CultureInfo.InvariantCulture));
                                 npc.transform.eulerAngles = AIRot;
 
                                 if (npc.GetComponent<AI_Health>() != null)
@@ -1012,8 +1012,8 @@ public class Manager_GameSaving : MonoBehaviour
         //using a text editor to write text to the game save file in the saved file path
         using StreamWriter saveFile = File.CreateText(savedFilePath);
 
-        saveFile.WriteLine("Save file for Lights Off Version " + gameManagerScript.str_GameVersion);
-        saveFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/lightsoff");
+        saveFile.WriteLine("Save file for Into The Blight Version " + gameManagerScript.str_GameVersion);
+        saveFile.WriteLine("Read more info about the game from https://greeenlaser.itch.io/intotheblight");
         saveFile.WriteLine("Download game versions from https://drive.google.com/drive/folders/12kvUT6EEndku0nDvZVrVd4QRPt50QV7g?usp=sharing");
         saveFile.WriteLine("");
         saveFile.WriteLine("WARNING: Invalid values will break the game - edit at your own risk!");
@@ -1561,9 +1561,9 @@ public class Manager_GameSaving : MonoBehaviour
 
                             output += cellIndex.ToString() + "_" + targetIndex.ToString() + " = ";
 
-                            Vector3 pos_AI = new Vector3(pos_AIX, pos_AIY, pos_AIZ);
+                            Vector3 pos_AI = new(pos_AIX, pos_AIY, pos_AIZ);
                             output += pos_AI;
-                            Vector3 rot_AI = new Vector3(rot_AIX, rot_AIY, rot_AIZ);
+                            Vector3 rot_AI = new(rot_AIX, rot_AIY, rot_AIZ);
                             output += ", " + rot_AI;
                             if (target.GetComponent<AI_Health>() != null
                                 && target.GetComponent<AI_Health>().isKillable)

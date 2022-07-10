@@ -112,7 +112,7 @@ public class GameManager : MonoBehaviour
     //press F12 for screenshot
     private void Screenshot()
     {
-        string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\LightsOff\Screenshots";
+        string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\IntoTheBlight\Screenshots";
 
         if (!Directory.Exists(folderPath))
         {

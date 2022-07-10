@@ -7,7 +7,7 @@ public class Env_ComputerPage : MonoBehaviour
     [Header("Assignables")]
     public string str_PageTitle;
     public string str_PageDescription;
-    public List<GameObject> pages = new List<GameObject>();
+    public List<GameObject> pages = new();
 
     [Header("Targets")]
     public bool canReuseTarget;

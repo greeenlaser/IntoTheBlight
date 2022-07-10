@@ -34,7 +34,6 @@ public class Item_Grenade : MonoBehaviour
     }
 
     [Header("Assignables")]
-
     [SerializeField] private GameObject particleEffect;
     [SerializeField] private Transform pos_HoldItem;
     [SerializeField] private Transform pos_GrenadeInstantiate;
@@ -92,8 +91,8 @@ public class Item_Grenade : MonoBehaviour
         if (stickyType == StickyType.sticky
             && explosionType == ExplosionType.onCollision)
         {
-            Debug.LogError("Error: " + gameObject.GetComponent<Env_Item>().str_ItemName + " " +
-                           "cannot be sticky and explode on collision! Changed it to non-sticky.");
+            Debug.LogWarning("Error: " + gameObject.GetComponent<Env_Item>().str_ItemName + " " +
+                             "cannot be sticky and explode on collision! Changed it to non-sticky.");
 
             stickyType = StickyType.nonSticky;
         }

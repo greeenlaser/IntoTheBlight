@@ -58,14 +58,17 @@ public class Manager_ItemUpgrades : MonoBehaviour
         //if we are upgrading a melee weapon
         else if (itemType == ItemType.melee)
         {
+            //no function added yet
         }
         //if we are upgrading an armor
         else if (itemType == ItemType.armor)
         {
+            //no function added yet
         }
         //if we are upgrading a gear item
         else if (itemType == ItemType.gear)
         {
+            //no function added yet
         }
     }
 

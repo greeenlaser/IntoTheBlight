@@ -65,7 +65,7 @@ public class Upgrade_Gun : MonoBehaviour
     public void UpgradeGun()
     {
         bool missingRequirements = false;
-        List<GameObject> requiredItems = new List<GameObject>();
+        List<GameObject> requiredItems = new();
 
         //check for requirements
         foreach (string requiredItem in upgradeRequirements)

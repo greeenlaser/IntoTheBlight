@@ -4,22 +4,21 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Noclip
   - Item
-  - NPC
   - WorldBlocker
+  - NPC
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - Ground
   - Water
   - UI
-  - Ground
-  - NPC
-  - EquippedItem
-  - LimitedCollision
-  - Visioncone
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 

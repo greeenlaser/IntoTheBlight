@@ -13,10 +13,10 @@ public class UI_RepairContent : MonoBehaviour
     [HideInInspector] public bool isNPCRepairUIOpen;
     [HideInInspector] public List<GameObject> buttons;
 
-
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) && isNPCRepairUIOpen)
+        if (Input.GetKeyDown(KeyCode.Tab) 
+            && isNPCRepairUIOpen)
         {
             CloseRepairAndPlayerInventory();
         }
