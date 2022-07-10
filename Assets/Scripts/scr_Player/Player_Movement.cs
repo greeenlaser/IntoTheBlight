@@ -303,7 +303,8 @@ public class Player_Movement : MonoBehaviour
             currentStamina -= 5;
             isJumping = true;
         }
-        else if (isGrounded && isJumping)
+        else if (isGrounded 
+                 && isJumping)
         {
             controller.stepOffset = 0.3f;
             isJumping = false;
