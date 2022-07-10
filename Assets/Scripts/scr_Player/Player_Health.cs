@@ -114,35 +114,36 @@ public class Player_Health : MonoBehaviour
                 || damageType == "electricity"
                 || damageType == "gas")
             {
-                float damageDealt = damageAmount;
-                if (damageType == "gravity")
+                if (health - damageAmount > 0)
                 {
-                    bool isAbilityInUse = false;
-                    foreach (GameObject ability in par_Managers.GetComponent<UI_AbilityManager>().abilities)
+                    if (damageType == "gravity")
                     {
-                        UI_Ability theAbility = ability.GetComponent<UI_Ability>();
-
-                        if (theAbility.abilityName == "Jump boost"
-                            && theAbility.isCooldownTimeRunning)
+                        bool isAbilityInUse = false;
+                        foreach (GameObject ability in par_Managers.GetComponent<UI_AbilityManager>().abilities)
                         {
-                            isAbilityInUse = true;
-                            break;
-                        }
-                    }
+                            UI_Ability theAbility = ability.GetComponent<UI_Ability>();
 
-                    if (isAbilityInUse)
-                    {
-                        damageDealt -= damageAmount / fallProtection;
+                            if (theAbility.abilityName == "Jump boost"
+                                && theAbility.isCooldownTimeRunning)
+                            {
+                                isAbilityInUse = true;
+                                break;
+                            }
+                        }
+
+                        if (isAbilityInUse)
+                        {
+                            health -= Mathf.FloorToInt(damageAmount / fallProtection);
+                        }
+                        else
+                        {
+                            health -= Mathf.FloorToInt(damageAmount);
+                        }
                     }
                     else
                     {
-                        damageDealt -= damageAmount;
+                        health -= Mathf.FloorToInt(damageAmount);
                     }
-                }
-
-                if (health - damageDealt > 0)
-                {
-                    health -= Mathf.FloorToInt(damageDealt);
                 }
                 else
                 {

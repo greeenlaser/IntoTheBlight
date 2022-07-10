@@ -133,7 +133,6 @@ public class Player_Movement : MonoBehaviour
                                         groundMask))
                 {
                     isGrounded = true;
-                    //Debug.Log("Player is grounded!");
                 }
                 else
                 {
