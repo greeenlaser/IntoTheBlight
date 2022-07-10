@@ -2182,7 +2182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46034f97bd6ffa742bae6747360405e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  str_GameVersion: ITB0.1.1-100722
+  str_GameVersion: ITB-0.1.1-100722
   txt_GameVersion: {fileID: 962294958}
   playerFaction: 0
   vsScientists: 0
