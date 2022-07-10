@@ -138,7 +138,6 @@ public class Player_Movement : MonoBehaviour
                 else
                 {
                     isGrounded = false;
-                    //Debug.Log("Player is no longer grounded...");
                 }
 
                 if (!isClimbingLadder)
@@ -507,12 +506,6 @@ public class Player_Movement : MonoBehaviour
         float damageDealt = Mathf.Round(Mathf.Abs(velocity.y * 1.2f) * 10) / 10;
 
         PlayerHealthScript.DealDamage("Ground", "gravity", damageDealt);
-
-        if (damageDealt >= PlayerHealthScript.health)
-        {
-            string deathMessage = "You took " + damageDealt + " damage from that fall and fell to your death! Shouldve brought rocket boots...";
-            PlayerHealthScript.Death(deathMessage);
-        }
     }
 
     //player stun effect, all stun effects last the same amount

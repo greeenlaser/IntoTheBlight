@@ -20,7 +20,7 @@ public class UI_AbilityManager : MonoBehaviour
     //public but hidden variables
     [HideInInspector] public bool hasExoskeleton;
     [HideInInspector] public int upgradeCellCount;
-    public List<GameObject> slots;
+    [HideInInspector] public List<GameObject> slots;
 
     //private variables
     private bool startAssignTimer;

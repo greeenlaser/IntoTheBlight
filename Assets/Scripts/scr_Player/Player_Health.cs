@@ -117,7 +117,27 @@ public class Player_Health : MonoBehaviour
                 float damageDealt = damageAmount;
                 if (damageType == "gravity")
                 {
-                    damageDealt /= fallProtection;
+                    bool isAbilityInUse = false;
+                    foreach (GameObject ability in par_Managers.GetComponent<UI_AbilityManager>().abilities)
+                    {
+                        UI_Ability theAbility = ability.GetComponent<UI_Ability>();
+
+                        if (theAbility.abilityName == "Jump boost"
+                            && theAbility.isCooldownTimeRunning)
+                        {
+                            isAbilityInUse = true;
+                            break;
+                        }
+                    }
+
+                    if (isAbilityInUse)
+                    {
+                        damageDealt -= damageAmount / fallProtection;
+                    }
+                    else
+                    {
+                        damageDealt -= damageAmount;
+                    }
                 }
 
                 if (health - damageDealt > 0)
@@ -173,7 +193,7 @@ public class Player_Health : MonoBehaviour
 
             enableTimer = true;
 
-            //Debug.Log(damageDealer + " dealt " + damageAmount + " " + damageSeverity + " " + damageType + " damage to player.");
+            Debug.Log(damageDealer + " dealt " + damageAmount + " " + damageType + " damage to player.");
         }
     }
 
