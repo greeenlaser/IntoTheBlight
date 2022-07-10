@@ -16,9 +16,9 @@ TagManager:
   - UI
   - Player
   - LimitedCollision
-  - 
-  - 
-  - 
+  - NPC
+  - EquippedItem
+  - VisionCone
   - 
   - 
   - 
