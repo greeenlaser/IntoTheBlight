@@ -129,6 +129,8 @@ public class UI_AbilityManager : MonoBehaviour
     {
         UI_Ability newAbility = abilities[newAbilityIndex].GetComponent<UI_Ability>();
 
+        Debug.Log(slot - 1 + ", " + newAbility.abilityName);
+
         //if nothing is assigned to the slot
         //or a placeholder is assigned to the slot
         if (slots[slot - 1] == null
@@ -202,9 +204,7 @@ public class UI_AbilityManager : MonoBehaviour
                     UIReuseScript.txt_cooldownTimer3.text = "0";
                 }
 
-                Debug.Log("Moved " + oldAbility.abilityName + " from slot " + slots.IndexOf(slots[oldAbilitySlot - 1]) + " to new slot " + slots.IndexOf(slots[slot - 1]) + "!");
-
-                //Debug.Log("Assigned " + newAbility.abilityName + " to slot " + slot + ".");
+                Debug.Log("Moved " + oldAbility.abilityName + " from slot " + oldAbilitySlot + " to new slot " + abilitySlot + "!");
 
                 FillEmptyAbilitySlots();
             }
