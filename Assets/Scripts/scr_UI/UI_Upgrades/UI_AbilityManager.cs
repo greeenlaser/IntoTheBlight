@@ -8,9 +8,6 @@ public class UI_AbilityManager : MonoBehaviour
     [Header("Abilities")]
     [SerializeField] private Transform pos_ButtonHide;
     public List<GameObject> abilities;
-    [SerializeField] private GameObject assignedAbilitiesPlaceholder1;
-    [SerializeField] private GameObject assignedAbilitiesPlaceholder2;
-    [SerializeField] private GameObject assignedAbilitiesPlaceholder3;
 
     [Header("Scripts")]
     [SerializeField] private Inv_Player PlayerInventoryScript;
@@ -123,6 +120,7 @@ public class UI_AbilityManager : MonoBehaviour
                     && !ability.GetComponent<UI_Ability>().isCooldownTimeRunning)
                 {
                     ability.GetComponent<UI_Ability>().UseAbility();
+                    Debug.Log("Using ability " + ability.GetComponent<UI_Ability>().abilityName + " in slot " + slot + "!");
                     break;
                 }
             }
@@ -131,81 +129,125 @@ public class UI_AbilityManager : MonoBehaviour
     //assigns an ability to the slot
     public void AssignToSlot(int slot, int newAbilityIndex)
     {
-        int abilitySlot = slot--;
+        int abilitySlot = slot;
         UI_Ability newAbility = abilities[newAbilityIndex].GetComponent<UI_Ability>();
 
-        foreach (GameObject ability in abilities)
+        if (slots.Count > 0)
         {
-            //if an ability is assigned to this slot
-            if (ability.GetComponent<UI_Ability>().selectedSlot == abilitySlot)
+            bool stoppedCheck = false;
+            bool foundAbility = false;
+
+            //checking if an ability can be found in the assignable slot
+            for (int i = 0; i < slots.Count; i++)
             {
-                //the assigned ability in the slot is not in use
-                if (!ability.GetComponent<UI_Ability>().isCooldownTimeRunning)
+                GameObject ability = slots[i];
+
+                if (ability.GetComponent<UI_Ability>().assignStatus == slot)
                 {
-                    UI_Ability oldAbility = ability.GetComponent<UI_Ability>();
-                    oldAbility.assignStatus = -1;
-                    slots.Remove(oldAbility.gameObject);
-
-                    newAbility.assignStatus = abilitySlot;
-                    slots.Add(newAbility.gameObject);
-
-                    if (abilitySlot == 0)
+                    //if previously assigned ability is currently in use
+                    if (ability.GetComponent<UI_Ability>().isCooldownTimeRunning)
                     {
-                        UIReuseScript.txt_cooldownTimer1.text = "0";
+                        Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
+                                         " to slot " + abilitySlot + " because the old ability in that slot is in use!");
+
+                        stoppedCheck = true;
+
+                        break;
                     }
-                    else if (abilitySlot == 1)
+                    //if previously assigned ability is the same as the new one
+                    else if (ability == newAbility.gameObject)
                     {
-                        UIReuseScript.txt_cooldownTimer2.text = "0";
+                        Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
+                                         " to slot " + abilitySlot + " because it is already assigned there!");
+
+                        stoppedCheck = true;
+
+                        break;
                     }
-                    else if (abilitySlot == 2)
+                    //replace previously assigned ability in this slot
+                    else
                     {
-                        UIReuseScript.txt_cooldownTimer3.text = "0";
+                        if (slots.Contains(newAbility.gameObject))
+                        {
+                            slots.Remove(newAbility.gameObject);
+                        }
+
+                        UI_Ability oldAbility = ability.GetComponent<UI_Ability>();
+                        oldAbility.assignStatus = 0;
+                        slots.Remove(oldAbility.gameObject);
+
+                        newAbility.assignStatus = abilitySlot;
+                        slots.Add(newAbility.gameObject);
+
+                        if (abilitySlot == 1)
+                        {
+                            UIReuseScript.txt_cooldownTimer1.text = "0";
+                        }
+                        else if (abilitySlot == 2)
+                        {
+                            UIReuseScript.txt_cooldownTimer2.text = "0";
+                        }
+                        else if (abilitySlot == 3)
+                        {
+                            UIReuseScript.txt_cooldownTimer3.text = "0";
+                        }
+
+                        foundAbility = true;
+
+                        Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
+
+                        break;
                     }
-
-                    Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
-
-                    break;
-                }
-                //the assigned ability in the slot is the same as this one
-                else if (ability.GetComponent<UI_Ability>() == newAbility)
-                {
-                    Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
-                                     " to slot " + abilitySlot + " because it is already assigned there!");
-
-                    break;
-                }
-                //the assigned ability in the slot is already in use
-                else if (ability.GetComponent<UI_Ability>().isCooldownTimeRunning)
-                {
-                    Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
-                                     " to slot " + abilitySlot + " because the old ability in that slot is in use!");
-
-                    break;
                 }
             }
-            //no ability assigned to this slot
-            else
+            //if no ability was found in the assignable slot
+            if (!foundAbility
+                && !stoppedCheck)
             {
+                if (slots.Contains(newAbility.gameObject))
+                {
+                    slots.Remove(newAbility.gameObject);
+                }
+
                 newAbility.assignStatus = abilitySlot;
                 slots.Add(newAbility.gameObject);
 
-                if (abilitySlot == 0)
+                if (abilitySlot == 1)
                 {
                     UIReuseScript.txt_cooldownTimer1.text = "0";
                 }
-                else if (abilitySlot == 1)
+                else if (abilitySlot == 2)
                 {
                     UIReuseScript.txt_cooldownTimer2.text = "0";
                 }
-                else if (abilitySlot == 2)
+                else if (abilitySlot == 3)
                 {
                     UIReuseScript.txt_cooldownTimer3.text = "0";
                 }
 
                 Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
-
-                break;
             }
+        }
+        //assign to new empty slot
+        else
+        {
+            newAbility.assignStatus = abilitySlot;
+            slots.Add(newAbility.gameObject);
+
+            if (abilitySlot == 1)
+            {
+                UIReuseScript.txt_cooldownTimer1.text = "0";
+            }
+            else if (abilitySlot == 2)
+            {
+                UIReuseScript.txt_cooldownTimer2.text = "0";
+            }
+            else if (abilitySlot == 3)
+            {
+                UIReuseScript.txt_cooldownTimer3.text = "0";
+            }
+
+            Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
         }
     }
 
