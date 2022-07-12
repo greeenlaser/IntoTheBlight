@@ -189,6 +189,7 @@ public class UI_PlayerMenu : MonoBehaviour
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
         UIReuseScript.par_PlayerMenuStats.SetActive(false);
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerFactionUI.SetActive(false);
         UIReuseScript.par_PlayerMenuRadio.SetActive(false);
@@ -233,6 +234,7 @@ public class UI_PlayerMenu : MonoBehaviour
         PlayerInventoryScript.CloseInventory();
         UIReuseScript.par_PlayerMenuStats.SetActive(false);
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerFactionUI.SetActive(false);
         UIReuseScript.par_PlayerMenuRadio.SetActive(false);
@@ -265,6 +267,7 @@ public class UI_PlayerMenu : MonoBehaviour
 
         PlayerInventoryScript.CloseInventory();
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerFactionUI.SetActive(false);
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
@@ -336,6 +339,7 @@ public class UI_PlayerMenu : MonoBehaviour
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
         UIReuseScript.par_PlayerMenuStats.SetActive(false);
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerMenuRadio.SetActive(false);
         UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
@@ -370,6 +374,7 @@ public class UI_PlayerMenu : MonoBehaviour
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
         UIReuseScript.par_PlayerMenuStats.SetActive(false);
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerFactionUI.SetActive(false);
         UIReuseScript.Minimap.transform.SetParent(UIReuseScript.par_MinimapMask.transform, false);
@@ -403,6 +408,7 @@ public class UI_PlayerMenu : MonoBehaviour
         par_Managers.GetComponent<UI_AcceptedQuests>().CloseQuests();
         UIReuseScript.par_PlayerMenuStats.SetActive(false);
         TooltipScript.showTooltipUI = false;
+        AbilityManagerScript.HideButtons();
         UIReuseScript.par_PlayerUpgrades.SetActive(false);
         UIReuseScript.par_PlayerFactionUI.SetActive(false);
         UIReuseScript.par_PlayerMenuRadio.SetActive(false);
@@ -434,6 +440,7 @@ public class UI_PlayerMenu : MonoBehaviour
         else if (openedUpgradeUI)
         {
             TooltipScript.showTooltipUI = false;
+            AbilityManagerScript.HideButtons();
             UIReuseScript.par_PlayerUpgrades.SetActive(false);
             openedUpgradeUI = false;
         }

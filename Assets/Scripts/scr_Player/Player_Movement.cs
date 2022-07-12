@@ -166,8 +166,8 @@ public class Player_Movement : MonoBehaviour
             {
                 minVelocity = velocity.y;
             }
-            //check if smallest velocity is less than or equal to -10f
-            if (minVelocity <= -15f
+            //check if smallest velocity is less than or equal to -25f
+            if (minVelocity <= -25f
                 && PlayerHealthScript.canTakeDamage)
             {
                 ApplyFallDamage();

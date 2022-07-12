@@ -102,7 +102,7 @@ public class UI_Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                     UIReuseScript.txt_cooldownTimer3.text = cooldownTime.ToString();
                     targetText = UIReuseScript.txt_cooldownTimer3;
                 }
-            }   
+            }
 
             remainder -= 1 * Time.deltaTime;
             targetText.text = Mathf.FloorToInt(remainder +1).ToString();

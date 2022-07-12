@@ -112,7 +112,7 @@ public class UI_AbilityManager : MonoBehaviour
         UIReuseScript.par_AbilityUI.SetActive(false);
 
         //are there any slots filled
-        if (slots.Count >= slot)
+        if (slots.Count > 0)
         {
             foreach (GameObject ability in slots)
             {
@@ -129,7 +129,6 @@ public class UI_AbilityManager : MonoBehaviour
     //assigns an ability to the slot
     public void AssignToSlot(int slot, int newAbilityIndex)
     {
-        int abilitySlot = slot;
         UI_Ability newAbility = abilities[newAbilityIndex].GetComponent<UI_Ability>();
 
         if (slots.Count > 0)
@@ -148,7 +147,7 @@ public class UI_AbilityManager : MonoBehaviour
                     if (ability.GetComponent<UI_Ability>().isCooldownTimeRunning)
                     {
                         Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
-                                         " to slot " + abilitySlot + " because the old ability in that slot is in use!");
+                                         " to slot " + slot + " because the old ability in that slot is in use!");
 
                         stoppedCheck = true;
 
@@ -158,7 +157,7 @@ public class UI_AbilityManager : MonoBehaviour
                     else if (ability == newAbility.gameObject)
                     {
                         Debug.LogWarning("Error: Cannot assign " + ability.GetComponent<UI_Ability>().abilityName +
-                                         " to slot " + abilitySlot + " because it is already assigned there!");
+                                         " to slot " + slot + " because it is already assigned there!");
 
                         stoppedCheck = true;
 
@@ -176,25 +175,12 @@ public class UI_AbilityManager : MonoBehaviour
                         oldAbility.assignStatus = 0;
                         slots.Remove(oldAbility.gameObject);
 
-                        newAbility.assignStatus = abilitySlot;
+                        newAbility.assignStatus = slot;
                         slots.Add(newAbility.gameObject);
-
-                        if (abilitySlot == 1)
-                        {
-                            UIReuseScript.txt_cooldownTimer1.text = "0";
-                        }
-                        else if (abilitySlot == 2)
-                        {
-                            UIReuseScript.txt_cooldownTimer2.text = "0";
-                        }
-                        else if (abilitySlot == 3)
-                        {
-                            UIReuseScript.txt_cooldownTimer3.text = "0";
-                        }
 
                         foundAbility = true;
 
-                        Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
+                        Debug.Log("Added " + newAbility.abilityName + " to slot " + slot + "!");
 
                         break;
                     }
@@ -209,45 +195,19 @@ public class UI_AbilityManager : MonoBehaviour
                     slots.Remove(newAbility.gameObject);
                 }
 
-                newAbility.assignStatus = abilitySlot;
+                newAbility.assignStatus = slot;
                 slots.Add(newAbility.gameObject);
 
-                if (abilitySlot == 1)
-                {
-                    UIReuseScript.txt_cooldownTimer1.text = "0";
-                }
-                else if (abilitySlot == 2)
-                {
-                    UIReuseScript.txt_cooldownTimer2.text = "0";
-                }
-                else if (abilitySlot == 3)
-                {
-                    UIReuseScript.txt_cooldownTimer3.text = "0";
-                }
-
-                Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
+                Debug.Log("Added " + newAbility.abilityName + " to slot " + slot + "!");
             }
         }
         //assign to new empty slot
         else
         {
-            newAbility.assignStatus = abilitySlot;
+            newAbility.assignStatus = slot;
             slots.Add(newAbility.gameObject);
 
-            if (abilitySlot == 1)
-            {
-                UIReuseScript.txt_cooldownTimer1.text = "0";
-            }
-            else if (abilitySlot == 2)
-            {
-                UIReuseScript.txt_cooldownTimer2.text = "0";
-            }
-            else if (abilitySlot == 3)
-            {
-                UIReuseScript.txt_cooldownTimer3.text = "0";
-            }
-
-            Debug.Log("Added " + newAbility.abilityName + " to slot " + abilitySlot + "!");
+            Debug.Log("Added " + newAbility.abilityName + " to slot " + slot + "!");
         }
     }
 
@@ -314,31 +274,31 @@ public class UI_AbilityManager : MonoBehaviour
             button.transform.SetParent(abilityScript.pos_Upgrade, false);
             button.transform.position = abilityScript.pos_Upgrade.position;
 
-            if (upgradeCell != null
-                && abilityScript.upgradeStatus == 0
-                && upgradeCellCount >= abilityScript.cost_unlock)
+            if (upgradeCell != null)
             {
-                abilityScript.GetComponent<Button>().interactable = true;
+                if (abilityScript.upgradeStatus == 0
+                    && upgradeCellCount >= abilityScript.cost_unlock)
+                {
+                    abilityScript.GetComponent<Button>().interactable = true;
 
-                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
-            }
-            else if (upgradeCell != null
-                     && abilityScript.upgradeStatus == 1
-                     && upgradeCellCount >= abilityScript.cost_tier2
-                     && !abilityScript.isCooldownTimeRunning)
-            {
-                abilityScript.GetComponent<Button>().interactable = true;
+                    button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+                }
+                else if (abilityScript.upgradeStatus == 1
+                         && upgradeCellCount >= abilityScript.cost_tier2
+                         && !abilityScript.isCooldownTimeRunning)
+                {
+                    abilityScript.GetComponent<Button>().interactable = true;
 
-                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
-            }
-            else if (upgradeCell != null
-                     && abilityScript.upgradeStatus == 2
-                     && upgradeCellCount >= abilityScript.cost_tier3
-                     && !abilityScript.isCooldownTimeRunning)
-            {
-                abilityScript.GetComponent<Button>().interactable = true;
+                    button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+                }
+                else if (abilityScript.upgradeStatus == 2
+                         && upgradeCellCount >= abilityScript.cost_tier3
+                         && !abilityScript.isCooldownTimeRunning)
+                {
+                    abilityScript.GetComponent<Button>().interactable = true;
 
-                button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+                    button.GetComponent<Button>().onClick.AddListener(abilityScript.UnlockOrUpgradeAbility);
+                }
             }
         }
     }
