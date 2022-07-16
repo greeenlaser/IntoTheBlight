@@ -450,6 +450,10 @@ public class Item_Grenade : MonoBehaviour
 
                 if (particleEffect != null)
                 {
+                    GameObject newParticleEffect = Instantiate(particleEffect, transform.position, Quaternion.identity, par_ThrownGrenades.transform);
+                    newParticleEffect.transform.localScale = new Vector3(explosionRange, explosionRange, explosionRange);
+                    particleEffect = newParticleEffect;
+
                     particleEffect.SetActive(true);
                 }
 
@@ -774,9 +778,6 @@ public class Item_Grenade : MonoBehaviour
         if (grenadeType == GrenadeType.fragmentation)
         {
             fragExplode = true;
-
-            particleEffect.transform.parent = par_ThrownGrenades;
-            particleEffect.transform.localScale = new Vector3(explosionRange, explosionRange, explosionRange);
         }
         //start plasma grenade effects
         else if (grenadeType == GrenadeType.plasma)
