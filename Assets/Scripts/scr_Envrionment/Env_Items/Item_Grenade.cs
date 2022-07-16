@@ -34,6 +34,8 @@ public class Item_Grenade : MonoBehaviour
     }
 
     [Header("Assignables")]
+    [Tooltip("Whats the correct rotation for this gun when held?")]
+    [SerializeField] private Vector3 correctHoldRotation;
     [SerializeField] private GameObject particleEffect;
     [SerializeField] private Transform pos_HoldItem;
     [SerializeField] private Transform pos_GrenadeInstantiate;
@@ -573,6 +575,7 @@ public class Item_Grenade : MonoBehaviour
                 gameObject.GetComponent<Rigidbody>().isKinematic = true;
                 gameObject.transform.parent = PlayerInventoryScript.pos_EquippedItem.transform;
                 gameObject.transform.position = PlayerInventoryScript.pos_EquippedItem.position;
+                gameObject.transform.localRotation = Quaternion.Euler(correctHoldRotation);
 
                 //Debug.Log("Equipped " + gameObject.GetComponent<Env_Item>().str_ItemName + "!");
             }
